@@ -1,6 +1,6 @@
 # Metodología de datos y análisis — Climate Paradox
 
-**Estado:** primera variable procesada, temperatura media del aire a 2 m (`T2M`). Este documento describe lo que ya ejecutamos y distingue los análisis pendientes. No representa todavía un protocolo validado para las nueve variables del producto.
+**Estado:** cuatro variables mensuales procesadas de NASA POWER: temperatura media (`T2M`), temperatura mínima (`T2M_MIN`), temperatura máxima (`T2M_MAX`) y precipitación corregida (`PRECTOTCORR`). Este documento describe lo que ya ejecutamos y distingue los análisis pendientes. No representa todavía un protocolo validado para las nueve variables del producto.
 
 ## 1. Pregunta y alcance inicial
 
@@ -79,4 +79,27 @@ El archivo `*.metadata.json` conserva la URL exacta de la petición. Como POWER 
 4. Fijar por adelantado periodos y análisis de sensibilidad; revisar residuos, elección de rezagos HAC, años influyentes y posible no linealidad.
 5. Decidir y documentar controles de variabilidad natural (por ejemplo, ENSO y PDO) y corrección por pruebas múltiples antes de etiquetar un resultado como robusto.
 6. Presentar por separado observación, reanálisis y modelos. Una relación entre variables o una tendencia significativa no establece causalidad.
+
+## 10. Ampliación POWER: temperatura mínima, máxima y precipitación
+
+El mismo endpoint regional permite solicitar **un parámetro por petición**. Descargamos `T2M_MIN`, `T2M_MAX` y `PRECTOTCORR` para la misma caja y periodo 1992–2024, conservando las respuestas originales y generando CSV de malla y región con el mismo promedio espacial. La API devolvió 15 celdas válidas en cada uno de los 396 meses, sin faltantes. Para temperatura reportó unidad `C` y fuentes `MERRA2` y `POWER`; para precipitación reportó `mm/day` y fuente `MERRA2`.
+
+Se analizaron con `scripts/analyze_power.py`, usando la misma climatología 1992–2021 y regresión con indicadores mensuales y HAC de 12 rezagos. Resultados **exploratorios, sin ajuste por pruebas múltiples**:
+
+| Parámetro POWER | Pendiente por década | IC 95 % | p individual |
+| --- | ---: | ---: | ---: |
+| `T2M_MIN` | +0.360 °C | +0.090 a +0.630 | 0.0090 |
+| `T2M_MAX` | +0.241 °C | −0.047 a +0.528 | 0.1010 |
+| `PRECTOTCORR` | +0.071 mm/día | −0.040 a +0.183 | 0.2082 |
+
+**Interpretación restringida:** que una pendiente individual cruce el umbral p = 0.05 y otra no lo haga **no demuestra que las dos pendientes sean diferentes**. Haría falta estimar directamente la diferencia con su incertidumbre. Tampoco `T2M_MIN` equivale al índice de noches cálidas `TN90p` ni `T2M_MAX` a los días en ola de calor `HWF`. `PRECTOTCORR` es una tasa media mensual de precipitación corregida de POWER/MERRA-2; no es el producto GPCP satélite + pluviómetros y no representa por sí misma lluvia acumulada mensual. La interpretación precisa de los extremos temporales de POWER debe cotejarse con sus metadatos antes de usarlos como indicadores de eventos.
+
+```powershell
+python scripts/power_t2m.py --start 1992 --end 2024 --variable T2M_MIN
+python scripts/power_t2m.py --start 1992 --end 2024 --variable T2M_MAX
+python scripts/power_t2m.py --start 1992 --end 2024 --variable PRECTOTCORR
+python scripts/analyze_power.py data/processed/power_t2m_min_region_1992_2024.csv data/results/power_t2m_min_region_1992_2024.json
+python scripts/analyze_power.py data/processed/power_t2m_max_region_1992_2024.csv data/results/power_t2m_max_region_1992_2024.json
+python scripts/analyze_power.py data/processed/power_prectotcorr_region_1992_2024.csv data/results/power_prectotcorr_region_1992_2024.json
+```
 

@@ -2,6 +2,10 @@
 
 La [metodología de datos y análisis](docs/METODOLOGIA.md) documenta las decisiones aplicadas, las limitaciones y las validaciones pendientes.
 
+El [glosario de datos y variables](docs/DATASETS.md) explica los archivos disponibles, sus campos y los productos que faltan.
+
+También se descargaron de POWER `T2M_MIN`, `T2M_MAX` y `PRECTOTCORR` para 1992–2024. Consulte la metodología antes de comparar esas series con los índices de extremos de Giovanni o con GPCP.
+
 La primera serie real usa **NASA POWER Monthly Regional API**, parámetro `T2M`, caja `[-101, 25, -99, 27]`, enero de 2010 a diciembre de 2012. POWER informa que la fuente meteorológica de esta respuesta es MERRA-2, pero **esta extracción no equivale automáticamente** al producto de Giovanni `M2TMNXSLV_5_12_4_T2M`.
 
 ```powershell
