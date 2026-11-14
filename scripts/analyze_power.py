@@ -10,7 +10,7 @@ import numpy as np
 import statsmodels.api as sm
 
 
-def run(source: Path, output: Path) -> None:
+def run(source: Path, output: Path, product_source: str = "POWER") -> None:
     with source.open(encoding="utf-8", newline="") as handle:
         reader = csv.DictReader(handle)
         columns = [c for c in reader.fieldnames if c not in ("date", "valid_grid_cells")]
@@ -43,7 +43,7 @@ def run(source: Path, output: Path) -> None:
     for y, v in zip(years, values):
         annual[int(y)].append(float(v))
     result = {
-        "source": "NASA POWER monthly regional API",
+        "source": "NASA POWER monthly regional API" if product_source == "POWER" else "NASA Giovanni area-averaged monthly CSV",
         "measurement": column,
         "bbox_wsen": [-101, 25, -99, 27],
         "period": [int(years[0]), int(years[-1])],
@@ -55,7 +55,7 @@ def run(source: Path, output: Path) -> None:
         "n_months": len(rows),
         "monthly": [{"date": d, "value": float(v), "anomaly": a} for d, v, a in zip(dates, values, anomaly)],
         "annual": [{"year": y, "mean_monthly_value": float(np.mean(v))} for y, v in sorted(annual.items())],
-        "limitations": ["Exploratory single-variable result", "No multiple-testing correction or ENSO/PDO adjustment", "POWER product is not an official Giovanni index", "Monthly temperature extrema are not counts of extreme days; precipitation rate is not monthly accumulation"],
+        "limitations": ["Exploratory single-variable result", "No multiple-testing correction or ENSO/PDO adjustment", "Spatial and product definitions must be checked before cross-source comparisons"],
     }
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
@@ -66,5 +66,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("source", type=Path)
     parser.add_argument("output", type=Path)
+    parser.add_argument("--product-source", choices=("POWER", "Giovanni"), default="POWER")
     args = parser.parse_args()
-    run(args.source, args.output)
+    run(args.source, args.output, args.product_source)

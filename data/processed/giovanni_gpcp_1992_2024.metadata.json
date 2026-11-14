@@ -1,0 +1,18 @@
+{
+  "source": "NASA Giovanni area-averaged time series CSV",
+  "variable": "GPCPMON_3_3_sat_gauge_precip",
+  "units": "mm/day",
+  "source_file": "data\\raw\\giovanni\\gpcp_1992_2024.csv",
+  "original_metadata": {
+    "Title": "Time Series, Area-Averaged of combined satellite-gauge precipitation monthly 0.5 deg. [AIRS, (monthly)",
+    "User Start Date": "1992-01-01T00:00:00Z",
+    "User End Date": "2024-12-31T23:59:59Z",
+    "User Bounding Box": "-101,25,-99,27",
+    "Data Bounding Box": "-100.75,25.25,-99.25,26.75",
+    "URL to Reproduce Results": "#service=ArAvTs&starttime=1992-01-01T00%3A00%3A00Z&endtime=2024-12-31T23%3A59%3A59Z&bbox=-101%2C25%2C-99%2C27&data=GPCPMON_3_3_sat_gauge_precip",
+    "Fill Value (mean_GPCPMON_3_3_sat_gauge_precip)": "-99999"
+  },
+  "months": 396,
+  "missing_months": 0,
+  "note": "Unit from Giovanni plot description; original CSV contains no machine-readable units field. Spatial averaging performed by Giovanni, not our POWER pipeline."
+}

@@ -1,0 +1,18 @@
+{
+  "source": "NASA Giovanni area-averaged time series CSV",
+  "variable": "M2SMNXEDI_2_RX5Day",
+  "units": "mm per 5 days",
+  "source_file": "data\\raw\\giovanni\\rx5day_2010_2012.csv",
+  "original_metadata": {
+    "Title": "Time Series, Area-Averaged of highest precipitation amount for a five-day interval monthly 0.5 x 0.625 (monthly)",
+    "User Start Date": "2010-01-01T00:00:00Z",
+    "User End Date": "2012-12-31T23:59:59Z",
+    "User Bounding Box": "-101,25,-99,27",
+    "Data Bounding Box": "-100.625,25,-99.375,27",
+    "URL to Reproduce Results": "#service=ArAvTs&starttime=2010-01-01T00%3A00%3A00Z&endtime=2012-12-31T23%3A59%3A59Z&bbox=-101%2C25%2C-99%2C27&data=M2SMNXEDI_2_RX5Day",
+    "Fill Value (mean_M2SMNXEDI_2_RX5Day)": "-9999"
+  },
+  "months": 36,
+  "missing_months": 0,
+  "note": "Unit from Giovanni plot description; original CSV contains no machine-readable units field. Spatial averaging performed by Giovanni, not our POWER pipeline."
+}

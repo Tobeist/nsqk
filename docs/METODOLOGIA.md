@@ -1,6 +1,6 @@
 # Metodología de datos y análisis — Climate Paradox
 
-**Estado:** cuatro variables mensuales procesadas de NASA POWER: temperatura media (`T2M`), temperatura mínima (`T2M_MIN`), temperatura máxima (`T2M_MAX`) y precipitación corregida (`PRECTOTCORR`). Este documento describe lo que ya ejecutamos y distingue los análisis pendientes. No representa todavía un protocolo validado para las nueve variables del producto.
+**Estado:** cuatro variables mensuales y una serie diaria de NASA POWER, más dos series mensuales oficiales exportadas desde Giovanni: GPCP y `RX5Day`. Este documento describe lo que ya ejecutamos y distingue los análisis pendientes. No representa todavía un protocolo validado para las nueve variables del producto.
 
 ## 1. Pregunta y alcance inicial
 
@@ -12,7 +12,7 @@ Usamos enero de 2010 a diciembre de 2012 para verificar extracción y estructura
 
 La serie descargada procede de la [API Monthly Regional de NASA POWER](https://power.larc.nasa.gov/docs/services/api/temporal/monthly/), parámetro `T2M`, comunidad `SB`, formato JSON. El encabezado de la respuesta consultada indica fuente `MERRA2`, unidad `C` y 15 puntos de malla en la caja. Según la [documentación de POWER](https://power.larc.nasa.gov/docs/methodology/data/sources_meteorology/), sus parámetros meteorológicos se basan en MERRA-2. **POWER es un producto procesado por su propia plataforma; no asumimos que sus valores coincidan exactamente con los del campo `M2TMNXSLV_5_12_4_T2M` solicitado a Giovanni.**
 
-Intentamos solicitar ese campo de Giovanni directamente. El servicio reconoció la consulta y localizó los archivos mensuales, pero el flujo indicó que requiere inicio de sesión en Earthdata. La petición directa por OPeNDAP respondió HTTP 401. El cotejo Giovanni–POWER queda pendiente hasta contar con una extracción autenticada. No se mezclan ambas fuentes bajo un mismo identificador.
+Inicialmente solicitamos T2M de Giovanni sin sesión Earthdata: el servicio localizó los archivos mensuales, pero el flujo falló y una petición directa por OPeNDAP respondió HTTP 401. Después activamos una sesión Earthdata en el navegador y descargamos GPCP y `RX5Day`; el cotejo de T2M Giovanni–POWER sigue pendiente. No se mezclan fuentes bajo un mismo identificador.
 
 ## 3. Extracción y archivos
 
@@ -73,7 +73,7 @@ El archivo `*.metadata.json` conserva la URL exacta de la petición. Como POWER 
 
 ## 9. Antes de publicar hallazgos comparativos
 
-1. Obtener T2M `M2TMNXSLV_5_12_4_T2M` mediante una sesión Earthdata autenticada y comparar unidades, malla, agregación temporal y valores con POWER.
+1. Obtener T2M `M2TMNXSLV_5_12_4_T2M` mediante la sesión Earthdata y comparar unidades, malla, agregación temporal y valores con POWER.
 2. Definir las cinco regiones mediante polígonos verificables y una media espacial consistente para cada producto.
 3. Descargar y verificar las variables de extremos; registrar unidades, definiciones de índices, periodo base de percentiles, cobertura y valores faltantes. No equiparar noches tropicales (`TR`) con noches cálidas (`TN90p`), ni días secos (`CDD`) con lluvia extrema (`R95P`).
 4. Fijar por adelantado periodos y análisis de sensibilidad; revisar residuos, elección de rezagos HAC, años influyentes y posible no linealidad.
@@ -114,5 +114,22 @@ La serie anual regional tiene 33 valores. Una regresión anual lineal con covari
 ```powershell
 python scripts/power_daily_rain.py
 python scripts/analyze_annual.py data/processed/power_rx5day_annual_region_1992_2024.csv data/results/power_rx5day_annual_region_1992_2024.json
+```
+
+## 12. Primeras series oficiales de Giovanni: GPCP y RX5Day
+
+Con una sesión Earthdata autenticada en el navegador solicitamos el servicio **Time Series, Area-Averaged** de Giovanni para la misma caja y el periodo 1992–2024. Descargamos CSV originales de `GPCPMON_3_3_sat_gauge_precip` y `M2SMNXEDI_2_RX5Day`, además de pruebas de 2010–2012. Cada archivo histórico contiene 396 valores mensuales, sin faltantes. Conservamos los CSV originales en `data/raw/giovanni/` y generamos copias limpias independientes con `scripts/normalize_giovanni.py`. Este script verifica la columna de variable, fechas completas, caja solicitada y valor de relleno de cada archivo. Giovanni reporta una caja efectiva de datos diferente para GPCP y `RX5Day`; sus agregaciones regionales **no deben suponerse idénticas** entre sí ni a la media espacial calculada para POWER.
+
+Según los títulos de los gráficos de Giovanni, GPCP se expresa en **mm/día** y `RX5Day` en **mm por cinco días**. El CSV original no incluye un campo de unidades legible por máquina, por lo que las unidades se registran en el archivo de metadatos procesado y deben corroborarse con el producto fuente antes de publicar.
+
+Aplicando el mismo modelo mensual estacional con HAC de 12 rezagos, obtuvimos resultados exploratorios para 1992–2024: **GPCP +0.099 mm/día por década** (IC 95 % −0.026 a +0.223; p = 0.121) y **`RX5Day` Giovanni +0.778 mm por cinco días por década** (IC 95 % −2.583 a +4.139; p = 0.650). Ninguno de estos intervalos excluye cero. Eso no prueba ausencia de cambio. Tampoco confirma la hipótesis de lluvia media estable con intensificación de extremos para este índice y caja.
+
+La discrepancia con el índice anual derivado de POWER es material: además de usar productos distintos, Giovanni entrega **máximos mensuales promediados regionalmente** y nuestro cálculo POWER entrega **máximos anuales por celda promediados después**. Las pendientes y p no deben compararse como si midieran la misma magnitud. El siguiente paso científico es alinear definiciones y periodos, analizar la sensibilidad y cotejar ambos a escala comparable antes de crear un hallazgo para la aplicación.
+
+```powershell
+python scripts/normalize_giovanni.py data/raw/giovanni/gpcp_1992_2024.csv data/processed/giovanni_gpcp_1992_2024.csv data/processed/giovanni_gpcp_1992_2024.metadata.json --variable GPCPMON_3_3_sat_gauge_precip
+python scripts/normalize_giovanni.py data/raw/giovanni/rx5day_1992_2024.csv data/processed/giovanni_rx5day_1992_2024.csv data/processed/giovanni_rx5day_1992_2024.metadata.json --variable M2SMNXEDI_2_RX5Day
+python scripts/analyze_power.py data/processed/giovanni_gpcp_1992_2024.csv data/results/giovanni_gpcp_1992_2024.json --product-source Giovanni
+python scripts/analyze_power.py data/processed/giovanni_rx5day_1992_2024.csv data/results/giovanni_rx5day_1992_2024.json --product-source Giovanni
 ```
 

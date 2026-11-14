@@ -8,7 +8,7 @@
 
 **MERRA-2.** Reanálisis meteorológico que POWER reporta como fuente de las cuatro variables descargadas. [Documentación de POWER](https://power.larc.nasa.gov/docs/methodology/data/sources_meteorology/).
 
-**Giovanni.** Servicio previsto para obtener directamente T2M, índices de extremos y GPCP. Reconoció nuestra consulta de T2M, pero el acceso a los archivos requiere una sesión Earthdata autenticada. Aún no tenemos datos descargados de Giovanni.
+**Giovanni.** Servicio NASA del que ya descargamos series regionales de GPCP y `RX5Day` mediante una sesión Earthdata autenticada. La descarga directa desde Python sin esa sesión sigue devolviendo HTTP 401.
 
 ## Variables descargadas
 
@@ -22,6 +22,10 @@
 
 **`PRECTOTCORR` diario — Precipitación corregida por día.** Datos en mm/día y tiempo UTC para 1992–2024. POWER limita cada petición diaria a 366 días, por lo que conservamos [un JSON original por año](../data/raw/power_daily_prectotcorr/) y un [CSV de valores diarios por celda](../data/processed/power_prectotcorr_daily_grid_1992_2024.csv). Esta serie es la entrada de nuestro índice de lluvia intensa.
 
+**GPCP `GPCPMON_3_3_sat_gauge_precip` — Precipitación combinada de satélite y pluviómetros.** Media regional mensual en mm/día exportada por Giovanni para 1992–2024. Es una fuente distinta de `PRECTOTCORR` de POWER. El CSV original contiene metadatos de fecha, caja, valor de relleno `-99999` y URL de reproducción. [CSV original](../data/raw/giovanni/gpcp_1992_2024.csv) · [CSV limpio](../data/processed/giovanni_gpcp_1992_2024.csv) · [Resultado](../data/results/giovanni_gpcp_1992_2024.json). También conservamos la [prueba 2010–2012](../data/raw/giovanni/gpcp_2010_2012.csv).
+
+**MERRA-2 `M2SMNXEDI_2_RX5Day` — Lluvia máxima en un intervalo de cinco días.** Índice mensual en mm por cinco días, promediado espacialmente por Giovanni para 1992–2024. No es la misma operación que nuestro máximo **anual** calculado con datos diarios de POWER. Su CSV original informa valor de relleno `-9999`. [CSV original](../data/raw/giovanni/rx5day_1992_2024.csv) · [CSV limpio](../data/processed/giovanni_rx5day_1992_2024.csv) · [Resultado](../data/results/giovanni_rx5day_1992_2024.json). También conservamos la [prueba 2010–2012](../data/raw/giovanni/rx5day_2010_2012.csv).
+
 Las cuatro series históricas cubren **396 meses**, con **15 celdas válidas por mes** y sin faltantes. Los CSV de cada punto de malla y los archivos `*.metadata.json` están en [`data/processed/`](../data/processed/). El [JSON de prueba 2010–2012](../data/raw/power_t2m_2010_2012.json) también se conserva.
 
 ## Campos y resultados derivados
@@ -33,6 +37,10 @@ Las cuatro series históricas cubren **396 meses**, con **15 celdas válidas por
 **`t2m_c`, `t2m_min_c`, `t2m_max_c`.** Temperatura en °C para `T2M`, `T2M_MIN` y `T2M_MAX`, respectivamente.
 
 **`prectotcorr_mm_day`.** Tasa media mensual de precipitación corregida, en mm/día.
+
+**`gpcp_mm_day`.** Tasa media mensual de precipitación GPCP según la serie regional de Giovanni, en mm/día.
+
+**`rx5day_mm_per_5days`.** Valor mensual del índice oficial `RX5Day` regional de Giovanni, en mm por cinco días.
 
 **`valid_grid_cells`.** Número de celdas válidas usadas en la media regional del mes.
 
@@ -52,10 +60,8 @@ POWER también devuelve una clave `AAAA13` de resumen anual; se excluye de los C
 
 ## Variables propuestas, aún sin datos descargados
 
-**Giovanni `M2TMNXSLV_5_12_4_T2M`.** Extracción directa para cotejar con `T2M` de POWER. Pendiente de acceso autenticado y comparación de unidades, malla y agregación.
+**Giovanni `M2TMNXSLV_5_12_4_T2M`.** Extracción directa para cotejar con `T2M` de POWER. Aún no descargada; la sesión Earthdata ya está disponible.
 
-**Índices `M2SMNXEDI`.** Familia propuesta para noches cálidas o tropicales, días en ola de calor y extremos de lluvia. Faltan descarga, verificación de identificadores y revisión de definiciones y periodos base. `TN90p` y `TR`, o `RX5Day` y `R95P`, responden preguntas diferentes.
-
-**GPCP `GPCPMON_3_3_sat_gauge_precip`.** Precipitación basada en satélite y pluviómetros. No debe sustituirse ni etiquetarse como `PRECTOTCORR`.
+**Otros índices `M2SMNXEDI`.** Falta descargar y validar noches cálidas o tropicales (`TN90p` o `TR`), días en ola de calor (`HWF`) y lluvia de días extremos (`R95P`). `TN90p` y `TR`, o `RX5Day` y `R95P`, responden preguntas diferentes.
 
 **FLDAS.** Fuente propuesta para humedad superficial y profunda del suelo y evapotranspiración. Segunda fase; aún no hay archivos descargados.

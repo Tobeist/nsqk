@@ -8,6 +8,8 @@ También se descargaron de POWER `T2M_MIN`, `T2M_MAX` y `PRECTOTCORR` para 1992�
 
 La lluvia diaria `PRECTOTCORR` de 1992–2024 permite calcular un primer índice regional de máxima lluvia en cinco días. Es un índice derivado de POWER y está documentado en el glosario y la metodología; aún no sustituye al `RX5Day` oficial de Giovanni.
 
+Con Earthdata Login también descargamos CSV oficiales de **GPCP** y **`RX5Day` de Giovanni** para 1992–2024. Sus datos originales, series limpias y resultados están descritos en el glosario. El índice `RX5Day` de Giovanni y el índice anual derivado de POWER tienen definiciones diferentes; sus tendencias no son directamente comparables.
+
 La primera serie real usa **NASA POWER Monthly Regional API**, parámetro `T2M`, caja `[-101, 25, -99, 27]`, enero de 2010 a diciembre de 2012. POWER informa que la fuente meteorológica de esta respuesta es MERRA-2, pero **esta extracción no equivale automáticamente** al producto de Giovanni `M2TMNXSLV_5_12_4_T2M`.
 
 ```powershell
