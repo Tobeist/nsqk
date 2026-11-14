@@ -1,9 +1,13 @@
 export type VariableId =
   | "temperature"
+  | "temperature-min"
+  | "temperature-max"
   | "warm-nights"
   | "heatwave"
   | "precipitation"
+  | "precipitation-power"
   | "rain5"
+  | "rain5-power-annual"
   | "extreme-rain"
   | "surface-moisture"
   | "deep-moisture"
@@ -31,6 +35,28 @@ export const variables: Variable[] = [
     available: true,
     color: "#f2a58e",
     plannedSource: "NASA POWER · T2M, datos integrados",
+  },
+  {
+    id: "temperature-min",
+    name: "Temperatura mínima mensual (POWER)",
+    short: "T mínima POWER",
+    description: "T2M_MIN mensual a 2 m. No cuenta noches cálidas.",
+    unit: "°C",
+    family: "Calor",
+    available: true,
+    color: "#e9b59b",
+    plannedSource: "NASA POWER · T2M_MIN, datos integrados",
+  },
+  {
+    id: "temperature-max",
+    name: "Temperatura máxima mensual (POWER)",
+    short: "T máxima POWER",
+    description: "T2M_MAX mensual a 2 m. No mide olas de calor.",
+    unit: "°C",
+    family: "Calor",
+    available: true,
+    color: "#f48a6c",
+    plannedSource: "NASA POWER · T2M_MAX, datos integrados",
   },
   {
     id: "warm-nights",
@@ -67,15 +93,37 @@ export const variables: Variable[] = [
     plannedSource: "NASA Giovanni · GPCP, datos integrados",
   },
   {
+    id: "precipitation-power",
+    name: "Precipitación corregida (POWER)",
+    short: "Lluvia POWER",
+    description: "PRECTOTCORR mensual en mm/día. Fuente distinta de GPCP.",
+    unit: "mm/día",
+    family: "Lluvia",
+    available: true,
+    color: "#6ac9d5",
+    plannedSource: "NASA POWER · PRECTOTCORR, datos integrados",
+  },
+  {
     id: "rain5",
-    name: "Lluvia máxima en cinco días",
-    short: "Lluvia en 5 días",
+    name: "RX5Day mensual (Giovanni)",
+    short: "RX5Day Giovanni",
     description: "Índice mensual RX5Day de Giovanni, resumido por año.",
     unit: "mm",
     family: "Lluvia",
     available: true,
     color: "#83b8f5",
     plannedSource: "NASA Giovanni · MERRA-2 RX5Day, datos integrados",
+  },
+  {
+    id: "rain5-power-annual",
+    name: "RX5day anual derivado de POWER",
+    short: "RX5day POWER",
+    description: "Máximo anual de cinco días calculado desde precipitación diaria; requiere 20 años.",
+    unit: "mm",
+    family: "Lluvia",
+    available: true,
+    color: "#4f9df3",
+    plannedSource: "NASA POWER · PRECTOTCORR diario, índice derivado",
   },
   {
     id: "extreme-rain",

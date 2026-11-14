@@ -20,7 +20,11 @@ export interface Statistics {
 export interface VariableResult {
   variableId: VariableId;
   unit: string;
-  source?: string;
+  source: string;
+  annualLabel: string;
+  sampleUnit: "meses" | "años";
+  method: { id: string; name: string; description: string };
+  limitations: string[];
   series: Observation[];
   trend: Observation[];
   statistics: Statistics | null;
@@ -32,7 +36,6 @@ export interface Analysis {
   region: Region;
   results: VariableResult[];
   mode: "real";
-  method: { id: string; name: string; description: string };
   provenance: {
     source: string;
     updatedAt: string;
@@ -51,7 +54,9 @@ export interface ChatContext {
   unit: string;
   series: Observation[];
   statistics: Statistics | null;
-  method: Analysis["method"];
+  method: VariableResult["method"];
+  sampleUnit: VariableResult["sampleUnit"];
+  annualLabel: string;
   sources: Analysis["provenance"];
   mode: "real";
 }

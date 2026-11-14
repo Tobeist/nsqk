@@ -10,8 +10,12 @@ export interface MapRegionValue {
 }
 const minimumLimits: Partial<Record<VariableId, number>> = {
   temperature: 0.5,
+  "temperature-min": 0.5,
+  "temperature-max": 0.5,
   precipitation: 0.25,
+  "precipitation-power": 0.25,
   rain5: 5,
+  "rain5-power-annual": 10,
   "surface-moisture": 0.02,
 };
 export function getMapLimit(id: VariableId, magnitude = 0) {

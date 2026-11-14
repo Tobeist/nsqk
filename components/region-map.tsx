@@ -20,7 +20,9 @@ const projection = geoMercator().fitExtent(
     ),
   },
 );
-const path = geoPath(projection);
+const path = geoPath(projection).digits(3);
+const projected = (point: [number, number]): [number, number] =>
+  projection(point)!.map((value) => Number(value.toFixed(3))) as [number, number];
 const box = [
   [-101, 25],
   [-99, 25],
@@ -32,12 +34,12 @@ const projectedRing = (ring: number[][]) =>
   ring
     .map(
       (point, i) =>
-        `${i ? "L" : "M"}${projection(point as [number, number])!.join(",")}`,
+        `${i ? "L" : "M"}${projected(point as [number, number]).join(",")}`,
     )
     .join(" ") + "Z";
 const footprint =
   box
-    .map((point, i) => `${i ? "L" : "M"}${projection(point)!.join(",")}`)
+    .map((point, i) => `${i ? "L" : "M"}${projected(point).join(",")}`)
     .join(" ") + "Z";
 const labelPositions: Record<string, [number, number]> = {
   "MX-COA": [-102.2, 27.5],
@@ -59,7 +61,7 @@ export function RegionMap({
     !!value?.statistics &&
     value.statistics.confidenceInterval[0] <= 0 &&
     value.statistics.confidenceInterval[1] >= 0;
-  const center = projection([-100, 26])!;
+  const center = projected([-100, 26]);
   return (
     <div className="regional-map">
       <svg
@@ -89,7 +91,7 @@ export function RegionMap({
         </defs>
         <g clipPath={`url(#map-clip-${id})`}>
           {Array.from({ length: 9 }, (_, i) => -105 + i).map((lon) => {
-            const x = projection([lon, 26])![0];
+            const x = projected([lon, 26])[0];
             return (
               <g key={lon}>
                 <line x1={x} x2={x} y1="0" y2={height} className="map-grid" />
@@ -100,7 +102,7 @@ export function RegionMap({
             );
           })}
           {[23, 24, 25, 26, 27, 28, 29, 30].map((lat) => {
-            const y = projection([-100, lat])![1];
+            const y = projected([-100, lat])[1];
             return (
               <g key={lat}>
                 <line x1="0" x2={width} y1={y} y2={y} className="map-grid" />
@@ -153,7 +155,7 @@ export function RegionMap({
                 ),
             )
             .map((f) => {
-              const p = projection(geoCentroid(f))!;
+              const p = projected(geoCentroid(f));
               return (
                 <text
                   className="map-neighbor-label"
@@ -167,7 +169,7 @@ export function RegionMap({
               );
             })}
           {intersectedStates.map((f) => {
-            const p = projection(
+            const p = projected(
               labelPositions[f.properties.id] ?? f.properties.label,
             )!;
             return (

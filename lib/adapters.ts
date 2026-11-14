@@ -20,7 +20,7 @@ export const localEvidenceChatAdapter: ChatAdapter = {
       return { text: "Este análisis describe la serie y su incertidumbre. No permite atribuir causas, aislar ENSO/PDO ni pronosticar. La caja estudiada tampoco representa todo el noreste de México.", evidence: "method" };
     if (/evidencia|intervalo|significativ|significancia|confian|segur|clara/.test(q))
       return { text: `El intervalo del 95 % es ${signed(s.confidenceInterval[0], 3)} a ${signed(s.confidenceInterval[1], 3)} ${context.unit}/década. ${evidenceLabel(s)} en esta caja y periodo. Un intervalo que incluye cero no demuestra ausencia de cambio. Son resultados exploratorios sin corrección por múltiples pruebas.`, evidence: "interval" };
-    return { text: `La pendiente estimada es ${signed(s.slopePerDecade, 3)} ${context.unit} por década para ${context.selection.start}–${context.selection.end}. Se estimó con ${s.sampleSize} meses, estacionalidad y errores HAC(12). La gráfica muestra promedios anuales para facilitar la lectura. ${context.sources.limitations[0]}`, evidence: "slope" };
+    return { text: `La pendiente estimada es ${signed(s.slopePerDecade, 3)} ${context.unit} por década para ${context.selection.start}–${context.selection.end}. Se estimó con ${s.sampleSize} ${context.sampleUnit} mediante ${context.method.name}. La gráfica muestra ${context.annualLabel}. ${context.sources.limitations[0]}`, evidence: "slope" };
   },
 };
 export function toChatContext(
@@ -36,7 +36,9 @@ export function toChatContext(
     unit: result.unit,
     series: result.series,
     statistics: result.statistics,
-    method: analysis.method,
+    method: result.method,
+    sampleUnit: result.sampleUnit,
+    annualLabel: result.annualLabel,
     sources: analysis.provenance,
     mode: analysis.mode,
   };
@@ -56,11 +58,15 @@ export function analysisCsv(
     "unit",
     "year",
     "value",
+    "annual_value_definition",
     "trend",
     "slope_per_decade",
     "ci95_low",
     "ci95_high",
     "method",
+    "method_id",
+    "sample_size",
+    "sample_unit",
     "source",
     "updated_at",
   ];
@@ -77,12 +83,16 @@ export function analysisCsv(
         r.unit,
         d.year,
         d.value,
+        r.annualLabel,
         r.trend[i]?.value,
         r.statistics?.slopePerDecade,
         r.statistics?.confidenceInterval[0],
         r.statistics?.confidenceInterval[1],
-        analysis.method.name,
-        r.source ?? analysis.provenance.source,
+        r.method.name,
+        r.method.id,
+        r.statistics?.sampleSize,
+        r.sampleUnit,
+        r.source,
         analysis.provenance.updatedAt,
       ]),
     ]

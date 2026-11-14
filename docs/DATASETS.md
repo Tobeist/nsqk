@@ -12,6 +12,8 @@
 
 ## Variables descargadas
 
+En la interfaz actual están habilitadas T2M, T2M_MIN, T2M_MAX, PRECTOTCORR mensual, GPCP, RX5Day mensual de Giovanni y el RX5day anual derivado de POWER. Se pueden seleccionar hasta tres a la vez. El índice anual requiere un periodo mínimo de veinte años; las seis series mensuales requieren diez.
+
 **`T2M` — Temperatura media del aire a 2 m.** Serie mensual en °C; es la base para estudiar el cambio del promedio. Tenemos una prueba de 2010–2012 y la serie histórica de 1992–2024. [JSON original](../data/raw/power_t2m_1992_2024.json) · [CSV regional](../data/processed/power_t2m_region_1992_2024.csv) · [Resultado](../data/results/power_t2m_region_1992_2024.json).
 
 **`T2M_MIN` — Temperatura mínima a 2 m.** Valor mensual en °C reportado por POWER. No cuenta noches cálidas o tropicales. Periodo: 1992–2024. [JSON original](../data/raw/power_t2m_min_1992_2024.json) · [CSV regional](../data/processed/power_t2m_min_region_1992_2024.csv) · [Resultado](../data/results/power_t2m_min_region_1992_2024.json).

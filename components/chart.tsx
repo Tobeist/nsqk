@@ -67,7 +67,7 @@ export function TrendChart({
   return (
     <div className={`trend-chart ${large ? "large" : ""}`}>
       <div className="chart-unit">
-        {result.unit} <span>· media anual</span>
+        {result.unit} <span>· {result.annualLabel}</span>
       </div>
       <svg
         viewBox={`0 0 ${w} ${h}`}

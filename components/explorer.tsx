@@ -49,10 +49,12 @@ import {
 } from "@/lib/contracts";
 import { evidenceLabel, formatNumber, signed } from "@/lib/format";
 import {
+  annualIndexId,
   createRealAnalysis,
   firstDataYear,
   lastDataYear,
-  minimumAnalysisYears,
+  minimumAnnualIndexYears,
+  minimumYearsForVariables,
   realDefaultSelection,
 } from "@/lib/real-data";
 import {
@@ -147,6 +149,11 @@ export function Explorer() {
       );
       return;
     }
+    if (id === annualIndexId && !draft.variables.includes(id) &&
+        draft.end - draft.start + 1 < minimumAnnualIndexYears) {
+      setSelectionMessage("RX5day anual de POWER requiere al menos 20 años. Amplía el periodo para seleccionarlo.");
+      return;
+    }
     setSelectionMessage("");
     setDraft((d) => ({
       ...d,
@@ -169,10 +176,13 @@ export function Explorer() {
       );
       setAnalysis(next);
       setHistory((h) => [...h.filter((a) => a.id !== next.id), next]);
+      const newlyAdded = snapshot.variables.find(
+        (id) => !analysis?.selection.variables.includes(id),
+      );
       setActiveId(
-        snapshot.variables.includes(activeId)
+        newlyAdded ?? (snapshot.variables.includes(activeId)
           ? activeId
-          : snapshot.variables[0],
+          : snapshot.variables[0]),
       );
       setRightTab("results");
       setMobileTab("results");
@@ -410,15 +420,16 @@ export function Explorer() {
                   <select
                     aria-label="Año inicial"
                     value={draft.start}
-                    onChange={(e) =>
-                      setDraft((d) => ({ ...d, start: Number(e.target.value) }))
-                    }
+                    onChange={(e) => {
+                      setDraft((d) => ({ ...d, start: Number(e.target.value) }));
+                      setSelectionMessage("");
+                    }}
                   >
                     {availableYears.map((year) => (
                       <option
                         key={year}
                         value={year}
-                        disabled={year > draft.end - minimumAnalysisYears + 1}
+                        disabled={year > draft.end - minimumYearsForVariables(draft.variables) + 1}
                       >
                         {year}
                       </option>
@@ -432,15 +443,16 @@ export function Explorer() {
                   <select
                     aria-label="Año final"
                     value={draft.end}
-                    onChange={(e) =>
-                      setDraft((d) => ({ ...d, end: Number(e.target.value) }))
-                    }
+                    onChange={(e) => {
+                      setDraft((d) => ({ ...d, end: Number(e.target.value) }));
+                      setSelectionMessage("");
+                    }}
                   >
                     {availableYears.map((year) => (
                       <option
                         key={year}
                         value={year}
-                        disabled={year < draft.start + minimumAnalysisYears - 1}
+                        disabled={year < draft.start + minimumYearsForVariables(draft.variables) - 1}
                       >
                         {year}
                       </option>
@@ -459,7 +471,7 @@ export function Explorer() {
               </div>
               <p className="period-note">
                 {draft.end >= draft.start ? draft.end - draft.start + 1 : 0}{" "}
-                años · mínimo {minimumAnalysisYears} · datos {firstDataYear}–
+                años · mínimo {minimumYearsForVariables(draft.variables)} · datos {firstDataYear}–
                 {lastDataYear}
               </p>
             </div>
@@ -500,7 +512,7 @@ export function Explorer() {
               </div>
             )}
             <span className="local-note">
-              Tendencia e intervalo recalculados con los meses elegidos
+              Tendencia e intervalo recalculados con los datos elegidos
             </span>
           </div>
         </aside>
@@ -867,10 +879,10 @@ export function Explorer() {
                         Cómo leer este resultado
                       </summary>
                       <p>
-                        {evidenceLabel(stat)} bajo los supuestos del ajuste
-                        ilustrativo. La pendiente describe dirección y magnitud;
+                        {evidenceLabel(stat)} bajo los supuestos del ajuste.
+                        La pendiente describe dirección y magnitud;
                         el intervalo describe incertidumbre. No explica causas.{" "}
-                        {analysis.method.description}
+                        {result.method.description}
                       </p>
                     </details>
                     <div className="chat-invitation">
@@ -995,7 +1007,8 @@ export function Explorer() {
           </div>
           <p className="comparison-note">
             Las variables se muestran en paralelo. No se suman ni se calcula
-            aquí una correlación, un índice combinado o atribución causal.
+            aquí una correlación, un índice combinado o atribución causal. Los
+            dos RX5day tienen definiciones temporales y fuentes distintas.
           </p>
         </Modal>
       )}
@@ -1029,8 +1042,8 @@ export function Explorer() {
             <h3>Qué estás viendo</h3>
             <p>
               Series NASA procesadas para una caja del noreste de México. La
-              gráfica resume meses en valores anuales; las pendientes e
-              intervalos proceden del análisis mensual. Las respuestas son
+              gráfica muestra valores anuales; las pendientes e intervalos se
+              calculan según el método de cada variable. Las respuestas son
               explicaciones locales, sin llamadas a Claude.
             </p>
             <h3>El mapa sí tiene geografía real</h3>
@@ -1232,16 +1245,17 @@ function Evidence({
           <dd>
             {analysis.selection.start}–{analysis.selection.end} · anual
             <small>
-              {s?.sampleSize ?? 0} meses en el modelo · {r.series.length} años
+              {s?.sampleSize ?? 0} {r.sampleUnit} en el modelo · {r.series.length} años
               en la tabla · {r.series.filter((d) => d.value === null).length}{" "}
               faltantes anuales
             </small>
+            <small>{r.annualLabel}</small>
           </dd>
         </div>
         <div>
           <dt>Fuente utilizada</dt>
           <dd>
-            {r.source ?? analysis.provenance.source}
+            {r.source}
             <small>
               Procesamiento local · actualizado {analysis.provenance.updatedAt}
             </small>
@@ -1274,7 +1288,7 @@ function Evidence({
             </strong>
           </div>
           <p>
-            {evidenceLabel(s)} bajo este modelo mensual. Un intervalo que cruza
+            {evidenceLabel(s)} bajo este modelo. Un intervalo que cruza
             cero no confirma la dirección y tampoco demuestra ausencia de
             cambio.
           </p>
@@ -1284,9 +1298,9 @@ function Evidence({
         className={`evidence-method ${focus === "method" ? "highlighted" : ""}`}
       >
         <h3>Método y límites</h3>
-        <p>{analysis.method.description}</p>
+        <p>{r.method.description}</p>
         <ul>
-          {analysis.provenance.limitations.map((l) => (
+          {[...r.limitations, ...analysis.provenance.limitations].map((l) => (
             <li key={l}>{l}</li>
           ))}
         </ul>
@@ -1311,7 +1325,7 @@ function Evidence({
             <tr>
               <th>Año</th>
               <th>Serie ({v.unit})</th>
-              <th>Recta ajustada ({v.unit})</th>
+              <th>Guía de tendencia ({v.unit})</th>
             </tr>
           </thead>
           <tbody>
