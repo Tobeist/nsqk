@@ -1,5 +1,7 @@
 # Climate Paradox — primera extracción T2M
 
+La [metodología de datos y análisis](docs/METODOLOGIA.md) documenta las decisiones aplicadas, las limitaciones y las validaciones pendientes.
+
 La primera serie real usa **NASA POWER Monthly Regional API**, parámetro `T2M`, caja `[-101, 25, -99, 27]`, enero de 2010 a diciembre de 2012. POWER informa que la fuente meteorológica de esta respuesta es MERRA-2, pero **esta extracción no equivale automáticamente** al producto de Giovanni `M2TMNXSLV_5_12_4_T2M`.
 
 ```powershell
