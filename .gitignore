@@ -1,0 +1,16 @@
+node_modules/
+.next/
+out/
+.env*
+!.env.example
+*.tsbuildinfo
+.DS_Store
+.agents/skills/stageshow/node_modules/
+.agents/skills/stageshow/playground/dist/
+.agents/skills/stageshow/playground/node_modules/
+test-results/
+.agents/
+MEMORIA.md
+MENTORIA.md
+PROMPT_INTERFAZ.md
+artifacts/demo/
