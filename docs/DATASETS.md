@@ -20,6 +20,8 @@
 
 **`PRECTOTCORR` — Precipitación corregida.** Tasa media del mes en mm/día, derivada de POWER/MERRA-2. No es acumulado mensual ni el producto GPCP de satélite y pluviómetros. Periodo: 1992–2024. [JSON original](../data/raw/power_prectotcorr_1992_2024.json) · [CSV regional](../data/processed/power_prectotcorr_region_1992_2024.csv) · [Resultado](../data/results/power_prectotcorr_region_1992_2024.json).
 
+**`PRECTOTCORR` diario — Precipitación corregida por día.** Datos en mm/día y tiempo UTC para 1992–2024. POWER limita cada petición diaria a 366 días, por lo que conservamos [un JSON original por año](../data/raw/power_daily_prectotcorr/) y un [CSV de valores diarios por celda](../data/processed/power_prectotcorr_daily_grid_1992_2024.csv). Esta serie es la entrada de nuestro índice de lluvia intensa.
+
 Las cuatro series históricas cubren **396 meses**, con **15 celdas válidas por mes** y sin faltantes. Los CSV de cada punto de malla y los archivos `*.metadata.json` están en [`data/processed/`](../data/processed/). El [JSON de prueba 2010–2012](../data/raw/power_t2m_2010_2012.json) también se conserva.
 
 ## Campos y resultados derivados
@@ -43,6 +45,8 @@ Las cuatro series históricas cubren **396 meses**, con **15 celdas válidas por
 **Promedio anual.** Media aritmética de los doce valores mensuales, sin ponderar por los días del mes. Es descriptivo.
 
 **Tendencia por década, intervalo de confianza y valor p.** Resultados exploratorios de regresión con estacionalidad mensual y errores HAC de 12 rezagos. Los valores p son individuales y no tienen corrección por múltiples pruebas. Véase la [metodología](METODOLOGIA.md).
+
+**`RX5day` derivado de POWER — Lluvia máxima acumulada en cinco días.** Para cada celda y año calculamos la mayor suma de cinco días consecutivos, sin cruzar el límite entre años. Después promediamos esos máximos de celda con pesos `cos(latitud)`. Unidad: mm. Disponible como [CSV anual por celda](../data/processed/power_rx5day_annual_grid_1992_2024.csv), [CSV anual regional](../data/processed/power_rx5day_annual_region_1992_2024.csv) y [resultado exploratorio](../data/results/power_rx5day_annual_region_1992_2024.json). **Es un índice calculado por el equipo, no el `RX5Day` oficial de Giovanni.**
 
 POWER también devuelve una clave `AAAA13` de resumen anual; se excluye de los CSV mensuales. El código excluye `-999` como valor faltante, aunque no apareció en estas cuatro series.
 

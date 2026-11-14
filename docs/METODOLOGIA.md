@@ -103,3 +103,16 @@ python scripts/analyze_power.py data/processed/power_t2m_max_region_1992_2024.cs
 python scripts/analyze_power.py data/processed/power_prectotcorr_region_1992_2024.csv data/results/power_prectotcorr_region_1992_2024.json
 ```
 
+## 11. Primera variable de lluvia extrema calculada a partir de datos diarios
+
+La [API diaria regional de POWER](https://power.larc.nasa.gov/docs/services/api/temporal/daily/) exige peticiones de **366 días o menos**. Descargamos `PRECTOTCORR` en UTC por año de 1992 a 2024, conservando cada JSON original en `data/raw/power_daily_prectotcorr/`. La API reportó mm/día y fuente MERRA2. Verificamos la cobertura de cada día, la misma malla de 15 celdas todos los años, valores finitos y precipitación no negativa; no hubo faltantes.
+
+Para cada celda calculamos la **máxima suma de cinco días consecutivos dentro de cada año calendario**. Una tasa media diaria de 1 mm/día equivale numéricamente a 1 mm acumulado durante ese día; por eso la suma de cinco valores diarios queda en mm. Luego promediamos los máximos anuales de las 15 celdas con pesos `cos(latitud)`. No calculamos el máximo de la lluvia ya promediada sobre la región: sería otra pregunta. Las ventanas de cinco días no cruzan el 31 de diciembre; esto debe recordarse al comparar con índices externos.
+
+La serie anual regional tiene 33 valores. Una regresión anual lineal con covarianza HAC de 3 rezagos produjo **+15.96 mm por década**, IC 95 % **[+8.23, +23.69]**, p individual **0.000052**. Como comprobación exploratoria, al excluir 2010 y 2024 la pendiente fue +12.04 mm por década (p = 0.00264). Estos cálculos todavía requieren sensibilidad a rezagos, periodos, corrección por múltiples pruebas y validación frente al índice oficial de Giovanni antes de presentarse como hallazgo firme. La precipitación media mensual y este máximo anual tienen unidades y definiciones diferentes; sus pendientes no se comparan numéricamente de forma directa.
+
+```powershell
+python scripts/power_daily_rain.py
+python scripts/analyze_annual.py data/processed/power_rx5day_annual_region_1992_2024.csv data/results/power_rx5day_annual_region_1992_2024.json
+```
+

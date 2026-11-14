@@ -1,0 +1,156 @@
+{
+  "source": "Derived from NASA POWER daily regional PRECTOTCORR",
+  "index": "cellwise annual maximum of five consecutive daily rainfall amounts, then latitude-weighted regional mean",
+  "period": [
+    1992,
+    2024
+  ],
+  "units": "mm",
+  "method": "OLS on annual values with intercept and time; HAC covariance with 3 annual lags",
+  "trend_mm_per_decade": 15.964087901069533,
+  "ci95_mm_per_decade": [
+    8.23431096232081,
+    23.693864839818257
+  ],
+  "p_value_unadjusted": 5.168854705804283e-05,
+  "annual": [
+    {
+      "year": 1992,
+      "rx5day_mm": 57.8884
+    },
+    {
+      "year": 1993,
+      "rx5day_mm": 88.6803
+    },
+    {
+      "year": 1994,
+      "rx5day_mm": 44.544
+    },
+    {
+      "year": 1995,
+      "rx5day_mm": 73.876
+    },
+    {
+      "year": 1996,
+      "rx5day_mm": 86.2327
+    },
+    {
+      "year": 1997,
+      "rx5day_mm": 60.7196
+    },
+    {
+      "year": 1998,
+      "rx5day_mm": 64.3333
+    },
+    {
+      "year": 1999,
+      "rx5day_mm": 60.6994
+    },
+    {
+      "year": 2000,
+      "rx5day_mm": 76.7716
+    },
+    {
+      "year": 2001,
+      "rx5day_mm": 94.6578
+    },
+    {
+      "year": 2002,
+      "rx5day_mm": 121.8866
+    },
+    {
+      "year": 2003,
+      "rx5day_mm": 124.591
+    },
+    {
+      "year": 2004,
+      "rx5day_mm": 97.3034
+    },
+    {
+      "year": 2005,
+      "rx5day_mm": 155.131
+    },
+    {
+      "year": 2006,
+      "rx5day_mm": 84.7787
+    },
+    {
+      "year": 2007,
+      "rx5day_mm": 65.2952
+    },
+    {
+      "year": 2008,
+      "rx5day_mm": 97.6285
+    },
+    {
+      "year": 2009,
+      "rx5day_mm": 51.2611
+    },
+    {
+      "year": 2010,
+      "rx5day_mm": 232.793
+    },
+    {
+      "year": 2011,
+      "rx5day_mm": 70.4885
+    },
+    {
+      "year": 2012,
+      "rx5day_mm": 46.4662
+    },
+    {
+      "year": 2013,
+      "rx5day_mm": 140.7431
+    },
+    {
+      "year": 2014,
+      "rx5day_mm": 95.0624
+    },
+    {
+      "year": 2015,
+      "rx5day_mm": 71.2809
+    },
+    {
+      "year": 2016,
+      "rx5day_mm": 71.4358
+    },
+    {
+      "year": 2017,
+      "rx5day_mm": 124.7596
+    },
+    {
+      "year": 2018,
+      "rx5day_mm": 98.1592
+    },
+    {
+      "year": 2019,
+      "rx5day_mm": 157.3699
+    },
+    {
+      "year": 2020,
+      "rx5day_mm": 128.4399
+    },
+    {
+      "year": 2021,
+      "rx5day_mm": 65.5172
+    },
+    {
+      "year": 2022,
+      "rx5day_mm": 116.2327
+    },
+    {
+      "year": 2023,
+      "rx5day_mm": 97.4903
+    },
+    {
+      "year": 2024,
+      "rx5day_mm": 165.8058
+    }
+  ],
+  "limitations": [
+    "Not Giovanni RX5Day",
+    "Index uses POWER corrected precipitation",
+    "No multiplicity correction or climate-mode adjustment",
+    "3-lag HAC choice needs sensitivity analysis"
+  ]
+}
