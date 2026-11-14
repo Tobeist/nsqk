@@ -16,7 +16,6 @@ import {
   Expand,
   ExternalLink,
   FileText,
-  Globe2,
   Layers3,
   Leaf,
   LoaderCircle,
@@ -27,7 +26,6 @@ import {
   RotateCcw,
   Send,
   ShieldCheck,
-  SlidersHorizontal,
   Thermometer,
   TrendingUp,
   X,
@@ -49,19 +47,23 @@ import {
   type ChatMessage,
   type Selection,
 } from "@/lib/contracts";
+import { evidenceLabel, formatNumber, signed } from "@/lib/format";
 import {
-  evidenceLabel,
-  formatNumber,
-  signed,
-} from "@/lib/format";
-import { createRealAnalysis, firstDataYear, lastDataYear, minimumAnalysisYears, realDefaultSelection } from "@/lib/real-data";
+  createRealAnalysis,
+  firstDataYear,
+  lastDataYear,
+  minimumAnalysisYears,
+  realDefaultSelection,
+} from "@/lib/real-data";
 import {
   analysisCsv,
   realAnalysisAdapter,
   localEvidenceChatAdapter,
   toChatContext,
 } from "@/lib/adapters";
-import { createMapLayer, mapLimits } from "@/lib/map-layer";
+import { createMapLayer, getMapLimit } from "@/lib/map-layer";
+import { RegionMap } from "./region-map";
+import { stateNames } from "@/lib/geography";
 import { TrendChart } from "./chart";
 import { Modal } from "./modal";
 const Globe = dynamic(() => import("./globe"), {
@@ -80,13 +82,21 @@ const suggestions = [
   "¿Qué tan clara es la evidencia?",
   "¿Qué no puedo concluir?",
 ];
-const availableYears = Array.from({ length: lastDataYear - firstDataYear + 1 }, (_, i) => firstDataYear + i);
+const availableYears = Array.from(
+  { length: lastDataYear - firstDataYear + 1 },
+  (_, i) => firstDataYear + i,
+);
 type MobileTab = "explore" | "results" | "chat";
 export function Explorer() {
   const [draft, setDraft] = useState<Selection>(realDefaultSelection);
-  const [analysis, setAnalysis] = useState<Analysis | null>(() => createRealAnalysis(realDefaultSelection));
-  const [history, setHistory] = useState<Analysis[]>(() => [createRealAnalysis(realDefaultSelection)]);
+  const [analysis, setAnalysis] = useState<Analysis | null>(() =>
+    createRealAnalysis(realDefaultSelection),
+  );
+  const [history, setHistory] = useState<Analysis[]>(() => [
+    createRealAnalysis(realDefaultSelection),
+  ]);
   const [activeId, setActiveId] = useState<VariableId>("temperature");
+  const [mapView, setMapView] = useState<"regional" | "globe">("regional");
   const [family, setFamily] = useState<Family>("Calor");
   const [mobileTab, setMobileTab] = useState<MobileTab>("explore");
   const [rightTab, setRightTab] = useState<"results" | "chat">("results");
@@ -238,7 +248,7 @@ export function Explorer() {
     scrollToSection();
   };
   const mapLayer = createMapLayer(history, analysis, activeId);
-  const mapLimit = mapLimits[activeId] ?? 1;
+  const mapLimit = mapLayer[0]?.limit ?? getMapLimit(activeId);
   const stat = result?.statistics;
   const inconclusive =
     stat && stat.confidenceInterval[0] <= 0 && stat.confidenceInterval[1] >= 0;
@@ -257,8 +267,7 @@ export function Explorer() {
         </Link>
         <div className="header-center">
           <span className="header-divider" />
-          <span className="workspace-label">Laboratorio de tendencias</span>
-          <span className="version">PREVIEW 01</span>
+          <span className="workspace-label">Explorador ambiental</span>
         </div>
         <div className="header-actions">
           <span className="demo-status">
@@ -306,13 +315,8 @@ export function Explorer() {
           aria-label="Configurar análisis"
         >
           <div className="filter-scroll">
-            <div className="section-kicker">
-              <SlidersHorizontal size={14} />
-              <span>TU INVESTIGACIÓN</span>
-              <span className="step-tag">01</span>
-            </div>
-            <h1>Busca una tendencia.</h1>
-            <p className="panel-intro">Elige qué observar y en qué periodo.</p>
+            <h1>Configurar análisis</h1>
+            <p className="panel-intro">Variables y periodo de estudio.</p>
             <div className="section-title">
               <h2>Variables ambientales</h2>
               <span>{draft.variables.length}/3</span>
@@ -411,7 +415,11 @@ export function Explorer() {
                     }
                   >
                     {availableYears.map((year) => (
-                      <option key={year} value={year} disabled={year > draft.end - minimumAnalysisYears + 1}>
+                      <option
+                        key={year}
+                        value={year}
+                        disabled={year > draft.end - minimumAnalysisYears + 1}
+                      >
                         {year}
                       </option>
                     ))}
@@ -429,7 +437,11 @@ export function Explorer() {
                     }
                   >
                     {availableYears.map((year) => (
-                      <option key={year} value={year} disabled={year < draft.start + minimumAnalysisYears - 1}>
+                      <option
+                        key={year}
+                        value={year}
+                        disabled={year < draft.start + minimumAnalysisYears - 1}
+                      >
                         {year}
                       </option>
                     ))}
@@ -438,14 +450,17 @@ export function Explorer() {
                 </label>
               </div>
               <div className="period-track">
-                <span style={{
-                  left: `${(draft.start - firstDataYear) / availableYears.length * 100}%`,
-                  width: `${(draft.end - draft.start + 1) / availableYears.length * 100}%`,
-                }} />
+                <span
+                  style={{
+                    left: `${((draft.start - firstDataYear) / availableYears.length) * 100}%`,
+                    width: `${((draft.end - draft.start + 1) / availableYears.length) * 100}%`,
+                  }}
+                />
               </div>
               <p className="period-note">
                 {draft.end >= draft.start ? draft.end - draft.start + 1 : 0}{" "}
-                años · mínimo {minimumAnalysisYears} · datos {firstDataYear}–{lastDataYear}
+                años · mínimo {minimumAnalysisYears} · datos {firstDataYear}–
+                {lastDataYear}
               </p>
             </div>
             <div className="scope-note">
@@ -493,32 +508,48 @@ export function Explorer() {
           className={`earth-panel ${mobileTab === "explore" ? "mobile-visible" : ""}`}
           aria-label="Explorador geográfico"
         >
-          <div className="earth-top">
-            <div className="section-kicker">
-              <span className="cyan-dot" />
-              OBSERVATORIO TERRESTRE
-            </div>
-            <span className="live-label">
-              <Globe2 size={12} />
-              VISTA 3D
-            </span>
-          </div>
           <div className="earth-heading">
-            <h2>Todo empieza en un lugar.</h2>
-            <p>Explora el planeta. Delimita tu pregunta.</p>
+            <div>
+              <h2>Área de estudio</h2>
+              <p>Una caja que cruza {stateNames.length} estados.</p>
+            </div>
+            <div className="map-view-switch" aria-label="Vista del mapa">
+              <button
+                aria-pressed={mapView === "regional"}
+                onClick={() => setMapView("regional")}
+              >
+                Estados
+              </button>
+              <button
+                aria-pressed={mapView === "globe"}
+                onClick={() => setMapView("globe")}
+              >
+                Planeta 3D
+              </button>
+            </div>
           </div>
-          <Globe
-            regionId={draft.regionId}
-            onSelect={chooseRegion}
-            layer={mapLayer}
-          />
-          <div className="globe-hint">
-            <span className="mouse-icon" />
-            Arrastra para rotar<span>·</span>Desplaza para acercar
+          {mapView === "regional" ? (
+            <RegionMap value={mapLayer[0]} variable={activeVariable} />
+          ) : (
+            <Globe
+              regionId={draft.regionId}
+              onSelect={chooseRegion}
+              layer={mapLayer}
+            />
+          )}
+          <div className="states-context">
+            <div>
+              {stateNames.map((name) => (
+                <span key={name}>{name === "Texas" ? "Texas (EE. UU.)" : name}</span>
+              ))}
+            </div>
+            <p>
+              El color de la tendencia corresponde sólo al recuadro, que cruza parte de Texas. Sin resultados por estado.
+            </p>
           </div>
           <div className="map-legend" aria-label="Leyenda del mapa">
             <div>
-              <span>PENDIENTE · {activeVariable.short.toUpperCase()}</span>
+              <span>Cambio por década · {activeVariable.short}</span>
               <strong>{activeVariable.unit}/década</strong>
             </div>
             <div className="map-color-ramp" />
@@ -556,9 +587,13 @@ export function Explorer() {
                 value={draft.regionId}
                 onChange={(e) => chooseRegion(e.target.value)}
               >
-                {regions.filter((r) => r.id === "mx-northeast").map((r) => (
-                  <option key={r.id} value={r.id}>{r.name}</option>
-                ))}
+                {regions
+                  .filter((r) => r.id === "mx-northeast")
+                  .map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.name}
+                    </option>
+                  ))}
               </select>
               <ChevronDown size={17} />
             </div>
@@ -658,10 +693,6 @@ export function Explorer() {
             ) : (
               <>
                 <div className="result-context">
-                  <div className="section-kicker">
-                    <span className="result-indicator" />
-                    ANÁLISIS NASA · EXPLORATORIO
-                  </div>
                   <h2>{analysis.region.name}</h2>
                   <p>
                     <MapPin size={12} />
@@ -720,7 +751,8 @@ export function Explorer() {
                     <Layers3 size={35} />
                     <h3>Esta combinación aún no tiene datos.</h3>
                     <p>
-                      Esta variable todavía no tiene una serie procesada para la caja seleccionada.
+                      Esta variable todavía no tiene una serie procesada para la
+                      caja seleccionada.
                     </p>
                     <button
                       className="secondary-button"
@@ -888,10 +920,10 @@ export function Explorer() {
       <footer className="app-footer">
         <span>
           <span className="cyan-dot" />
-          Un planeta de preguntas. Una investigación a la vez.
+          Fuentes: NASA POWER · GPCP · MERRA-2
         </span>
         <span>
-          Hecho para explorar, con evidencia.
+          Análisis regional exploratorio
           <span className="footer-tag">MX · caja noreste</span>
         </span>
       </footer>
@@ -996,8 +1028,8 @@ export function Explorer() {
             </p>
             <h3>Qué estás viendo</h3>
             <p>
-              Series NASA procesadas para una caja del noreste de México.
-              La gráfica resume meses en valores anuales; las pendientes e
+              Series NASA procesadas para una caja del noreste de México. La
+              gráfica resume meses en valores anuales; las pendientes e
               intervalos proceden del análisis mensual. Las respuestas son
               explicaciones locales, sin llamadas a Claude.
             </p>
@@ -1200,8 +1232,9 @@ function Evidence({
           <dd>
             {analysis.selection.start}–{analysis.selection.end} · anual
             <small>
-              {s?.sampleSize ?? 0} meses en el modelo · {r.series.length} años en la tabla ·{" "}
-              {r.series.filter((d) => d.value === null).length} faltantes anuales
+              {s?.sampleSize ?? 0} meses en el modelo · {r.series.length} años
+              en la tabla · {r.series.filter((d) => d.value === null).length}{" "}
+              faltantes anuales
             </small>
           </dd>
         </div>
@@ -1241,8 +1274,8 @@ function Evidence({
             </strong>
           </div>
           <p>
-            {evidenceLabel(s)} bajo este modelo mensual. Un intervalo que
-            cruza cero no confirma la dirección y tampoco demuestra ausencia de
+            {evidenceLabel(s)} bajo este modelo mensual. Un intervalo que cruza
+            cero no confirma la dirección y tampoco demuestra ausencia de
             cambio.
           </p>
         </div>

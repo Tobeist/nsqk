@@ -21,6 +21,12 @@ Otras regiones y las variables sin archivos procesados están deshabilitadas. La
 
 La sección de preguntas ofrece respuestas locales deterministas basadas en el resultado visible; **no consulta un modelo de IA**. Las fixtures sintéticas y la ruta `/demo` fueron retiradas del MVP.
 
+## Mapa del área de estudio
+
+La vista «Estados» muestra fronteras reales de Natural Earth y señala Coahuila, Nuevo León, Tamaulipas y Texas (EE. UU.), que intersectan la caja solicitada. Su relleno es contexto geográfico: sólo el recuadro representa el análisis. La contribución efectiva de cada producto depende de sus celdas y máscaras; no hay resultados por estado completo. «Planeta 3D» conserva el globo como vista alterna.
+
+La leyenda cambia con la variable y el periodo ejecutados y amplía su escala para cubrir la pendiente visible, incluido RX5Day. Más detalles y procedencia en [docs/INTERFAZ_MAPA.md](docs/INTERFAZ_MAPA.md).
+
 ## Qué falta para ampliar el producto
 
 - Agregar nuevas regiones con polígonos, máscara y pesos espaciales definidos, y descargar o procesar las mismas variables para cada una. No reutilizar la serie de esta caja en otra región.

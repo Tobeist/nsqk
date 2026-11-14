@@ -1,0 +1,655 @@
+/* Geographic reading takes priority over decorative dashboard chrome. */
+:root {
+  --map-state: #245a61;
+  --map-state-edge: #88c8c9;
+  --map-cold: #209fff;
+  --map-warm: #ff963c;
+}
+body {
+  font-family: var(--font-plex), Arial, sans-serif;
+}
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+.app-shell .app-header {
+  background: #0b141c;
+}
+.app-shell .workspace-label {
+  font-size: 13px;
+  color: #b2c0c7;
+}
+.app-shell .brand {
+  letter-spacing: -0.035em;
+  font-weight: 600;
+}
+.app-shell .brand-light {
+  font-weight: 400;
+}
+.app-shell .filters-panel,
+.app-shell .analysis-panel {
+  background: #101c26;
+}
+.app-shell .filters-panel h1 {
+  font-size: 23px;
+  letter-spacing: -0.025em;
+  margin-top: 0;
+  font-weight: 500;
+}
+.app-shell .panel-intro {
+  font-size: 12px;
+  color: #a5b7c3;
+  margin-top: 7px;
+}
+.app-shell .section-title h2 {
+  font-size: 13px;
+}
+.app-shell .family-tabs {
+  background: #0b151e;
+  border-radius: 6px;
+  gap: 5px;
+}
+.app-shell .family-tabs button {
+  font-size: 12px;
+}
+.app-shell .family-tabs button.selected {
+  box-shadow: none;
+  background: #2b4249;
+  border: 1px solid #5d8b8b;
+  color: #d0f1e8;
+}
+.app-shell .variable-option {
+  background: #13232e;
+  border-radius: 6px;
+}
+.app-shell .variable-option.is-selected {
+  background: #213b42;
+  border-color: #6caaa4;
+}
+.app-shell .variable-name {
+  font-size: 13px;
+  line-height: 1.5;
+}
+.app-shell .variable-option p {
+  font-size: 11px;
+  line-height: 1.6;
+  color: #b0c3ce;
+}
+.app-shell .variable-meta {
+  font-size: 10px;
+  line-height: 1.6;
+}
+.app-shell .selected-summary button {
+  font-size: 10px;
+  padding: 6px 7px;
+}
+.app-shell .pending-variables summary {
+  font-size: 11px;
+  color: #aec1ce;
+}
+.app-shell .period-note {
+  font-size: 10px;
+  color: #afc3d0;
+}
+.app-shell .scope-note {
+  display: none;
+}
+.app-shell .local-note {
+  font-size: 10px;
+  color: #a6bdca;
+  line-height: 1.6;
+}
+.app-shell .analyze-button {
+  font-size: 13px;
+  background: #a3dfca;
+  border-radius: 6px;
+}
+.app-shell .earth-panel {
+  background: #0a141d;
+}
+.app-shell .earth-panel:before,
+.app-shell .globe-halo {
+  display: none;
+}
+.app-shell .earth-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 25px 30px 0;
+  flex: none;
+}
+.app-shell .earth-heading h2 {
+  font-size: 24px;
+  letter-spacing: -0.025em;
+  font-weight: 500;
+}
+.app-shell .earth-heading p {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #a1b7c5;
+  margin-top: 5px;
+}
+.map-view-switch {
+  display: flex;
+  flex: none;
+  border: 1px solid #3c505d;
+  border-radius: 6px;
+  padding: 3px;
+  gap: 3px;
+  background: #0d1a24;
+}
+.map-view-switch button {
+  font-size: 11px;
+  color: #abc0cd;
+  padding: 7px 11px;
+  min-height: 33px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.map-view-switch button[aria-pressed="true"] {
+  color: #e4f4f0;
+  background: #2d464c;
+}
+.regional-map {
+  position: relative;
+  flex: 1;
+  min-height: 250px;
+  margin: 15px 0 0;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+.regional-map > svg {
+  width: 100%;
+  height: 100%;
+  max-height: 430px;
+  display: block;
+  overflow: hidden;
+}
+.map-grid {
+  stroke: #395262;
+  stroke-width: 0.7;
+  opacity: 0.4;
+}
+.map-coordinate {
+  fill: #7f9dac;
+  font-size: 10px;
+  font-family: inherit;
+}
+.state-area {
+  fill: #142732;
+  stroke: #456474;
+  stroke-width: 1;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.state-area.intersects {
+  fill: var(--map-state);
+  stroke: var(--map-state-edge);
+  stroke-width: 1.4;
+}
+.map-state-name {
+  fill: #d0eeea;
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  paint-order: stroke;
+  stroke: #164048;
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+.map-neighbor-label {
+  fill: #7394a4;
+  font-size: 11px;
+  paint-order: stroke;
+  stroke: #142732;
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+.map-box-label {
+  fill: #071824;
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.7px;
+  pointer-events: none;
+}
+.map-north {
+  position: absolute;
+  top: 14px;
+  right: 30px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  color: #bad0d9;
+}
+.map-north svg {
+  transform: rotate(-45deg);
+}
+.map-geographic-note {
+  position: absolute;
+  bottom: 14px;
+  left: 30px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #b7cbd5;
+  font-size: 10px;
+  pointer-events: none;
+  background: #0b1822dd;
+  padding: 7px 9px;
+  border: 1px solid #35515e;
+  border-radius: 3px;
+}
+.map-geographic-note > i {
+  width: 13px;
+  height: 10px;
+  background: #245a61;
+  border: 1px solid #88c8c9;
+}
+.states-context {
+  padding: 0 30px 15px;
+  flex: none;
+  position: relative;
+}
+.states-context > div {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: #b8ddda;
+  font-weight: 500;
+  line-height: 1.7;
+}
+.states-context > div > span + span {
+  position: relative;
+}
+.states-context > div > span + span:before {
+  content: "·";
+  position: absolute;
+  left: -10px;
+  color: #6c979e;
+}
+.states-context > p {
+  font-size: 11px;
+  line-height: 1.7;
+  color: #9fb8c6;
+  margin-top: 5px;
+  max-width: 66ch;
+}
+.app-shell .map-legend {
+  margin: 0 30px 13px;
+  padding: 13px 15px;
+  background: #132530;
+  border: 1px solid #3a5362;
+  backdrop-filter: none;
+  border-radius: 6px;
+}
+.app-shell .map-legend > div:first-child {
+  font-size: 10px;
+  color: #c5d9e1;
+  letter-spacing: 0.4px;
+}
+.app-shell .map-legend strong {
+  font-size: 11px;
+  color: #e1eef0;
+}
+.app-shell .map-color-ramp {
+  height: 9px;
+  background: linear-gradient(90deg, var(--map-cold), #c6d1d5, var(--map-warm));
+  border-radius: 2px;
+}
+.app-shell .map-scale-labels {
+  font-size: 10px;
+  color: #c5d8e2;
+  margin-top: 6px;
+}
+.app-shell .map-legend > p,
+.app-shell .map-certainty {
+  font-size: 10px;
+  color: #abc0cc;
+  line-height: 1.7;
+}
+.app-shell .map-legend > p > span {
+  color: #bed5ca;
+}
+.app-shell .region-selector {
+  background: #101f2a;
+  border: 1px solid #344e5d;
+  backdrop-filter: none;
+  border-radius: 6px;
+  padding: 14px 16px;
+}
+.app-shell .region-selector-label label {
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+.app-shell .region-select-row select {
+  font-size: 17px;
+}
+.app-shell .region-detail {
+  font-size: 10px;
+  color: #adc2cf;
+}
+.app-shell .coverage {
+  padding: 13px 20px 17px;
+  gap: 6px;
+}
+.app-shell .coverage p {
+  font-size: 9px;
+  color: #a2b7c5;
+}
+.app-shell .analysis-scroll {
+  padding-top: 24px;
+}
+.app-shell .result-context h2 {
+  font-size: 23px;
+  margin-top: 0;
+  line-height: 1.4;
+  letter-spacing: -0.025em;
+}
+.app-shell .result-context > p {
+  font-size: 11px;
+}
+.app-shell .result-variable-tabs button {
+  font-size: 10px;
+  padding: 7px 9px;
+  border-radius: 4px;
+}
+.app-shell .result-variable-tabs button.active {
+  background: #253944;
+  border-color: #749196;
+  color: #e8f3f1;
+}
+.app-shell .compare-series-button {
+  font-size: 11px;
+}
+.app-shell .variable-eyebrow {
+  font-size: 12px;
+}
+.app-shell .result-summary h3 {
+  font-size: 18px;
+  line-height: 1.5;
+  letter-spacing: -0.02em;
+}
+.app-shell .result-summary p {
+  font-size: 12px;
+  color: #b1c4cf;
+  line-height: 1.8;
+}
+.app-shell .metric-label {
+  font-size: 10px;
+  letter-spacing: 0.8px;
+  color: #b1c4cf;
+}
+.app-shell .main-metric {
+  font-size: 43px;
+  letter-spacing: -0.035em;
+}
+.app-shell .evidence-status {
+  font-size: 10px;
+}
+.app-shell .interval-row > span {
+  font-size: 11px;
+}
+.app-shell .interval-row strong {
+  font-size: 13px;
+}
+.app-shell .interval-row strong > span {
+  font-size: 11px;
+}
+.app-shell .chart-heading h4 {
+  font-size: 13px;
+}
+.app-shell .chart-unit,
+.app-shell .chart-legend {
+  font-size: 10px;
+}
+.trend-chart svg text {
+  font-family: var(--font-plex), Arial, sans-serif;
+}
+.app-shell .app-footer {
+  font-size: 10px;
+  color: #a3bbc8;
+}
+@media (max-width: 1300px) and (min-width: 1051px) {
+  .app-shell .earth-heading {
+    padding: 22px 24px 0;
+    gap: 12px;
+  }
+  .app-shell .earth-heading h2 {
+    font-size: 22px;
+  }
+  .map-view-switch button {
+    padding: 6px 8px;
+    font-size: 10px;
+  }
+  .states-context {
+    padding: 0 24px 12px;
+  }
+  .app-shell .map-legend {
+    margin-left: 24px;
+    margin-right: 24px;
+  }
+  .regional-map {
+    min-height: 220px;
+    margin-top: 10px;
+  }
+  .states-context > div {
+    font-size: 11px;
+  }
+  .states-context > p {
+    font-size: 10px;
+  }
+}
+@media (min-width: 1051px) and (max-height: 820px) {
+  .regional-map {
+    min-height: 215px;
+  }
+  .app-shell .earth-heading {
+    padding-top: 19px;
+  }
+  .app-shell .earth-heading h2 {
+    font-size: 21px;
+  }
+  .states-context {
+    padding-bottom: 9px;
+  }
+  .states-context > p {
+    font-size: 10px;
+  }
+  .app-shell .map-legend {
+    padding: 10px 14px;
+  }
+  .app-shell .coverage {
+    padding-top: 10px;
+    padding-bottom: 13px;
+  }
+  .app-shell .map-certainty {
+    font-size: 9px;
+  }
+  .app-shell .map-legend > p {
+    font-size: 9px;
+  }
+}
+@media (max-width: 1050px) and (min-width: 701px) {
+  .app-shell .earth-panel {
+    min-height: 820px;
+  }
+  .regional-map {
+    min-height: 340px;
+  }
+  .app-shell .earth-heading {
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .map-view-switch button {
+    padding: 6px 9px;
+  }
+}
+@media (max-width: 700px) {
+  .app-shell .brand {
+    font-size: 21px;
+  }
+  .app-shell .earth-heading {
+    padding: 23px 21px 0;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .app-shell .earth-heading h2 {
+    font-size: 23px;
+  }
+  .app-shell .earth-heading p {
+    font-size: 11px;
+  }
+  .map-view-switch button {
+    font-size: 10px;
+    padding: 7px 8px;
+    min-height: 36px;
+  }
+  .map-view-switch {
+    margin-top: 2px;
+  }
+  .app-shell .earth-panel {
+    min-height: 790px;
+  }
+  .regional-map {
+    min-height: 310px;
+    margin-top: 11px;
+    flex: 1;
+  }
+  .regional-map > svg {
+    max-height: 360px;
+  }
+  .map-state-name {
+    font-size: 19px;
+  }
+  .map-box-label {
+    font-size: 12px;
+  }
+  .map-coordinate {
+    font-size: 12px;
+  }
+  .map-geographic-note {
+    left: 21px;
+    bottom: 10px;
+    font-size: 9px;
+  }
+  .map-north {
+    right: 23px;
+    top: 6px;
+  }
+  .states-context {
+    padding: 0 21px 15px;
+  }
+  .states-context > div {
+    font-size: 12px;
+    gap: 15px;
+  }
+  .states-context > p {
+    font-size: 11px;
+  }
+  .app-shell .map-legend {
+    margin: 0 21px 13px;
+    padding: 13px 14px;
+  }
+  .app-shell .map-legend > div:first-child {
+    font-size: 9px;
+  }
+  .app-shell .map-certainty {
+    font-size: 9px;
+  }
+  .app-shell .region-selector {
+    margin: 0 21px;
+    padding: 14px;
+  }
+  .app-shell .region-select-row select {
+    font-size: 17px;
+  }
+  .app-shell .region-detail {
+    font-size: 9px;
+  }
+  .app-shell .coverage {
+    padding: 14px 20px 18px;
+  }
+  .app-shell .coverage p {
+    font-size: 9px;
+  }
+  .app-shell .analysis-scroll {
+    padding-top: 24px;
+  }
+  .app-shell .filters-panel h1 {
+    font-size: 24px;
+  }
+  .app-shell .variable-name {
+    font-size: 14px;
+  }
+  .app-shell .variable-option p {
+    font-size: 12px;
+  }
+  .app-shell .variable-meta {
+    font-size: 11px;
+  }
+  .app-shell .pending-variables summary {
+    font-size: 12px;
+  }
+  .app-shell .main-metric {
+    font-size: 46px;
+  }
+}
+@media (max-width: 360px) {
+  .app-shell .earth-heading {
+    flex-wrap: wrap;
+  }
+  .map-view-switch {
+    margin-top: 1px;
+  }
+  .app-shell .earth-panel {
+    min-height: 850px;
+  }
+  .states-context > div {
+    font-size: 11px;
+    gap: 13px;
+  }
+}
+:root {
+  --map-state: #276d73;
+  --map-state-edge: #9ddfd8;
+  --map-warm: #ff8b22;
+}
+.app-shell .coverage {
+  display: none;
+}
+.app-shell .region-selector {
+  margin-bottom: 22px;
+}
+.states-context {
+  padding-bottom: 12px;
+}
+.states-context > p {
+  max-width: 72ch;
+  line-height: 1.6;
+}
+@media (min-width: 1051px) {
+  .regional-map {
+    max-height: 440px;
+  }
+  .regional-map > svg {
+    max-height: 440px;
+  }
+}
+@media (max-width: 700px) {
+  .app-shell .earth-panel {
+    min-height: 790px;
+  }
+  .app-shell .region-selector {
+    margin-bottom: 22px;
+  }
+  .regional-map {
+    min-height: 320px;
+  }
+}

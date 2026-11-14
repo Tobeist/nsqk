@@ -5,6 +5,7 @@ import {
   Suspense,
   useEffect,
   useRef,
+  useMemo,
   useState,
   type ReactNode,
 } from "react";
@@ -19,8 +20,11 @@ import {
   Color,
   SRGBColorSpace,
   Vector3,
+  Vector2,
+  ShapeUtils,
 } from "three";
 import { Crosshair, Minus, Plus, RotateCcw } from "lucide-react";
+import { intersectedStates, type StateFeature } from "@/lib/geography";
 import { regions, type Region } from "@/lib/catalog";
 import type { MapRegionValue } from "@/lib/map-layer";
 import type { OrbitControls as OrbitControlsType } from "three-stdlib";
@@ -115,45 +119,75 @@ function RegionMark({
         color={selected ? "#b1ffdf" : (value?.color ?? "#9ac0cc")}
         lineWidth={selected ? 2.6 : 1}
       />
-      <mesh
-        position={position(region.lat, region.lon, 2.023)}
-        onClick={(e) => {
-          e.stopPropagation();
-          onSelect(region.id);
-        }}
-        onPointerOver={() => {
-          document.body.style.cursor = "pointer";
-        }}
-        onPointerOut={() => {
-          document.body.style.cursor = "";
-        }}
-      >
-        <sphereGeometry args={[selected ? 0.037 : 0.026, 16, 16]} />
+    </group>
+  );
+}
+function StateSurface({ feature }: { feature: StateFeature }) {
+  const geometry = useMemo(() => {
+    const points: number[] = [];
+    function subdivide(a: Vector3, b: Vector3, c: Vector3, depth: number) {
+      if (depth === 0) {
+        points.push(...a.toArray(), ...b.toArray(), ...c.toArray());
+        return;
+      }
+      const ab = a.clone().add(b).normalize().multiplyScalar(2.006),
+        bc = b.clone().add(c).normalize().multiplyScalar(2.006),
+        ca = c.clone().add(a).normalize().multiplyScalar(2.006);
+      subdivide(a, ab, ca, depth - 1);
+      subdivide(ab, b, bc, depth - 1);
+      subdivide(ca, bc, c, depth - 1);
+      subdivide(ab, bc, ca, depth - 1);
+    }
+    const polygons =
+      feature.geometry.type === "Polygon"
+        ? [feature.geometry.coordinates]
+        : feature.geometry.type === "MultiPolygon"
+          ? feature.geometry.coordinates
+          : [];
+    for (const polygon of polygons) {
+      const rings = polygon.map((ring) =>
+        ring.slice(0, -1).map((p) => new Vector2(p[0], p[1])),
+      );
+      const flat = rings.flat();
+      for (const face of ShapeUtils.triangulateShape(
+        rings[0],
+        rings.slice(1),
+      )) {
+        const vertices = face.map(
+          (i) => new Vector3(...position(flat[i].y, flat[i].x, 2.006)),
+        );
+        subdivide(vertices[0], vertices[1], vertices[2], 2);
+      }
+    }
+    const g = new BufferGeometry();
+    g.setAttribute("position", new Float32BufferAttribute(points, 3));
+    return g;
+  }, [feature]);
+  useEffect(() => () => geometry.dispose(), [geometry]);
+  const polygons =
+    feature.geometry.type === "Polygon"
+      ? [feature.geometry.coordinates]
+      : feature.geometry.type === "MultiPolygon"
+        ? feature.geometry.coordinates
+        : [];
+  return (
+    <group>
+      <mesh geometry={geometry}>
         <meshBasicMaterial
-          color={
-            value?.state === "analyzed"
-              ? value.color
-              : selected
-                ? "#a0ffeb"
-                : "#b3d3df"
-          }
-        />
-      </mesh>
-      <mesh
-        position={position(region.lat, region.lon, 2.03)}
-        onClick={(e) => {
-          e.stopPropagation();
-          onSelect(region.id);
-        }}
-      >
-        <sphereGeometry args={[0.11, 12, 12]} />
-        <meshBasicMaterial
+          color="#39878a"
           transparent
-          opacity={selected ? 0.13 : 0.04}
-          color="#7ef5d9"
-          depthWrite={false}
+          opacity={0.65}
+          side={DoubleSide}
         />
       </mesh>
+      {polygons.map((polygon, i) => (
+        <Line
+          key={i}
+          points={polygon[0].map((p) => position(p[1], p[0], 2.009))}
+          color="#a5e0d7"
+          lineWidth={1}
+        />
+      ))}
     </group>
   );
 }
@@ -288,6 +322,9 @@ export default function Globe({
             />
             <Suspense fallback={null}>
               <Earth />
+              {intersectedStates.map((f) => (
+                <StateSurface key={f.properties.id} feature={f} />
+              ))}
               {regions.map((region) => (
                 <RegionMark
                   key={region.id}
