@@ -475,12 +475,13 @@ a {
 }
 .period-track span {
   display: block;
-  width: 100%;
+  position: absolute;
   height: 100%;
   background: #71afa4;
+  border-radius: 3px;
 }
-.period-track:before,
-.period-track:after {
+.period-track span:before,
+.period-track span:after {
   content: "";
   position: absolute;
   height: 6px;
@@ -489,10 +490,10 @@ a {
   background: #b1dacd;
   border-radius: 50%;
 }
-.period-track:before {
+.period-track span:before {
   left: 0;
 }
-.period-track:after {
+.period-track span:after {
   right: 0;
 }
 .period-note {
@@ -1460,7 +1461,7 @@ a {
   color: #98adb9;
   margin-top: 9px;
 }
-.mock-notice {
+.chat-notice {
   padding: 13px 14px;
   border: 1px solid #34454b;
   border-radius: 7px;
@@ -1478,7 +1479,7 @@ a {
   font-weight: 400;
   letter-spacing: 0.2px;
 }
-.mock-notice p {
+.chat-notice p {
   font-size: 10px;
   line-height: 1.8;
   color: #adc2c6;
@@ -2552,10 +2553,10 @@ a {
   .chat-context-label {
     font-size: 10px;
   }
-  .mock-notice {
+  .chat-notice {
     padding: 15px;
   }
-  .mock-notice p {
+  .chat-notice p {
     font-size: 11px;
   }
   .suggested-questions {

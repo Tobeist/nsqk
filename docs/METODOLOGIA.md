@@ -133,3 +133,9 @@ python scripts/analyze_power.py data/processed/giovanni_gpcp_1992_2024.csv data/
 python scripts/analyze_power.py data/processed/giovanni_rx5day_1992_2024.csv data/results/giovanni_rx5day_1992_2024.json --product-source Giovanni
 ```
 
+## 13. Selección interactiva de años en el MVP
+
+Los tres JSON integrados conservan enero de 1992 a diciembre de 2024 sin meses faltantes. La interfaz permite seleccionar años completos dentro de esa cobertura, con un mínimo de diez años como en los scripts de análisis. Al analizar, `lib/seasonal-trend.ts` aplica a los meses elegidos la misma regresión de tiempo lineal e indicadores de mes, con covarianza HAC/Newey–West de Bartlett y 12 rezagos. El intervalo bilateral del 95 % usa el cuantil normal, como `statsmodels` para estos ajustes. Con la ventana completa, pendiente y extremos del intervalo coinciden con los resultados Python versionados a una tolerancia de `1e-9`.
+
+La gráfica y el CSV usan las medias simples de los doce meses de cada año seleccionado. La recta mostrada conserva la pendiente mensual y se centra en la media de esos resúmenes anuales; sirve de guía visual. Las anomalías almacenadas conservan la referencia fija 1992–2021, pero no entran en el ajuste de tendencias por periodo. Cada periodo elegido constituye un análisis exploratorio nuevo; seleccionar varios hasta encontrar un intervalo que excluya cero requiere control de pruebas múltiples antes de presentar un hallazgo firme.
+

@@ -7,8 +7,5 @@ export default defineConfig([
   globalIgnores([
     ".next/**",
     ".agents/**",
-    "demo-kit/**",
-    "components/demo/kit/**",
-    "components/demo/gold/**",
   ]),
 ]);

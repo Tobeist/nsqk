@@ -1,77 +1,28 @@
-import {
-  createDemoAnalysis,
-  formatNumber,
-  signed,
-  evidenceLabel,
-} from "./fixtures";
+import { signed, evidenceLabel } from "./format";
 import { getVariable } from "./catalog";
+import { createRealAnalysis } from "./real-data";
 import type { AnalysisAdapter, ChatAdapter, ChatContext } from "./contracts";
-function pause(ms: number, signal?: AbortSignal) {
-  return new Promise<void>((resolve, reject) => {
-    const timer = setTimeout(resolve, ms);
-    signal?.addEventListener(
-      "abort",
-      () => {
-        clearTimeout(timer);
-        reject(new DOMException("Cancelado", "AbortError"));
-      },
-      { once: true },
-    );
-  });
-}
-export const demoAnalysisAdapter: AnalysisAdapter = {
+export const realAnalysisAdapter: AnalysisAdapter = {
   async analyze(selection, signal) {
-    await pause(700, signal);
-    return createDemoAnalysis(selection);
+    if (signal?.aborted) throw new DOMException("Cancelado", "AbortError");
+    return createRealAnalysis(selection);
   },
 };
-export function demoReply(question: string, c: ChatContext) {
-  const s = c.statistics,
-    variable = getVariable(c.variableId);
-  if (!s)
-    return {
-      text: "Esta combinación no tiene una serie de demostración disponible. No puedo estimar una tendencia ni interpretar evidencia inexistente.",
-      evidence: "method" as const,
-    };
-  const q = question.toLowerCase(),
-    prefix = `En este ejemplo de ${variable.name.toLowerCase()} para ${c.region.name} (${c.selection.start}–${c.selection.end}), `;
-  if (
-    /causa|concluir|niño|enso|pdo|futuro|pron[oó]st|ma[ñn]ana|clim[aá]tico/.test(
-      q,
-    )
-  )
-    return {
-      text:
-        prefix +
-        "no podemos atribuir el cambio a una causa, separar El Niño de otras influencias ni predecir el futuro. Los datos son sintéticos y el ajuste describe sólo el periodo elegido. Harían falta observaciones, validación y un método científico apropiado.",
-      evidence: "method" as const,
-    };
-  if (/evidencia|clara|intervalo|segur|signific|confian|real/.test(q)) {
-    const crosses =
-      s.confidenceInterval[0] <= 0 && s.confidenceInterval[1] >= 0;
-    return {
-      text:
-        prefix +
-        `el intervalo del 95 % va de ${signed(s.confidenceInterval[0], 3)} a ${signed(s.confidenceInterval[1], 3)} ${c.unit}/década. ${crosses ? "Incluye cero: la dirección no queda resuelta por este ajuste. Eso no demuestra ausencia de cambio." : "Excluye cero: el ajuste ilustra evidencia de " + (s.slopePerDecade > 0 ? "aumento" : "disminución") + ". Eso no identifica su causa."} Este intervalo supone errores independientes y es sólo demostrativo.`,
-      evidence: "interval" as const,
-    };
-  }
-  return {
-    text:
-      prefix +
-      `la pendiente es ${signed(s.slopePerDecade, 3)} ${c.unit} por década: la recta ajustada cambia esa cantidad cada diez años. No significa que todos los años cambien igual. ${evidenceLabel(s)} en esta fixture, con ${s.sampleSize} valores anuales. El promedio de la serie es ${formatNumber(c.series.filter((d) => d.value !== null).reduce((a, d) => a + d.value!, 0) / s.sampleSize, 3)} ${c.unit}. Son cifras sintéticas, no un hallazgo ambiental.`,
-    evidence: "slope" as const,
-  };
-}
-export const mockChatAdapter: ChatAdapter = {
+export const localEvidenceChatAdapter: ChatAdapter = {
   connected: true,
-  mode: "demo",
+  mode: "real",
   async reply(question, context, signal) {
-    await pause(850, signal);
-    return demoReply(question, context);
+    if (signal?.aborted) throw new DOMException("Cancelado", "AbortError");
+    const s = context.statistics;
+    if (!s) return { text: "No hay datos para esta selección.", evidence: "method" };
+    const q = question.toLowerCase();
+    if (/causa|niño|enso|pdo|futuro|pron[oó]st|clim[aá]tico/.test(q))
+      return { text: "Este análisis describe la serie y su incertidumbre. No permite atribuir causas, aislar ENSO/PDO ni pronosticar. La caja estudiada tampoco representa todo el noreste de México.", evidence: "method" };
+    if (/evidencia|intervalo|significativ|significancia|confian|segur|clara/.test(q))
+      return { text: `El intervalo del 95 % es ${signed(s.confidenceInterval[0], 3)} a ${signed(s.confidenceInterval[1], 3)} ${context.unit}/década. ${evidenceLabel(s)} en esta caja y periodo. Un intervalo que incluye cero no demuestra ausencia de cambio. Son resultados exploratorios sin corrección por múltiples pruebas.`, evidence: "interval" };
+    return { text: `La pendiente estimada es ${signed(s.slopePerDecade, 3)} ${context.unit} por década para ${context.selection.start}–${context.selection.end}. Se estimó con ${s.sampleSize} meses, estacionalidad y errores HAC(12). La gráfica muestra promedios anuales para facilitar la lectura. ${context.sources.limitations[0]}`, evidence: "slope" };
   },
 };
-// Future server adapters implement these interfaces. There is no operational Claude/NASA endpoint.
 export function toChatContext(
   analysis: import("./contracts").Analysis,
   variableId: import("./catalog").VariableId,
@@ -131,7 +82,7 @@ export function analysisCsv(
         r.statistics?.confidenceInterval[0],
         r.statistics?.confidenceInterval[1],
         analysis.method.name,
-        analysis.provenance.source,
+        r.source ?? analysis.provenance.source,
         analysis.provenance.updatedAt,
       ]),
     ]

@@ -25,13 +25,12 @@ export const variables: Variable[] = [
     id: "temperature",
     name: "Temperatura media del aire",
     short: "Temperatura",
-    description: "Promedio anual del aire cerca de la superficie.",
+    description: "Temperatura media a 2 m; serie POWER 1992–2024.",
     unit: "°C",
     family: "Calor",
     available: true,
     color: "#f2a58e",
-    plannedSource:
-      "NASA POWER · T2M (integración prevista, sin datos conectados)",
+    plannedSource: "NASA POWER · T2M, datos integrados",
   },
   {
     id: "warm-nights",
@@ -60,24 +59,23 @@ export const variables: Variable[] = [
     id: "precipitation",
     name: "Precipitación media",
     short: "Precipitación",
-    description: "Promedio diario de precipitación, agregado por año.",
+    description: "Precipitación media mensual GPCP, resumida por año.",
     unit: "mm/día",
     family: "Lluvia",
     available: true,
     color: "#83b8f5",
-    plannedSource:
-      "NASA POWER · PRECTOTCORR (integración prevista, sin datos conectados)",
+    plannedSource: "NASA Giovanni · GPCP, datos integrados",
   },
   {
     id: "rain5",
     name: "Lluvia máxima en cinco días",
     short: "Lluvia en 5 días",
-    description: "Máximo anual acumulado en cinco días consecutivos.",
+    description: "Índice mensual RX5Day de Giovanni, resumido por año.",
     unit: "mm",
     family: "Lluvia",
-    available: false,
+    available: true,
     color: "#83b8f5",
-    plannedSource: "Producto por validar",
+    plannedSource: "NASA Giovanni · MERRA-2 RX5Day, datos integrados",
   },
   {
     id: "extreme-rain",
@@ -94,13 +92,12 @@ export const variables: Variable[] = [
     id: "surface-moisture",
     name: "Humedad superficial",
     short: "Humedad del suelo",
-    description: "Contenido de agua en una capa superficial ilustrativa.",
+    description: "Contenido de agua en una capa superficial; producto por validar.",
     unit: "m³/m³",
     family: "Suelo",
-    available: true,
+    available: false,
     color: "#bdc997",
-    plannedSource:
-      "Producto y profundidad por validar; ninguna equivalencia con GLDAS aprobada",
+    plannedSource: "FLDAS pendiente; ninguna serie descargada",
   },
   {
     id: "deep-moisture",
@@ -130,8 +127,8 @@ export const getVariable = (id: VariableId) =>
 export interface Region {
   id: string;
   name: string;
-  country: "México" | "Estados Unidos";
-  countryCode: "MX" | "US";
+  country: "México";
+  countryCode: "MX";
   bbox: [number, number, number, number];
   lat: number;
   lon: number;
@@ -140,43 +137,13 @@ export interface Region {
 export const regions: Region[] = [
   {
     id: "mx-northeast",
-    name: "Noreste de México",
+    name: "Caja del noreste de México",
     country: "México",
     countryCode: "MX",
     bbox: [-101, 25, -99, 27],
     lat: 26,
     lon: -100,
     extent: "25–27° N · 101–99° O",
-  },
-  {
-    id: "mx-northwest",
-    name: "Noroeste de México",
-    country: "México",
-    countryCode: "MX",
-    bbox: [-113, 29, -111, 31],
-    lat: 30,
-    lon: -112,
-    extent: "29–31° N · 113–111° O",
-  },
-  {
-    id: "us-texas",
-    name: "Oeste de Texas",
-    country: "Estados Unidos",
-    countryCode: "US",
-    bbox: [-103, 30, -101, 32],
-    lat: 31,
-    lon: -102,
-    extent: "30–32° N · 103–101° O",
-  },
-  {
-    id: "us-california",
-    name: "California central",
-    country: "Estados Unidos",
-    countryCode: "US",
-    bbox: [-121, 35, -119, 37],
-    lat: 36,
-    lon: -120,
-    extent: "35–37° N · 121–119° O",
   },
 ];
 export const getRegion = (id: string) => regions.find((r) => r.id === id)!;

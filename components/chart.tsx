@@ -2,7 +2,7 @@
 import { useId, useMemo, useState, useSyncExternalStore } from "react";
 import { line, scaleLinear, extent, curveLinear } from "d3";
 import { getVariable } from "@/lib/catalog";
-import { formatNumber } from "@/lib/fixtures";
+import { formatNumber } from "@/lib/format";
 import type { Observation, VariableResult } from "@/lib/contracts";
 const subscribeNarrow = (notify: () => void) => {
   const q = window.matchMedia("(max-width:700px)");

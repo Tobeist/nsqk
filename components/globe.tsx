@@ -273,7 +273,7 @@ export default function Globe({
             camera={{ position: position(26, -103, 5.8), fov: 42 }}
             gl={{ antialias: true, alpha: true }}
             fallback={<Fallback />}
-            aria-label="Globo terrestre interactivo. Arrastra para rotar y usa la rueda para acercar. Las cuatro regiones de demostración son seleccionables."
+            aria-label="Globo terrestre interactivo. Arrastra para rotar y usa la rueda para acercar. La caja noreste de México tiene datos disponibles."
           >
             <ambientLight intensity={1.7} />
             <directionalLight

@@ -14,12 +14,13 @@ export interface Statistics {
   confidenceInterval: [number, number];
   confidenceLevel: 0.95;
   intercept: number;
-  rSquared: number;
+  rSquared?: number;
   sampleSize: number;
 }
 export interface VariableResult {
   variableId: VariableId;
   unit: string;
+  source?: string;
   series: Observation[];
   trend: Observation[];
   statistics: Statistics | null;
@@ -30,7 +31,7 @@ export interface Analysis {
   selection: Selection;
   region: Region;
   results: VariableResult[];
-  mode: "demo" | "real";
+  mode: "real";
   method: { id: string; name: string; description: string };
   provenance: {
     source: string;
@@ -52,7 +53,7 @@ export interface ChatContext {
   statistics: Statistics | null;
   method: Analysis["method"];
   sources: Analysis["provenance"];
-  mode: "demo" | "real";
+  mode: "real";
 }
 export interface ChatMessage {
   id: string;
@@ -62,7 +63,7 @@ export interface ChatMessage {
 }
 export interface ChatAdapter {
   connected: boolean;
-  mode: "demo" | "real";
+  mode: "real";
   reply(
     question: string,
     context: ChatContext,

@@ -2,7 +2,6 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import {
   ArrowDownToLine,
   ArrowLeft,
@@ -51,16 +50,15 @@ import {
   type Selection,
 } from "@/lib/contracts";
 import {
-  createDemoAnalysis,
-  defaultSelection,
   evidenceLabel,
   formatNumber,
   signed,
-} from "@/lib/fixtures";
+} from "@/lib/format";
+import { createRealAnalysis, firstDataYear, lastDataYear, minimumAnalysisYears, realDefaultSelection } from "@/lib/real-data";
 import {
   analysisCsv,
-  demoAnalysisAdapter,
-  mockChatAdapter,
+  realAnalysisAdapter,
+  localEvidenceChatAdapter,
   toChatContext,
 } from "@/lib/adapters";
 import { createMapLayer, mapLimits } from "@/lib/map-layer";
@@ -82,16 +80,12 @@ const suggestions = [
   "¿Qué tan clara es la evidencia?",
   "¿Qué no puedo concluir?",
 ];
+const availableYears = Array.from({ length: lastDataYear - firstDataYear + 1 }, (_, i) => firstDataYear + i);
 type MobileTab = "explore" | "results" | "chat";
 export function Explorer() {
-  const query = useSearchParams();
-  const [draft, setDraft] = useState<Selection>(defaultSelection);
-  const [analysis, setAnalysis] = useState<Analysis | null>(() =>
-    query.get("empty") === "1" ? null : createDemoAnalysis(defaultSelection),
-  );
-  const [history, setHistory] = useState<Analysis[]>(() =>
-    query.get("empty") === "1" ? [] : [createDemoAnalysis(defaultSelection)],
-  );
+  const [draft, setDraft] = useState<Selection>(realDefaultSelection);
+  const [analysis, setAnalysis] = useState<Analysis | null>(() => createRealAnalysis(realDefaultSelection));
+  const [history, setHistory] = useState<Analysis[]>(() => [createRealAnalysis(realDefaultSelection)]);
   const [activeId, setActiveId] = useState<VariableId>("temperature");
   const [family, setFamily] = useState<Family>("Calor");
   const [mobileTab, setMobileTab] = useState<MobileTab>("explore");
@@ -108,7 +102,6 @@ export function Explorer() {
   const [chatErrors, setChatErrors] = useState<Record<string, string>>({});
   const resultRef = useRef<HTMLDivElement>(null);
   const regionRef = useRef<HTMLDivElement>(null);
-  const errorOnce = useRef({ analysis: false, chat: false });
   const requestRef = useRef<AbortController | null>(null);
   const region = getRegion(draft.regionId);
   const result = analysis?.results.find((r) => r.variableId === activeId);
@@ -118,12 +111,12 @@ export function Explorer() {
     : true;
   const contextKey = analysis ? conversationKey(analysis.id, activeId) : "none";
   const messages = threads[contextKey] ?? [];
-  const chatOffline = query.get("simulate") === "chat-offline";
   const openEvidence = (focus = "") => {
     setEvidenceFocus(focus);
     setModal("evidence");
   };
   function chooseRegion(id: string) {
+    if (id !== "mx-northeast") return;
     setDraft((d) => ({ ...d, regionId: id }));
     setSelectionMessage("");
     if (
@@ -160,17 +153,7 @@ export function Explorer() {
     setLoading(true);
     const snapshot = structuredClone(draft);
     try {
-      if (
-        query.get("simulate") === "analysis-error" &&
-        !errorOnce.current.analysis
-      ) {
-        errorOnce.current.analysis = true;
-        await new Promise((r) => setTimeout(r, 600));
-        throw new Error(
-          "No se pudo preparar el análisis de demostración. Tu selección está guardada.",
-        );
-      }
-      const next = await demoAnalysisAdapter.analyze(
+      const next = await realAnalysisAdapter.analyze(
         snapshot,
         controller.signal,
       );
@@ -209,12 +192,12 @@ export function Explorer() {
       url = URL.createObjectURL(blob),
       a = document.createElement("a");
     a.href = url;
-    a.download = `trend-detectives_${analysis.region.id}_${activeId}_${analysis.selection.start}-${analysis.selection.end}_demo.csv`;
+    a.download = `trend-detectives_${analysis.region.id}_${activeId}_${analysis.selection.start}-${analysis.selection.end}.csv`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
   async function send(question: string, retry = false) {
-    if (!analysis || !result || chatBusy[contextKey] || chatOffline) return;
+    if (!analysis || !result || chatBusy[contextKey]) return;
     const key = contextKey,
       context = toChatContext(analysis, activeId);
     const id = crypto.randomUUID();
@@ -226,12 +209,7 @@ export function Explorer() {
     setChatBusy((b) => ({ ...b, [key]: true }));
     setChatErrors((e) => ({ ...e, [key]: "" }));
     try {
-      if (query.get("simulate") === "chat-error" && !errorOnce.current.chat) {
-        errorOnce.current.chat = true;
-        await new Promise((r) => setTimeout(r, 650));
-        throw new Error("La respuesta de demostración no se pudo completar.");
-      }
-      const response = await mockChatAdapter.reply(question, context);
+      const response = await localEvidenceChatAdapter.reply(question, context);
       setThreads((t) => ({
         ...t,
         [key]: [
@@ -285,11 +263,8 @@ export function Explorer() {
         <div className="header-actions">
           <span className="demo-status">
             <i />
-            Datos de demostración
+            Datos NASA · análisis exploratorio
           </span>
-          <Link href="/demo" className="demo-link">
-            Ver demo <ArrowUpRight size={14} />
-          </Link>
           <button
             className="icon-button help-button"
             aria-label="Acerca del proyecto y los datos"
@@ -435,8 +410,10 @@ export function Explorer() {
                       setDraft((d) => ({ ...d, start: Number(e.target.value) }))
                     }
                   >
-                    {[1984, 1994, 2004, 2014].map((y) => (
-                      <option key={y}>{y}</option>
+                    {availableYears.map((year) => (
+                      <option key={year} value={year} disabled={year > draft.end - minimumAnalysisYears + 1}>
+                        {year}
+                      </option>
                     ))}
                   </select>
                   <ChevronDown size={13} />
@@ -451,19 +428,24 @@ export function Explorer() {
                       setDraft((d) => ({ ...d, end: Number(e.target.value) }))
                     }
                   >
-                    {[1994, 2004, 2014, 2024].map((y) => (
-                      <option key={y}>{y}</option>
+                    {availableYears.map((year) => (
+                      <option key={year} value={year} disabled={year < draft.start + minimumAnalysisYears - 1}>
+                        {year}
+                      </option>
                     ))}
                   </select>
                   <ChevronDown size={13} />
                 </label>
               </div>
               <div className="period-track">
-                <span />
+                <span style={{
+                  left: `${(draft.start - firstDataYear) / availableYears.length * 100}%`,
+                  width: `${(draft.end - draft.start + 1) / availableYears.length * 100}%`,
+                }} />
               </div>
               <p className="period-note">
                 {draft.end >= draft.start ? draft.end - draft.start + 1 : 0}{" "}
-                años · frecuencia anual · mínimo 10 años
+                años · mínimo {minimumAnalysisYears} · datos {firstDataYear}–{lastDataYear}
               </p>
             </div>
             <div className="scope-note">
@@ -503,7 +485,7 @@ export function Explorer() {
               </div>
             )}
             <span className="local-note">
-              Exploración local · sin datos en vivo
+              Tendencia e intervalo recalculados con los meses elegidos
             </span>
           </div>
         </aside>
@@ -528,7 +510,6 @@ export function Explorer() {
           <Globe
             regionId={draft.regionId}
             onSelect={chooseRegion}
-            forceFallback={query.get("simulate") === "webgl-off"}
             layer={mapLayer}
           />
           <div className="globe-hint">
@@ -552,9 +533,9 @@ export function Explorer() {
             </div>
             <p>
               {analysis
-                ? `${analysis.selection.start}–${analysis.selection.end} · ${mapLayer.filter((v) => v.state === "analyzed").length}/4 áreas analizadas`
+                ? `${analysis.selection.start}–${analysis.selection.end} · ${mapLayer.filter((v) => v.state === "analyzed").length}/1 caja analizada`
                 : "Analiza una selección para colorear su área."}
-              <span>Datos demo</span>
+              <span>Datos NASA</span>
             </p>
             <div className="map-certainty">
               <i />
@@ -566,7 +547,7 @@ export function Explorer() {
             <div className="region-selector-label">
               <MapPin size={14} />
               <label htmlFor="region">REGIÓN DE ESTUDIO</label>
-              <span>4 áreas demo</span>
+              <span>1 caja con datos</span>
             </div>
             <div className="region-select-row">
               <span className="country-code">{region.countryCode}</span>
@@ -575,16 +556,8 @@ export function Explorer() {
                 value={draft.regionId}
                 onChange={(e) => chooseRegion(e.target.value)}
               >
-                {["México", "Estados Unidos"].map((country) => (
-                  <optgroup key={country} label={country}>
-                    {regions
-                      .filter((r) => r.country === country)
-                      .map((r) => (
-                        <option key={r.id} value={r.id}>
-                          {r.name}
-                        </option>
-                      ))}
-                  </optgroup>
+                {regions.filter((r) => r.id === "mx-northeast").map((r) => (
+                  <option key={r.id} value={r.id}>{r.name}</option>
                 ))}
               </select>
               <ChevronDown size={17} />
@@ -598,12 +571,9 @@ export function Explorer() {
             <div>
               <i className="coverage-on" />
               México
-              <i className="coverage-on" />
-              Estados Unidos
             </div>
             <p>
-              Sólo las áreas delimitadas tienen fixtures. Sin cobertura
-              nacional.
+              La caja noreste tiene datos procesados. No representa todo México.
             </p>
           </div>
         </section>
@@ -690,7 +660,7 @@ export function Explorer() {
                 <div className="result-context">
                   <div className="section-kicker">
                     <span className="result-indicator" />
-                    ANÁLISIS DE DEMOSTRACIÓN
+                    ANÁLISIS NASA · EXPLORATORIO
                   </div>
                   <h2>{analysis.region.name}</h2>
                   <p>
@@ -736,7 +706,6 @@ export function Explorer() {
                     messages={messages}
                     busy={chatBusy[contextKey]}
                     error={chatErrors[contextKey]}
-                    offline={chatOffline}
                     disabled={result?.status === "no-data"}
                     onSend={send}
                     onEvidence={openEvidence}
@@ -751,9 +720,7 @@ export function Explorer() {
                     <Layers3 size={35} />
                     <h3>Esta combinación aún no tiene datos.</h3>
                     <p>
-                      No hay fixture de humedad superficial para California
-                      central. Prueba otra variable o región; no se estimaron
-                      cifras.
+                      Esta variable todavía no tiene una serie procesada para la caja seleccionada.
                     </p>
                     <button
                       className="secondary-button"
@@ -787,7 +754,7 @@ export function Explorer() {
                             ", pero su intervalo incluye cero."
                           : "El intervalo de este ajuste excluye cero."}{" "}
                         <span>
-                          Ejemplo sintético, no un hallazgo ambiental.
+                          Resultado exploratorio; revisa fuente y método.
                         </span>
                       </p>
                     </div>
@@ -878,7 +845,7 @@ export function Explorer() {
                       <div className="chat-invitation-title">
                         <MessageCircle size={18} />
                         <h3>Pregunta sobre este análisis</h3>
-                        <span>DEMO</span>
+                        <span>DATOS NASA</span>
                       </div>
                       <p>Entiende la señal. Revisa sus límites.</p>
                       <button
@@ -898,7 +865,7 @@ export function Explorer() {
                         <ArrowRight size={14} />
                       </button>
                       <span className="chat-disclaimer">
-                        Respuestas simuladas · Claude no está conectado
+                        Explicaciones locales del resultado · sin Claude
                       </span>
                     </div>
                   </>
@@ -925,7 +892,7 @@ export function Explorer() {
         </span>
         <span>
           Hecho para explorar, con evidencia.
-          <span className="footer-tag">MX / US</span>
+          <span className="footer-tag">MX · caja noreste</span>
         </span>
       </footer>
       {modal === "chart" && analysis && result && (
@@ -935,7 +902,7 @@ export function Explorer() {
           onClose={() => setModal(null)}
         >
           <div className="expanded-context">
-            <span className="demo-pill">Datos de demostración</span>
+            <span className="demo-pill">Datos NASA</span>
             <h3>{activeVariable.name}</h3>
             <p>
               {analysis.region.name} · {analysis.selection.start}–
@@ -973,7 +940,7 @@ export function Explorer() {
           onClose={() => setModal(null)}
         >
           <div className="expanded-context">
-            <span className="demo-pill">Datos de demostración</span>
+            <span className="demo-pill">Datos NASA</span>
             <h3>{analysis.region.name}</h3>
             <p>
               {analysis.selection.start}–{analysis.selection.end} · Mismo eje
@@ -1029,9 +996,10 @@ export function Explorer() {
             </p>
             <h3>Qué estás viendo</h3>
             <p>
-              Series anuales sintéticas, intervalos ilustrativos y un chat de
-              respuestas deterministas. No se consultan servicios NASA ni la API
-              de Claude.
+              Series NASA procesadas para una caja del noreste de México.
+              La gráfica resume meses en valores anuales; las pendientes e
+              intervalos proceden del análisis mensual. Las respuestas son
+              explicaciones locales, sin llamadas a Claude.
             </p>
             <h3>El mapa sí tiene geografía real</h3>
             <p>
@@ -1043,19 +1011,14 @@ export function Explorer() {
               >
                 Natural Earth (dominio público)
               </a>
-              . Las cuatro cajas son áreas de demostración, no fronteras ni
-              cobertura nacional. La textura cartográfica está guardada
-              localmente.
+              . Sólo una caja tiene datos climáticos; no representa fronteras
+              administrativas ni cobertura nacional.
             </p>
             <h3>Lo que sigue</h3>
             <p>
-              Conectar los adaptadores a observaciones con procedencia, un
-              análisis validado y Claude desde el servidor.
+              Añadir más regiones con agregación espacial validada y más
+              variables oficiales de NASA.
             </p>
-            <Link className="secondary-button" href="/demo">
-              Ver la demo separada
-              <ArrowUpRight size={14} />
-            </Link>
           </div>
         </Modal>
       )}
@@ -1066,7 +1029,6 @@ function ChatView({
   messages,
   busy,
   error,
-  offline,
   disabled,
   onSend,
   onEvidence,
@@ -1076,7 +1038,6 @@ function ChatView({
   messages: ChatMessage[];
   busy?: boolean;
   error?: string;
-  offline: boolean;
   disabled?: boolean;
   onSend: (q: string) => void;
   onEvidence: (f?: string) => void;
@@ -1086,7 +1047,7 @@ function ChatView({
   const [input, setInput] = useState("");
   function submit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!input.trim() || busy || offline) return;
+    if (!input.trim() || busy) return;
     onSend(input.trim());
     setInput("");
   }
@@ -1097,22 +1058,14 @@ function ChatView({
         <h3>Pregunta sobre este análisis</h3>
       </div>
       <p className="chat-context-label">Contexto: {context}</p>
-      <div className="mock-notice">
-        <span className="demo-pill">Adaptador de demostración</span>
+      <div className="chat-notice">
+        <span className="demo-pill">Explicación local</span>
         <p>
-          Claude no está conectado. Las respuestas explican las fixtures
-          visibles.
+          Respuestas deterministas basadas en la pendiente, el intervalo y las
+          limitaciones del análisis visible. No hay un modelo de IA conectado.
         </p>
       </div>
-      {offline ? (
-        <div className="error-box" role="status">
-          <strong>Conexión de chat no disponible</strong>
-          <p>
-            El análisis y su evidencia siguen disponibles. No hay un proveedor
-            de chat conectado en este escenario.
-          </p>
-        </div>
-      ) : disabled ? (
+      {disabled ? (
         <div className="error-box">
           No hay una serie disponible para conversar sobre esta combinación.
         </div>
@@ -1134,7 +1087,7 @@ function ChatView({
             {messages.map((m) => (
               <div className={`message ${m.role}`} key={m.id}>
                 <span className="message-role">
-                  {m.role === "user" ? "TÚ" : "ASISTENTE · DEMO"}
+                  {m.role === "user" ? "TÚ" : "EXPLICACIÓN LOCAL"}
                 </span>
                 <p>{m.text}</p>
                 {m.evidence && (
@@ -1149,7 +1102,7 @@ function ChatView({
             {busy && (
               <div className="chat-loading">
                 <LoaderCircle className="spin" size={14} />
-                Preparando explicación demostrativa…
+                Preparando explicación…
               </div>
             )}
           </div>
@@ -1173,7 +1126,7 @@ function ChatView({
           rows={2}
           value={input}
           maxLength={1500}
-          disabled={busy || offline || disabled}
+          disabled={busy || disabled}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
@@ -1181,9 +1134,7 @@ function ChatView({
               e.currentTarget.form?.requestSubmit();
             }
           }}
-          placeholder={
-            offline ? "Chat no disponible" : "¿Qué te gustaría entender?"
-          }
+          placeholder="¿Qué te gustaría entender?"
         />
         <div>
           <span>Enter para enviar · Shift + Enter para salto</span>
@@ -1191,7 +1142,7 @@ function ChatView({
             type="submit"
             className="send-button"
             aria-label="Enviar pregunta"
-            disabled={busy || offline || disabled || !input.trim()}
+            disabled={busy || disabled || !input.trim()}
           >
             <Send size={15} />
           </button>
@@ -1221,10 +1172,10 @@ function Evidence({
   return (
     <div className="evidence-content">
       <div className="evidence-intro">
-        <span className="demo-pill">Datos de demostración</span>
+        <span className="demo-pill">Datos NASA</span>
         <p>
-          Estos números son sintéticos. Su fuente real es una fixture local; los
-          productos NASA mencionados son integraciones previstas.
+          Estos resultados provienen de datos NASA procesados para una caja de
+          prueba. Son exploratorios y no permiten atribuir causas.
         </p>
       </div>
       <dl className="evidence-grid">
@@ -1249,22 +1200,22 @@ function Evidence({
           <dd>
             {analysis.selection.start}–{analysis.selection.end} · anual
             <small>
-              {s?.sampleSize ?? 0} valores ·{" "}
-              {r.series.filter((d) => d.value === null).length} faltantes
+              {s?.sampleSize ?? 0} meses en el modelo · {r.series.length} años en la tabla ·{" "}
+              {r.series.filter((d) => d.value === null).length} faltantes anuales
             </small>
           </dd>
         </div>
         <div>
           <dt>Fuente utilizada</dt>
           <dd>
-            {analysis.provenance.source}
+            {r.source ?? analysis.provenance.source}
             <small>
-              Versión fixture-v1 · actualización {analysis.provenance.updatedAt}
+              Procesamiento local · actualizado {analysis.provenance.updatedAt}
             </small>
           </dd>
         </div>
         <div>
-          <dt>Fuente prevista · no conectada</dt>
+          <dt>Producto integrado</dt>
           <dd>{v.plannedSource}</dd>
         </div>
         <div>
@@ -1290,7 +1241,7 @@ function Evidence({
             </strong>
           </div>
           <p>
-            {evidenceLabel(s)} bajo los supuestos ilustrativos. Un intervalo que
+            {evidenceLabel(s)} bajo este modelo mensual. Un intervalo que
             cruza cero no confirma la dirección y tampoco demuestra ausencia de
             cambio.
           </p>
@@ -1321,7 +1272,7 @@ function Evidence({
       <div className="evidence-table">
         <table>
           <caption className="sr-only">
-            Serie anual sintética y valores de la recta ajustada
+            Resumen anual de la serie NASA y guía de tendencia
           </caption>
           <thead>
             <tr>
@@ -1382,7 +1333,7 @@ function VariableChoice({
       <div className="variable-meta">
         <span>{v.unit}</span>
         <span>
-          {v.available ? "Fixture disponible" : "Pendiente de integrar"}
+          {v.available ? "Datos disponibles" : "Pendiente de integrar"}
         </span>
       </div>
     </label>

@@ -1,6 +1,6 @@
 # Giovanni y la comparación de variables
 
-Investigación: 14 nov 2026. No se generó una consulta autenticada ni se descargaron observaciones NASA.
+Investigación inicial: 14 nov 2026. Posteriormente se descargaron series autenticadas de GPCP y RX5Day para 1992–2024. Véanse [glosario](DATASETS.md) y [metodología](METODOLOGIA.md) para los datos efectivamente usados.
 
 Fuentes primarias:
 
@@ -15,4 +15,4 @@ Límite de la verificación: el sitio Beta requiere Earthdata Login para generar
 
 Decisión de interfaz: hasta tres variables configurables; pestaña de variable activa y una comparación en paneles alineados temporalmente, cada uno con unidad y eje Y propio. No sumar grados, precipitación y humedad; no usar un índice combinado ni inferir causalidad.
 
-Mapa de tendencias: color = pendiente por década de la variable activa del análisis ejecutado; azul = estimación negativa, neutral = cero, coral = positiva. Límites fijos explícitos por variable; valores fuera del dominio saturan. Borde discontinuo = IC incluye cero. Sólo se rellenan cajas con resultados ejecutados para el mismo periodo; regiones sin análisis o sin datos permanecen neutrales. Fuente de cifras: fixtures sintéticas, no Giovanni. Cambiar borradores no recolorea resultados antiguos.
+Mapa de tendencias: color = pendiente por década de la variable activa del análisis ejecutado; azul = estimación negativa, neutral = cero, coral = positiva. Límites fijos explícitos por variable; valores fuera del dominio saturan. Borde discontinuo = IC incluye cero. Sólo se rellena la caja noreste, única región con resultados procesados. Las cifras de GPCP y RX5Day proceden de Giovanni; T2M procede de POWER. Cambiar borradores no recolorea resultados antiguos.
