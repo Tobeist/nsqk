@@ -37,6 +37,20 @@ export function claudeConfiguration() {
 const object = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
+// Keep only answered user→assistant exchanges, in order. A failed reply leaves an unanswered user turn and the
+// client's 8-message window can start with an assistant turn; neither may block the next question (it used to).
+// Turns sent by the client are untrusted context: the verified summary is always rebuilt on the server.
+export function answeredExchanges(history: ClaudeChatRequest["history"]) {
+  const kept: ClaudeChatRequest["history"] = [];
+  for (let i = 0; i < history.length - 1; i++) {
+    if (history[i].role === "user" && history[i + 1].role === "assistant") {
+      kept.push(history[i], history[i + 1]);
+      i++;
+    }
+  }
+  return kept;
+}
+
 export function validateChatRequest(input: unknown): ClaudeChatRequest {
   if (!object(input) || typeof input.question !== "string" || !input.question.trim() ||
       input.question.length > 1500 || !object(input.selection) || !Array.isArray(input.selection.variables) ||
@@ -61,13 +75,9 @@ export function validateChatRequest(input: unknown): ClaudeChatRequest {
     typeof m.text !== "string" || !m.text.trim() || m.text.length > 1500)) {
     throw new ChatError("El historial de conversación no es válido. Inicia una nueva conversación.", 400);
   }
-  // Turns must alternate user/assistant and end with an assistant reply, so the new question follows it.
-  if (history.some((m, i) => m.role !== (i % 2 === 0 ? "user" : "assistant")) || history.length % 2 !== 0) {
-    throw new ChatError("El historial de conversación no es válido. Inicia una nueva conversación.", 400);
-  }
   return {
     question: input.question.trim(), selection, variableId: input.variableId as VariableId,
-    history: history.map((m) => ({ role: m.role, text: m.text })),
+    history: answeredExchanges(history.map((m) => ({ role: m.role, text: m.text }))),
   };
 }
 
