@@ -1,0 +1,663 @@
+/* The existing visual system, with the data reading as the primary task. */
+.app-shell .workspace {
+  grid-template-columns: 320px minmax(0, 1fr);
+}
+.study-panel {
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: #101c26;
+  border-right: 1px solid var(--line);
+}
+.study-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 24px 22px;
+  scrollbar-width: thin;
+  scrollbar-color: #354754 transparent;
+}
+.study-panel .earth-panel {
+  display: block;
+  min-height: 0;
+  background: none;
+  overflow: visible;
+}
+.study-panel .earth-panel::before {
+  display: none;
+}
+.study-panel h1 {
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin-bottom: 20px;
+}
+.app-shell .study-panel .region-selector {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.study-panel .region-selector-label {
+  gap: 7px;
+}
+.study-panel .region-selector-label label {
+  font-size: 12px;
+  letter-spacing: 0;
+}
+.study-panel .region-selector-label > span {
+  font-size: 10px;
+}
+.study-panel .region-select-row {
+  margin-top: 8px;
+}
+.study-panel .region-select-row select {
+  font-size: 16px;
+  min-height: 44px;
+}
+.study-panel .country-code {
+  display: none;
+}
+.study-panel .region-detail {
+  font-size: 11px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.study-panel .regional-map {
+  height: 205px;
+  min-height: 0;
+  max-height: none;
+  flex: none;
+  margin: 16px -8px 0;
+}
+.study-panel .regional-map > svg {
+  height: 100%;
+  max-height: none;
+}
+.study-panel .state-area.intersects {
+  fill: #1d3a45;
+  stroke: #7b9ea8;
+}
+.study-panel .map-geographic-note {
+  display: none;
+}
+.study-panel .map-north {
+  right: 10px;
+  top: 10px;
+}
+.area-scope {
+  color: #b0c3ce;
+  font-size: 12px;
+  line-height: 1.55;
+  margin-top: 10px;
+}
+.map-scale-details {
+  margin-top: 8px;
+}
+.map-scale-details > summary,
+.advanced-tools > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  list-style: none;
+  min-height: 42px;
+  color: #bfd0d8;
+  font-size: 13px;
+}
+.map-scale-details > summary::-webkit-details-marker,
+.advanced-tools > summary::-webkit-details-marker,
+.selection-settings > summary::-webkit-details-marker {
+  display: none;
+}
+.map-scale-details[open] > summary > svg,
+.advanced-tools[open] > summary > svg,
+.selection-settings[open] > summary > svg:last-child {
+  transform: rotate(180deg);
+}
+.app-shell .study-panel .map-legend {
+  margin: 0;
+  padding: 12px;
+}
+.study-panel .map-legend > div:first-child,
+.study-panel .map-legend > p,
+.study-panel .map-certainty {
+  font-size: 11px;
+}
+.selection-settings {
+  margin-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.selection-settings > summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding-top: 15px;
+  min-height: 64px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.selection-settings > summary > span {
+  flex: 1;
+}
+.selection-settings small {
+  display: block;
+  font-size: 12px;
+  color: #abc0cd;
+  margin-top: 5px;
+}
+.app-shell .study-panel .filters-panel {
+  display: flex;
+  background: none;
+  border: 0;
+  min-height: 0;
+}
+.app-shell .study-panel .filter-scroll {
+  padding: 0;
+  overflow: visible;
+}
+.study-panel .section-title {
+  margin-top: 23px;
+}
+.study-panel .family-tabs button {
+  flex: 1;
+  min-height: 40px;
+}
+.study-panel .variable-option {
+  padding: 11px;
+}
+.study-panel .variable-option p {
+  font-size: 12px;
+}
+.study-panel .variable-meta {
+  font-size: 11px;
+}
+.study-panel .selected-summary button {
+  min-height: 32px;
+  font-size: 11px;
+}
+.study-panel .period-note {
+  font-size: 11px;
+}
+.study-panel .year-fields label {
+  font-size: 12px;
+}
+.study-panel .year-fields select {
+  min-height: 44px;
+  font-size: 14px;
+}
+.study-panel .filter-bottom {
+  padding: 15px 22px 18px;
+  background: #101c26;
+  border-top: 1px solid var(--line);
+}
+.study-panel .analyze-button {
+  min-height: 46px;
+  font-size: 14px;
+}
+.study-panel .draft-status {
+  font-size: 12px;
+}
+.study-panel .local-note {
+  font-size: 11px;
+}
+.study-panel .globe-container {
+  height: 245px;
+  min-height: 245px;
+}
+.app-shell .analysis-panel {
+  border: 0;
+  min-height: 0;
+  grid-column: auto;
+}
+.app-shell .analysis-tabs {
+  min-height: 50px;
+  padding: 0 32px;
+}
+.app-shell .analysis-tabs > button:not(.icon-button) {
+  font-size: 14px;
+}
+.app-shell .analysis-scroll {
+  padding: 21px 32px 18px;
+  max-height: none;
+}
+.result-context {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px 18px;
+}
+.app-shell .result-context h2 {
+  margin: 0;
+  font-size: 21px;
+}
+.app-shell .result-context > p {
+  margin: 0;
+  font-size: 12px;
+}
+.app-shell .result-variable-tabs {
+  margin-top: 14px;
+}
+.app-shell .result-variable-tabs button {
+  font-size: 12px;
+  min-height: 36px;
+}
+.reading-summary {
+  margin-top: 19px;
+}
+.reading-summary h3 {
+  font-size: 23px;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+}
+.reading-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 15px;
+}
+.change-value > span,
+.change-evidence > span {
+  display: block;
+  font-size: 12px;
+  color: #b2c4cf;
+}
+.change-value strong {
+  display: block;
+  font-size: 39px;
+  line-height: 1.25;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  margin-top: 5px;
+}
+.change-value small {
+  font-size: 19px;
+  font-weight: 400;
+}
+.change-evidence > strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 18px;
+  font-weight: 500;
+}
+.is-significant {
+  color: #a9dfcc;
+}
+.is-inconclusive {
+  color: #d7cba5;
+}
+.change-evidence > p {
+  max-width: 43ch;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #b8c9d2;
+  margin-top: 5px;
+}
+.app-shell .chart-heading {
+  margin: 19px 0 4px;
+}
+.app-shell .chart-heading h4 {
+  font-size: 13px;
+  font-weight: 400;
+}
+.app-shell .chart-heading .icon-button {
+  min-width: 36px;
+  height: 36px;
+}
+.app-shell .trend-chart.overview {
+  max-width: none;
+  margin: 0;
+}
+.app-shell .trend-chart.overview svg {
+  max-height: none;
+  width: 100%;
+  height: auto;
+}
+.app-shell .trend-chart.overview svg text {
+  font-size: 16px;
+}
+.app-shell .trend-chart.overview .chart-unit {
+  font-size: 12px;
+  margin: 0;
+}
+.app-shell .trend-chart.overview .chart-legend {
+  font-size: 12px;
+  margin-top: 1px;
+}
+.app-shell .chart-legend button {
+  min-height: 32px;
+}
+.reading-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px 22px;
+  margin-top: 13px;
+}
+.reading-actions .secondary-button {
+  font-size: 13px;
+  min-height: 40px;
+}
+.reading-actions .text-button {
+  font-size: 13px;
+  min-height: 40px;
+}
+.app-shell .result-source-links {
+  margin: 13px 0 0;
+  font-size: 12px;
+  gap: 7px 15px;
+}
+.advanced-tools {
+  border-top: 1px solid var(--line);
+  margin-top: 14px;
+}
+.advanced-tools > div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 18px;
+  padding-bottom: 8px;
+}
+.advanced-tools button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  text-align: left;
+  color: #bbccd4;
+  font-size: 13px;
+}
+.app-shell .result-footnote {
+  font-size: 10px;
+  padding: 10px 32px;
+}
+.app-shell .pending-banner p {
+  font-size: 12px;
+}
+.app-shell .pending-banner > span {
+  font-size: 12px;
+}
+.app-shell .chat-view {
+  max-width: 800px;
+  padding-top: 22px;
+}
+.app-shell .chat-title h3 {
+  font-size: 21px;
+}
+.app-shell .chat-context-label {
+  font-size: 13px;
+}
+.app-shell .chat-notice {
+  padding: 0;
+  margin: 10px 0 17px;
+  background: none;
+  border: 0;
+}
+.app-shell .chat-notice > .demo-pill,
+.app-shell .chat-notice > p {
+  display: none;
+}
+.app-shell .suggested-questions {
+  margin: 0 0 18px;
+}
+.app-shell .suggested-questions button {
+  font-size: 13px;
+  min-height: 42px;
+}
+.app-shell .message p {
+  font-size: 15px;
+  line-height: 1.65;
+}
+.app-shell .message-role {
+  font-size: 11px;
+}
+.app-shell .verified-chat-summary {
+  margin-top: 14px;
+  background: none;
+  padding: 0;
+  border: 0;
+}
+.verified-chat-summary > summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: #b5cbd1;
+  min-height: 32px;
+}
+.app-shell .verified-chat-summary p {
+  font-size: 13px;
+}
+.app-shell .chat-composer textarea {
+  font-size: 15px;
+}
+.app-shell .chat-composer > div > span {
+  font-size: 11px;
+}
+.app-shell .chat-limit {
+  font-size: 12px;
+}
+.experiment-context {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #b8c9d2;
+  margin-top: 14px;
+}
+@media (min-width: 1600px) {
+  .app-shell .workspace {
+    grid-template-columns: 370px minmax(0, 1fr);
+  }
+  .app-shell .analysis-scroll {
+    padding-left: 48px;
+    padding-right: 48px;
+  }
+}
+@media (min-width: 701px) and (max-width: 1050px) {
+  .app-shell {
+    height: 100dvh;
+    min-height: 660px;
+    overflow: hidden;
+  }
+  .app-shell .workspace {
+    grid-template-columns: 280px minmax(0, 1fr);
+    min-height: 0;
+    flex: 1;
+  }
+  .app-shell .analysis-scroll {
+    padding: 20px;
+  }
+  .app-shell .analysis-tabs {
+    padding: 0 20px;
+  }
+  .reading-summary h3 {
+    font-size: 21px;
+  }
+  .reading-metrics {
+    gap: 15px;
+  }
+  .change-value strong {
+    font-size: 34px;
+  }
+}
+@media (max-height: 760px) and (min-width: 701px) {
+  .app-shell .app-header {
+    height: 60px;
+  }
+  .app-shell .analysis-scroll {
+    padding-top: 17px;
+  }
+  .reading-summary {
+    margin-top: 15px;
+  }
+  .reading-metrics {
+    margin-top: 10px;
+  }
+  .app-shell .chart-heading {
+    margin-top: 12px;
+  }
+  .study-scroll {
+    padding-top: 20px;
+  }
+}
+@media (max-width: 700px) {
+  .app-shell {
+    min-height: 100dvh;
+    height: auto;
+    overflow: visible;
+  }
+  .app-shell .workspace {
+    display: flex;
+    min-height: 0;
+  }
+  .study-panel {
+    display: none;
+    border: 0;
+  }
+  .study-panel.mobile-visible {
+    display: flex;
+  }
+  .study-scroll {
+    overflow: visible;
+    padding: 22px 20px;
+  }
+  .app-shell .analysis-panel {
+    display: none;
+    min-height: calc(100dvh - 160px);
+  }
+  .app-shell .analysis-panel.mobile-visible {
+    display: flex;
+  }
+  .app-shell .analysis-scroll {
+    overflow: visible;
+    padding: 20px;
+  }
+  .app-shell .analysis-tabs {
+    display: none;
+  }
+  .app-shell .result-context {
+    gap: 8px;
+  }
+  .app-shell .result-context h2 {
+    font-size: 20px;
+  }
+  .app-shell .result-context > p {
+    font-size: 12px;
+  }
+  .reading-summary {
+    margin-top: 22px;
+  }
+  .reading-summary h3 {
+    font-size: 22px;
+  }
+  .reading-metrics {
+    gap: 16px;
+    grid-template-columns: 1fr 1.1fr;
+  }
+  .change-value strong {
+    font-size: 34px;
+  }
+  .change-value small {
+    font-size: 17px;
+  }
+  .change-evidence > p {
+    font-size: 12px;
+  }
+  .app-shell .trend-chart.overview svg text {
+    font-size: 15px;
+  }
+  .app-shell .reading-actions {
+    gap: 8px 15px;
+  }
+  .reading-actions .secondary-button,
+  .reading-actions .text-button {
+    min-height: 44px;
+  }
+  .app-shell .result-source-links {
+    line-height: 1.7;
+    margin-top: 15px;
+  }
+  .advanced-tools {
+    margin-top: 20px;
+  }
+  .advanced-tools > summary {
+    min-height: 48px;
+  }
+  .advanced-tools > div {
+    grid-template-columns: 1fr;
+  }
+  .study-panel .filter-bottom {
+    padding: 15px 20px 20px;
+  }
+  .study-panel .regional-map {
+    height: 235px;
+  }
+  .app-shell .study-panel .earth-panel {
+    min-height: 0;
+  }
+  .app-shell .chat-view {
+    min-height: 0;
+    padding-top: 22px;
+  }
+  .app-shell .chat-context-label {
+    font-size: 13px;
+  }
+  .app-shell .result-footnote {
+    padding: 13px 20px;
+  }
+  .app-shell .mobile-nav {
+    position: sticky;
+    top: 0;
+    z-index: 8;
+    background: #101c26;
+  }
+}
+/* Keep selection reachable before the geographic preview. */
+.study-panel .selection-settings {
+  margin-top: 12px;
+}
+.study-panel .selection-settings > summary {
+  padding-top: 10px;
+  min-height: 60px;
+}
+.study-panel h1 {
+  margin-bottom: 15px;
+}
+.study-panel .regional-map {
+  height: 170px;
+}
+.study-panel .filter-bottom {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+.study-panel .local-note {
+  margin-top: 8px;
+}
+.app-shell .reading-actions .result-source-links {
+  margin: 0 0 0 auto;
+}
+
+@media (max-width: 700px) {
+  .study-panel .regional-map {
+    height: 235px;
+  }
+  .app-shell .reading-actions .result-source-links {
+    margin: 0;
+    flex-basis: 100%;
+  }
+}
+.app-shell .suggested-questions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+}
+@media (max-width: 700px) {
+  .app-shell .suggested-questions {
+    grid-template-columns: 1fr;
+  }
+}
+.experiment-heading {
+  font-size: 18px;
+  font-weight: 500;
+  margin-top: 18px;
+}
