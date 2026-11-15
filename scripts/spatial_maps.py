@@ -8,6 +8,7 @@ Per-cell trend tests are individual and descriptive: no multiple-comparison or s
 import argparse
 import hashlib
 import json
+import shutil
 import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
@@ -26,6 +27,7 @@ import trend_lib as tl
 ROOT = Path(__file__).resolve().parents[1]
 RAW = ROOT / "data" / "external" / "power_map"
 OUT = ROOT / "analysis" / "maps"
+PUBLIC = ROOT / "public" / "maps"  # copies served by the app (components/nasa-maps.tsx)
 URL = "https://power.larc.nasa.gov/api/temporal/monthly/regional"
 FILL = -999.0
 START, END = 1992, 2024
@@ -289,7 +291,10 @@ def main(refresh=False):
         if variable == "T2M":
             small_multiples(lats, lons, annual)
     (OUT / "spatial_summary.json").write_text(json.dumps(summary, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    print(f"Wrote maps to {OUT}")
+    PUBLIC.mkdir(parents=True, exist_ok=True)
+    for png in OUT.glob("*.png"):
+        shutil.copyfile(png, PUBLIC / png.name)
+    print(f"Wrote maps to {OUT} and copies to {PUBLIC}")
 
 
 if __name__ == "__main__":

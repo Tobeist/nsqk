@@ -653,3 +653,44 @@ textarea {
     min-height: 320px;
   }
 }
+.nasa-maps {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  min-height: 250px;
+  margin: 15px 0 0;
+}
+.nasa-map-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.nasa-map-tabs button {
+  font-size: 11px;
+  color: #abc0cd;
+  padding: 6px 10px;
+  border: 1px solid #3c505d;
+  border-radius: 4px;
+  background: #0d1a24;
+}
+.nasa-map-tabs button[aria-selected="true"] {
+  color: #e4f4f0;
+  background: #2d464c;
+}
+.nasa-map-frame {
+  display: block;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fff;
+}
+.nasa-map-frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.nasa-map-note {
+  font-size: 11px;
+  line-height: 1.45;
+  color: #9fb3c0;
+}
