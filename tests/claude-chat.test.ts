@@ -42,15 +42,31 @@ test("Claude server uses canonical inference, protects credentials and handles f
     assert.equal(result.text, `${result.verifiedSummary}\n\n${result.explanation}`);
     assert.match(result.text, /0\.4840/);
     assert.match(result.text, /1992–2024/);
-    assert.match(result.text, /18 pruebas/);
+    assert.match(result.text, /criterio < 0.05/);
     assert.match(result.text, /\+0\.267/);
     assert.doesNotMatch(result.text, /999/);
     assert.equal(calls[0].url, "https://api.anthropic.com/v1/messages");
     const sent = JSON.parse(String(calls[0].init?.body));
     assert.match(sent.system[1].text, /"pAdjusted":0.484/);
+    assert.match(sent.system[1].text, /"familySize":18/);
     assert.doesNotMatch(String(calls[0].init?.body), /test-only-not-a-real-key|slopePerDecade":999/);
     assert.equal(sent.messages.at(-1).content, body.question);
     assert.ok(result.analysisId.includes("1992-2024"));
+  });
+
+  await t.test("prediction answers use the actual experiment and never label it as a current forecast", async (st) => {
+    let facts = "";
+    st.mock.method(globalThis, "fetch", async (_url: string, init?: RequestInit) => {
+      const sent = JSON.parse(String(init?.body)); facts = sent.system[1].text;
+      return providerReply();
+    });
+    const response = await POST(request({ ...body, question: "¿Qué predice la red neuronal?" }));
+    const result = await response.json();
+    assert.match(result.verifiedSummary, /Proyección de 2025 desde diciembre de 2024/);
+    assert.match(facts, /"projectionYear":2025/);
+    assert.match(facts, /"testMae":/);
+    assert.match(facts, /not a current weather forecast/);
+    assert.match(facts, /"sourceLinks":/);
   });
 
   await t.test("keeps conversation history scoped to the current canonical analysis", async (st) => {
