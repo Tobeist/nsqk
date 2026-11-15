@@ -1,0 +1,5 @@
+# Deep forecast experiment (scripts/deep_forecast.py, scripts/t2m_heatmaps.py). Not needed by the app runtime.
+-r requirements-forecast.txt
+torch==2.15.0
+optuna==5.0.0
+matplotlib==3.11.2
