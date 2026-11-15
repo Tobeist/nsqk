@@ -1,0 +1,138 @@
+{
+  "source": "NASA POWER monthly regional (MERRA-2), 0.5°×0.625°",
+  "period": [
+    1992,
+    2024
+  ],
+  "baseline": [
+    1992,
+    2021
+  ],
+  "tiles_wsen": {
+    "nw": [
+      -108,
+      20,
+      -98,
+      30
+    ],
+    "sw": [
+      -108,
+      14,
+      -98,
+      20
+    ],
+    "se": [
+      -98,
+      14,
+      -88,
+      22
+    ],
+    "ne": [
+      -98,
+      22,
+      -88,
+      30
+    ]
+  },
+  "trend_method": "OLS on monthly values + 11 month indicators; slope*10; HAC/Newey-West 12 lags",
+  "significance_warning": "Puntos: celdas cuyo IC95 HAC(12) individual excluye 0. Pruebas individuales por celda, SIN corrección por comparaciones múltiples ni por dependencia espacial; solo descriptivo.",
+  "T2M": {
+    "units": "°C",
+    "cells": 1056,
+    "grid_shape": [
+      33,
+      32
+    ],
+    "missing_values": 0,
+    "mean_range": [
+      11.848914141414141,
+      28.572525252525256
+    ],
+    "trend_per_decade": {
+      "min": -0.23359514260249847,
+      "median": 0.3274468025846683,
+      "max": 0.6592552361853876,
+      "share_positive": 0.9857954545454546,
+      "share_ci_excludes_zero": 0.9375
+    },
+    "anomaly_2023": {
+      "min": 0.29861111111111455,
+      "median": 1.198027777777777,
+      "max": 2.0316388888888883
+    },
+    "anomaly_2024": {
+      "min": 0.01916666666666848,
+      "median": 1.1204999999999998,
+      "max": 2.3217777777777795
+    },
+    "boxes": {
+      "mx-northeast": {
+        "cells": 15,
+        "trend_median": 0.2677334001782561,
+        "anomaly_2024_median": 1.3477222222222245
+      },
+      "mx-chihuahua-interior": {
+        "cells": 20,
+        "trend_median": 0.49209698083779396,
+        "anomaly_2024_median": 1.7915972222222223
+      },
+      "mx-south-humid": {
+        "cells": 15,
+        "trend_median": 0.31287321746880536,
+        "anomaly_2024_median": 1.4953611111111105
+      }
+    }
+  },
+  "PRECTOTCORR": {
+    "units": "mm/día",
+    "cells": 1056,
+    "grid_shape": [
+      33,
+      32
+    ],
+    "missing_values": 0,
+    "mean_range": [
+      0.6500757575757576,
+      6.783964646464646
+    ],
+    "trend_per_decade": {
+      "min": -0.46102662655971377,
+      "median": -0.004471646613190411,
+      "max": 1.6584670231729066,
+      "share_positive": 0.4876893939393939,
+      "share_ci_excludes_zero": 0.24621212121212122
+    },
+    "anomaly_2023": {
+      "min": -2.646527777777778,
+      "median": -0.5399166666666666,
+      "max": 2.444972222222222
+    },
+    "anomaly_2024": {
+      "min": -2.892583333333334,
+      "median": -0.14081944444444444,
+      "max": 3.5241388888888885
+    },
+    "boxes": {
+      "mx-northeast": {
+        "cells": 15,
+        "trend_median": 0.07803865864527693,
+        "anomaly_2024_median": 0.20561111111111088
+      },
+      "mx-chihuahua-interior": {
+        "cells": 20,
+        "trend_median": -0.029002339572192417,
+        "anomaly_2024_median": -0.4645138888888888
+      },
+      "mx-south-humid": {
+        "cells": 15,
+        "trend_median": 0.19495320855615061,
+        "anomaly_2024_median": -0.5128333333333331
+      }
+    },
+    "trend_pct_per_decade": {
+      "min": -21.38250115175691,
+      "median": -0.21343880596874942,
+      "max": 35.61807223605636
+    }
+  }
+}
