@@ -12,9 +12,16 @@ from statsmodels.stats.multitest import multipletests
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-import audit_regions as audit  # noqa: E402
+# The full historical audit needs requirements.txt (matplotlib, shapely, ...), not the API's requirements-analysis.txt.
+try:
+    import audit_regions as audit  # noqa: E402
+    MISSING = None
+except ModuleNotFoundError as error:
+    MISSING = error.name
 
 
+
+@unittest.skipIf(MISSING, f"requiere requirements.txt (falta {MISSING})")
 class RegionalAuditTest(unittest.TestCase):
     def test_input_scope_and_provenance(self):
         data, hashes = audit.load_inputs()

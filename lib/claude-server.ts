@@ -61,6 +61,10 @@ export function validateChatRequest(input: unknown): ClaudeChatRequest {
     typeof m.text !== "string" || !m.text.trim() || m.text.length > 1500)) {
     throw new ChatError("El historial de conversación no es válido. Inicia una nueva conversación.", 400);
   }
+  // Turns must alternate user/assistant and end with an assistant reply, so the new question follows it.
+  if (history.some((m, i) => m.role !== (i % 2 === 0 ? "user" : "assistant")) || history.length % 2 !== 0) {
+    throw new ChatError("El historial de conversación no es válido. Inicia una nueva conversación.", 400);
+  }
   return {
     question: input.question.trim(), selection, variableId: input.variableId as VariableId,
     history: history.map((m) => ({ role: m.role, text: m.text })),
@@ -72,7 +76,9 @@ export async function readChatRequest(request: Request) {
   // Next may expose its bind address (0.0.0.0) in request.url behind a proxy.
   // The incoming Host identifies the browser-facing authority; never accept an arbitrary origin.
   const host = (request.headers.get("host") || new URL(request.url).host).trim().toLowerCase();
-  let allowedOrigin = !origin;
+  // Browsers send Origin on every POST; a missing Origin means a non-browser client, which is rejected.
+  // This blocks cross-site use, not determined scripts: a public deployment still needs authentication.
+  let allowedOrigin = false;
   if (origin) {
     try {
       const parsed = new URL(origin);
