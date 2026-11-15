@@ -5,22 +5,22 @@
   "window": 12,
   "features": "temp_enso",
   "channels": 32,
-  "blocks": 2,
-  "gru": 64,
-  "dropout": 0.38386655584668333,
-  "lr": 0.0009373074399369348,
-  "weight_decay": 2.650611286824396e-05
+  "blocks": 1,
+  "gru": 32,
+  "dropout": 0.38793436797940667,
+  "lr": 0.000555851736848889,
+  "weight_decay": 7.294603452540311e-05
  },
  "rounds": 2,
  "trials_logged": 50,
- "validation_mae_ensemble": 0.9101800060148503,
+ "validation_mae_ensemble": 0.9426742403191462,
  "test_network": {
-  "mae": 1.3386651807306986,
-  "rmse": 1.7011981447375897,
-  "mse": 2.894075127658617,
-  "r2_monthly_values": 0.9045960987147541,
-  "r2_anomalies_vs_training_climatology": 0.11697616016738743,
-  "bias": -0.5577542059281457
+  "mae": 1.3074848126416014,
+  "rmse": 1.6748482420886128,
+  "mse": 2.8051166340273164,
+  "r2_monthly_values": 0.9075286374259212,
+  "r2_anomalies_vs_training_climatology": 0.14411867277229928,
+  "bias": -0.4561275107567311
  },
  "test_deployed_model": {
   "mae": 1.347913475214063,
@@ -36,25 +36,25 @@
   "climatology_test_mae": 1.45,
   "trend_test_mae": 1.349
  },
- "improvement_vs_deployed_mae_pct": 0.6924940110757727,
- "improvement_vs_climatology_mae_pct": 7.678263397882857,
- "improvement_vs_trend_mae_pct": 0.7661096567310177,
+ "improvement_vs_deployed_mae_pct": 3.005577697210582,
+ "improvement_vs_climatology_mae_pct": 9.828633610924031,
+ "improvement_vs_trend_mae_pct": 3.077478677420198,
  "diebold_mariano_vs_deployed": {
-  "statistic": -0.30098902599012856,
-  "p_value": 0.7634228627292826,
+  "statistic": -0.9355995632861492,
+  "p_value": 0.34947939950720064,
   "loss": "absolute error",
   "hac_lags": 11,
   "note": "negative statistic = network has smaller absolute errors"
  },
  "meets_publication_rule": false,
  "per_year_mae": {
-  "2021": 1.326162456633633,
-  "2022": 1.189234389906929,
-  "2023": 1.5901850999977272,
-  "2024": 1.2490787763845055
+  "2021": 1.3581683596378198,
+  "2022": 1.1802624522175162,
+  "2023": 1.4889153441609944,
+  "2024": 1.2025930945500747
  },
  "hardware": "CPU (Apple M2), no CUDA; mixed precision not applicable",
  "seed": 20261114,
  "ensemble_seeds": 5,
- "protocol_sha256": "a1bd72df73d675de84fe2be8a126aaaac1894c60e5f45d85efb7ae55667038f5"
+ "protocol_sha256": "b4b863706ca26b60b51722d777d5f937f3734498a287c03a31b1589499047e25"
 }

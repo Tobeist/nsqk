@@ -1,0 +1,60 @@
+{
+ "target": "NASA POWER T2M monthly, northeast box [-101,25,-99,27], °C",
+ "task": "12-month forecast issued each December",
+ "frozen_config": {
+  "window": 12,
+  "features": "temp_enso",
+  "channels": 32,
+  "blocks": 2,
+  "gru": 64,
+  "dropout": 0.38386655584668333,
+  "lr": 0.0009373074399369348,
+  "weight_decay": 2.650611286824396e-05
+ },
+ "rounds": 2,
+ "trials_logged": 50,
+ "validation_mae_ensemble": 0.9101800060148503,
+ "test_network": {
+  "mae": 1.3386651807306986,
+  "rmse": 1.7011981447375897,
+  "mse": 2.894075127658617,
+  "r2_monthly_values": 0.9045960987147541,
+  "r2_anomalies_vs_training_climatology": 0.11697616016738743,
+  "bias": -0.5577542059281457
+ },
+ "test_deployed_model": {
+  "mae": 1.347913475214063,
+  "rmse": 1.7306954594680772,
+  "mse": 2.995306773423419,
+  "r2_monthly_values": 0.9012589725126082,
+  "r2_anomalies_vs_training_climatology": 0.08608893277597929,
+  "bias": -0.41463697825467555
+ },
+ "baseline_reference": {
+  "deployed_neural_test_mae": 1.348,
+  "deployed_neural_validation_mae": 0.958,
+  "climatology_test_mae": 1.45,
+  "trend_test_mae": 1.349
+ },
+ "improvement_vs_deployed_mae_pct": 0.6924940110757727,
+ "improvement_vs_climatology_mae_pct": 7.678263397882857,
+ "improvement_vs_trend_mae_pct": 0.7661096567310177,
+ "diebold_mariano_vs_deployed": {
+  "statistic": -0.30098902599012856,
+  "p_value": 0.7634228627292826,
+  "loss": "absolute error",
+  "hac_lags": 11,
+  "note": "negative statistic = network has smaller absolute errors"
+ },
+ "meets_publication_rule": false,
+ "per_year_mae": {
+  "2021": 1.326162456633633,
+  "2022": 1.189234389906929,
+  "2023": 1.5901850999977272,
+  "2024": 1.2490787763845055
+ },
+ "hardware": "CPU (Apple M2), no CUDA; mixed precision not applicable",
+ "seed": 20261114,
+ "ensemble_seeds": 5,
+ "protocol_sha256": "a1bd72df73d675de84fe2be8a126aaaac1894c60e5f45d85efb7ae55667038f5"
+}

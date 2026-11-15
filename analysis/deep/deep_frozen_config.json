@@ -3,13 +3,13 @@
   "window": 12,
   "features": "temp_enso",
   "channels": 32,
-  "blocks": 2,
-  "gru": 64,
-  "dropout": 0.38386655584668333,
-  "lr": 0.0009373074399369348,
-  "weight_decay": 2.650611286824396e-05
+  "blocks": 1,
+  "gru": 32,
+  "dropout": 0.38793436797940667,
+  "lr": 0.000555851736848889,
+  "weight_decay": 7.294603452540311e-05
  },
- "single_seed_validation_mae": 0.8976479059588353,
+ "single_seed_validation_mae": 0.9381178474570794,
  "rounds": 2,
  "frozen_before_test": true
 }

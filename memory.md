@@ -27,36 +27,36 @@ Protocolo previo: `docs/DEEP_FORECAST_PROTOCOL.md`. Código: `scripts/t2m_heatma
 
 - **Objetivo:** T2M mensual del noreste.
 - **Error base:** el "error histórico medio" de la app para esa serie, **MAE 1.348 °C** en 2021–2024 (modelo desplegado `neural`). Referencias: climatología 1.450, tendencia 1.349.
-- **Arquitectura ganadora:**
-  - proyección lineal → 2 bloques Conv1D causales residuales (32 canales, LayerNorm, GELU) → BiGRU de 64 unidades → atención aditiva → cabeza MLP con salto, que da 12 salidas directas;
-  - predice el residuo sobre la regresión de tendencia + mes ajustada en cada origen.
+- **Arquitectura ganadora (v2, tras corregir la parada temprana):**
+  - proyección lineal → 1 bloque Conv1D causal residual (32 canales, LayerNorm, GELU) → BiGRU de 32 unidades → atención aditiva → cabeza MLP con salto, que da 12 salidas directas;
+  - predice el residuo sobre tendencia + mes ajustado en cada origen.
 - **Hiperparámetros congelados:**
   - ventana de 12 meses;
   - variables: T2M, T2M_MIN, T2M_MAX + Niño 3.4 (sin las series de lluvia);
-  - dropout 0.384, AdamW con lr 9.37e-4 y weight_decay 2.65e-5;
+  - dropout 0.388, AdamW con lr 5.56e-04 y weight_decay 7.29e-05;
   - CosineAnnealingLR, HuberLoss, batch 32, hasta 400 épocas con paciencia 60;
   - ensamble de 5 semillas.
-- **Búsqueda:** Optuna TPE con 30 + 20 ensayos, solo en validación 2016–2020. La segunda ronda se ejecutó porque la primera no bajó de 0.958.
-- **Métricas:**
+- **Búsqueda:** Optuna TPE con 30 + 20 ensayos, solo en validación 2016–2020.
+- **Métricas (v2):**
 
 | Conjunto | Red | Modelo desplegado |
 | --- | ---: | ---: |
-| Validación 2016–2020, MAE (ensamble) | 0.910 | 0.958 |
-| Prueba 2021–2024, MAE | **1.339** | 1.348 |
-| Prueba, RMSE / MSE | 1.701 / 2.894 | 1.731 / 2.995 |
-| Prueba, R² de valores mensuales | 0.905 | 0.901 |
-| Prueba, R² de anomalías | 0.117 | 0.086 |
+| Validación 2016–2020, MAE (ensamble) | 0.943 | 0.958 |
+| Prueba 2021–2024, MAE | **1.307** | 1.348 |
+| Prueba, RMSE / MSE | 1.675 / 2.805 | 1.731 / 2.995 |
+| Prueba, R² de valores mensuales | 0.908 | 0.901 |
+| Prueba, R² de anomalías | 0.144 | 0.086 |
 
-  - Mejora frente al modelo desplegado: **0.7 %**; frente a la climatología: 7.7 %.
-  - **Diebold–Mariano:** p = 0.76, sin diferencia significativa. No cumple la regla de publicación; no se despliega.
+  - Mejora frente al modelo desplegado: **3.0 %**; frente a la climatología: 9.8 %.
+  - **Diebold–Mariano:** p = 0.35, sin diferencia significativa. No cumple la regla de publicación; no se despliega.
+  - **v1, con validación solapada (archivada):** prueba 1.339, p = 0.76.
 - **Lectura:**
-  - La red no supera de forma significativa al modelo desplegado ni a la tendencia + calendario. Sus predicciones se parecen mucho a las del modelo desplegado: correlación 0.998 y diferencia media de 0.27 °C.
-  - La pérdida de validación interna sube desde las primeras épocas: con unas 230 ventanas por origen, la red sobreajusta enseguida.
-  - La anomalía de T2M casi no tiene memoria más allá de 2–3 meses: r ≤ 0.24 desde el rezago 2 (`heatmap_correlaciones_rezagos.png`).
-  - El R² de 0.90 refleja sobre todo el ciclo anual; el R² de anomalías (0.12) es la habilidad real.
-  - Todos los modelos subestiman 2023, un año excepcionalmente cálido.
+  - Corregir el solapamiento cambió la configuración elegida y bajó el error de prueba, pero la diferencia con el modelo desplegado sigue sin ser significativa en 48 meses.
+  - La prueba ya se había visto en v1, así que v2 no es una evaluación ciega.
+  - La anomalía de T2M casi no tiene memoria más allá de 2–3 meses (r ≤ 0.24 desde el rezago 2).
+  - El R² de 0.91 refleja sobre todo el ciclo anual.
 - **No se reentrenó mirando la prueba.** Hacerlo convertiría 2021–2024 en entrenamiento y cualquier "mejora" sería falsa.
-- **Fuga corregida antes de evaluar:** la escala de Niño 3.4 usaba noviembre y diciembre del año de origen. Se detectó con `tests/test_deep_forecast.py`, se detuvo la corrida (sin haber evaluado la prueba) y se relanzó corregida.
+- **Correcciones:** (1) la parada temprana compartía hasta 11 meses objetivo con el entrenamiento; se separaron y se repitió el experimento (v2). (2) **Fuga corregida antes de evaluar v1:** la escala de Niño 3.4 usaba noviembre y diciembre del año de origen. Se detectó con `tests/test_deep_forecast.py`, se detuvo la corrida (sin haber evaluado la prueba) y se relanzó corregida.
 
 ## Siguientes pasos razonables
 

@@ -29,12 +29,17 @@ class DeepForecastTest(unittest.TestCase):
         for key in ("x", "h", "y", "x_new", "h_new", "base_future", "clim_future"):
             np.testing.assert_allclose(a[key], b[key], err_msg=key)
 
-    def test_training_targets_end_by_the_origin_and_early_stop_uses_the_latest(self):
+    def test_early_stopping_targets_do_not_overlap_training_targets(self):
         origin = d.origin_index(2016)
         data = d.prepare(self.frame, self.enso, origin, 24, "temp_enso")
         self.assertEqual(data["x"].shape[1:], (24, 3 + 1 + 4 + 2 + 1))
-        self.assertEqual(int(data["early"].sum()), 24)
-        self.assertTrue(data["early"][-24:].all() and not data["early"][:-24].any())
+        ends = origin - 12 - np.arange(len(data["y"]))[::-1]  # window end index for each sample, oldest first
+        self.assertEqual(int(data["early"].sum()), 13)  # ends origin-24 .. origin-12
+        self.assertEqual(int((~data["early"] & ~data["fit"]).sum()), 11)  # purged windows
+        fit_targets = {m for e in ends[data["fit"]] for m in range(e + 1, e + 13)}
+        early_targets = {m for e in ends[data["early"]] for m in range(e + 1, e + 13)}
+        self.assertFalse(fit_targets & early_targets)
+        self.assertLessEqual(max(early_targets), origin)
 
 
 if __name__ == "__main__":

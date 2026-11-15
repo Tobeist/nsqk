@@ -86,11 +86,14 @@ def prepare(frame, enso_full, origin, window, feature_set):
         feats.append(f)
         heads.append(h)
         targets.append(resid[e + 1:e + 13] / rsd)
-    early = np.array([e + 12 > origin - 24 for e in ends])  # targets in the last 24 training months: early stopping only
+    # Early stopping uses windows whose 12 targets all lie in the last 24 training months; training windows' targets
+    # end before that block. Windows in between are purged, so no target month is shared between the two sets.
+    early = np.array([e + 1 > origin - 24 for e in ends])
+    fit = np.array([e + 12 <= origin - 24 for e in ends])
     f_last, h_last = sample(origin)
     if np.isnan(np.array(feats)).any() or np.isnan(f_last).any():
         raise ValueError("NaN in features; refusing to fill")
-    return {"x": np.array(feats, np.float32), "h": np.array(heads, np.float32), "y": np.array(targets, np.float32), "early": early,
+    return {"x": np.array(feats, np.float32), "h": np.array(heads, np.float32), "y": np.array(targets, np.float32), "early": early, "fit": fit,
             "x_new": f_last[None].astype(np.float32), "h_new": h_last[None].astype(np.float32),
             "base_future": base[origin + 1:origin + 13], "rsd": rsd,
             "clim_future": clim["T2M"].reindex(frame.index.month[origin + 1:origin + 13]).to_numpy()}
@@ -148,7 +151,7 @@ def train_one(args):
     opt = torch.optim.AdamW(net.parameters(), lr=params["lr"], weight_decay=params["weight_decay"])
     sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=MAX_EPOCHS)
     loss_fn = torch.nn.HuberLoss(delta=1.0)
-    tr, va = ~data["early"], data["early"]
+    tr, va = data["fit"], data["early"]
     xt, ht, yt = (torch.from_numpy(data[k][tr]) for k in ("x", "h", "y"))
     xv, hv, yv = (torch.from_numpy(data[k][va]) for k in ("x", "h", "y"))
     rng = np.random.default_rng(seed)
