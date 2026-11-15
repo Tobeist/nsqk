@@ -24,7 +24,7 @@ Gráfica, mapa, explicación y CSV comparten el resultado auditado del periodo e
 
 Las variables sin archivos procesados siguen deshabilitadas. Ninguna caja equivale a un estado completo ni a los cinco polígonos regionales propuestos. Las diferencias de malla y procesamiento entre POWER, GPCP y MERRA-2 se explican en la metodología. El RX5Day mensual de Giovanni y el RX5day anual de POWER tienen definiciones y fuentes distintas. T2M_MIN y T2M_MAX no son índices de noches cálidas u olas de calor. Comparar muchos periodos y elegir el más llamativo aumenta el riesgo de interpretar una señal casual como robusta.
 
-La sección de preguntas ofrece respuestas locales deterministas basadas en el resultado visible; **no consulta un modelo de IA**. Las fixtures sintéticas y la ruta `/demo` fueron retiradas del MVP.
+La conversación usa Claude desde el servidor y conserva el contexto de la caja, variable y periodo visibles. El servidor reconstruye las estadísticas antes de consultar Anthropic; el navegador no envía cifras que puedan sustituir el análisis. La significancia se calcula con p de Holm < 0.05 y se muestra por separado de la solidez de la conclusión. Configuración y límites: [docs/CLAUDE.md](docs/CLAUDE.md). Las fixtures sintéticas y la ruta `/demo` fueron retiradas del MVP.
 
 ## Mapa del área de estudio
 
@@ -38,7 +38,7 @@ La leyenda cambia con la variable y el periodo ejecutados y amplía su escala pa
 - Descargar y validar los índices de calor, `R95P` y FLDAS. Habilitar una variable únicamente cuando existan su serie, unidades, procedencia y análisis reproducible.
 - Cotejar T2M de POWER con la extracción directa de Giovanni y estudiar las diferencias entre el `RX5Day` oficial mensual y el índice anual derivado de POWER antes de presentar comparaciones de extremos.
 - Extender los controles de variabilidad natural y contrastar los posibles escalones con productos independientes. ENSO y el calendario no representan todos los factores naturales. Un intervalo que incluye cero no demuestra ausencia de cambio.
-- Si se quiere un chat con preguntas abiertas, conectar un servicio de IA mediante una API que reciba únicamente la selección, las estadísticas y la procedencia de la variable visible, y verifique que cada respuesta cite esos datos. El chat actual sólo da explicaciones locales predefinidas.
+- Evaluar las explicaciones de Claude con preguntas del equipo y casos de resultados inconclusos o pendientes. Las explicaciones de IA no sustituyen la validación científica ni atribuyen causas.
 
 Los scripts Python en `scripts/` y los archivos originales en `data/raw/` se conservan para reproducibilidad. La cartografía local y sus atribuciones están en `public/assets/`.
 

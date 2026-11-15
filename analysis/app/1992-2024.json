@@ -1,13 +1,14 @@
 {
   "version": "app-seasonal-enso-sieve-v1",
+  "hashPolicy": "sha256-text-lf-v1",
   "start": 1992,
   "end": 2024,
   "replicates": 4999,
   "seed": 20261114,
-  "fingerprint": "6a358cb2eed77b0abbc0848c1c099a62e8f5f336742912ff63559560c66acfd5",
+  "fingerprint": "f93b9be9efb04d843da464aa1b9a2b28b31c88272b415d4ab2f7131b49726a57",
   "inputHashes": {
-    "docs/APP_TREND_PROTOCOL.md": "0997d73704725e3900b85f533cf6e0a22a7dec9bd223d2891f7ad624512c080f",
-    "scripts/app_trends.py": "b3102a7f3033c38c2ace9ff40a39e229728cb661ddf5e477b1a7e35b380952e5",
+    "docs/APP_TREND_PROTOCOL.md": "ac7cf511bf194219bd00d2e08e4dd201281c9e3cf0ec16a67c7a2271a75734d1",
+    "scripts/app_trends.py": "3a5ce91702d79131f36a87d38ac56f935474fb4adfd71139ce004871e585d4d9",
     "scripts/trend_lib.py": "813ca458e6f0d683b10b6e464db76b0c70421e942abfcdf5c0ff1fb97010ddc9",
     "scripts/study_regions.py": "d12d96dbdf7b44ab69269f0eb25c01c758683eb90dd10fb0706d26c639f7c617",
     "requirements-analysis.txt": "cb8a75a88fb02894fefec94c1c62b193eb974783358f3a038d63b7987f18ea57",

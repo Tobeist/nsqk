@@ -16,6 +16,7 @@ from study_regions import BOXES, data_dir
 
 ROOT = Path(__file__).resolve().parents[1]
 VERSION = "app-seasonal-enso-sieve-v1"
+HASH_POLICY = "sha256-text-lf-v1"
 SEED, REPS = 20261114, 4999
 # Preserve the first three original series' bootstrap keys for numerical comparison.
 FILES = {
@@ -39,8 +40,16 @@ def input_files():
         for rid in BOXES for name in list(FILES.values()) + [ANNUAL_FILE]]
 
 
+def text_sha256(path):
+    """Hash text independently of Git's CRLF/LF checkout conversion.
+
+    Preserve every other byte, including numeric precision and whitespace.
+    """
+    return hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+
+
 def fingerprints():
-    hashes = {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in input_files()}
+    hashes = {p.relative_to(ROOT).as_posix(): text_sha256(p) for p in input_files()}
     return hashlib.sha256(json.dumps(hashes, sort_keys=True).encode()).hexdigest(), hashes
 
 
@@ -217,7 +226,7 @@ def compute(start, end):
             for row, p in zip(entries, basep):
                 if row.get("baseline"):
                     row["baseline"].update(pAdjusted=float(p), family="monthly-18-without-enso", familySize=len(entries))
-    return {"version": VERSION, "start": start, "end": end, "replicates": REPS, "seed": SEED,
+    return {"version": VERSION, "hashPolicy": HASH_POLICY, "start": start, "end": end, "replicates": REPS, "seed": SEED,
             "fingerprint": fingerprint, "inputHashes": hashes, "results": results}
 
 

@@ -7,12 +7,12 @@
 - Ventana fija: enero de 1992 a diciembre de 2024. Cajas: noreste `[-101,25,-99,27]`, Chihuahua interior `[-107,28,-105,30]` y sur `[-94,16,-92,18]`.
 - Series primarias, en la misma definición y producto para las tres cajas: T2M mensual de POWER, GPCP mensual y RX5Day mensual de Giovanni, y Rx5day anual derivado de POWER diario UTC. El último índice no es intercambiable con RX5Day mensual.
 - El CSV anual usado por la app redondea a cuatro decimales. El p e IC ya publicados para el noreste proceden de la serie diaria con más precisión; se conserva esa inferencia previa y se admite una diferencia numérica de hasta `1e-6` mm/década al verificar la pendiente contra el CSV procesado.
-- Verificar `region_id`, caja, cobertura consecutiva, unidades, valores finitos y procedencia de cada entrada antes de estimar. Registrar SHA-256 de archivos procesados y del plan.
+- Verificar `region_id`, caja, cobertura consecutiva, unidades, valores finitos y procedencia de cada entrada antes de estimar. Registrar SHA-256 de archivos procesados y del plan; el formato de huellas portable se describe en la corrección de reproducibilidad al final.
 
 ## Modelos e incertidumbre
 
-- Series mensuales: M0 = tiempo lineal + once indicadores de mes; M1 = M0 + Niño 3.4 contemporáneo, como la auditoría del noreste. Pendiente por década, HAC(12). M0 se informa para comparar con la app; M1 es el modelo primario de la extensión.
-- Rx5day anual: intercepto + tiempo lineal, HAC(2), como la auditoría previa. La app emplea HAC(3); ambas estimaciones de pendiente deben coincidir, pero los intervalos pueden diferir.
+- Series mensuales: M0 = tiempo lineal + once indicadores de mes; M1 = M0 + Niño 3.4 contemporáneo, como la auditoría del noreste. Pendiente por década, HAC(12). M0 se informa como comparación sin ENSO; M1 es el modelo primario de esta extensión y de la app actual.
+- Rx5day anual: intercepto + tiempo lineal, HAC(2), como la auditoría previa y la app actual. El cálculo de referencia anterior de la interfaz empleaba HAC(3); ya no alimenta su inferencia principal.
 - Para los p e intervalos primarios: bootstrap-t de criba AR bajo la nula sin tendencia, orden 0–12 mensual u 0–3 anual elegido por AIC, innovaciones remuestreadas y escaladas por mes para las series mensuales; 4 999 réplicas y semilla 20261114. Conservar la cobertura estimada del IC HAC nominal. Repetir con AR(1) y con innovaciones gaussianas como sensibilidad, 999 réplicas cada una.
 - Corregir con Holm la familia **F2-regional** de nueve p M1 (tres variables × tres cajas) y la familia **B-regional** de tres p del Rx5day anual. Los p del noreste proceden de la auditoría publicada; la ampliación de las familias se decidió después de conocerlos y se etiqueta exploratoria.
 
@@ -27,4 +27,8 @@ Para cada una de las cuatro series, calcular las tres diferencias mensuales o an
 - Estado por caja/serie: **inconcluso** si el p Holm de su familia no es < 0.05; **pendiente** si lo es pero aparece el escalón anterior; **sensible** si lo es pero cambia de signo entre ventanas o alguna variante de bootstrap pierde el umbral; **sustentado dentro de este protocolo** si pasa esas comprobaciones. Estos estados no implican atribución causal ni representatividad estatal.
 - Las diferencias regionales se describen por su estimación, IC, p corregido y límites espaciales; no se infieren de signos, intervalos separados ni categorías de las cajas.
 
-Salidas separadas en `analysis/regions/`. No modificar `analysis/results/final_status.*` ni habilitar conclusiones auditadas nuevas en la interfaz hasta revisar esta extensión.
+Salidas separadas en `analysis/regions/`. No modificar `analysis/results/final_status.*` ni sustituir la inferencia de la interfaz por estos resultados sin revisar su alcance. La app tiene su propia extensión a 21 series (seis variables mensuales y un índice anual en cada caja), documentada en [APP_TREND_PROTOCOL.md](APP_TREND_PROTOCOL.md): Holm sobre 18 pruebas mensuales y, por separado, tres anuales. Esta auditoría mantiene nueve mensuales y tres anuales, además de 12 contrastes regionales. Sus p ajustados no son intercambiables.
+
+## Corrección editorial y de reproducibilidad posterior a los resultados
+
+Estas aclaraciones sobre la app y las huellas se añadieron después de la ejecución original; no cambian modelos, familias, reglas ni resultados estadísticos. Las huellas `sha256-text-lf-v1` normalizan únicamente CRLF a LF antes de calcular SHA-256, para que un checkout de Git con otros saltos de línea no parezca una modificación de los datos. No se ignoran cambios de valores, espacios ni precisión. `run_info.json` conserva las huellas originales y marca la migración de metadatos sin una nueva ejecución estadística. Las ejecuciones futuras registran este formato explícitamente.

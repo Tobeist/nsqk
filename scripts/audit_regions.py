@@ -43,10 +43,16 @@ VARIANTS = {
 PAIRS = (("mx-chihuahua-interior", "mx-northeast"),
          ("mx-south-humid", "mx-northeast"),
          ("mx-south-humid", "mx-chihuahua-interior"))
+HASH_POLICY = "sha256-text-lf-v1"
 
 
 def sha256(path):
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    """Fingerprint text identically after Git's LF/CRLF checkout conversion.
+
+    Only normalize CRLF to LF. Whitespace, numeric precision, encoding and all
+    other content remain significant; this is not a hash of parsed values.
+    """
+    return hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
 
 
 def load_inputs():
@@ -278,6 +284,7 @@ def run(primary_reps=4999, sensitivity_reps=999):
             "primary_reps": primary_reps, "sensitivity_reps": sensitivity_reps,
             "python": platform.python_version(),
             "packages": {p: version(p) for p in ("numpy", "pandas", "scipy", "statsmodels")},
+            "hash_policy": HASH_POLICY,
             "plan_sha256": sha256(PLAN), "script_sha256": sha256(Path(__file__)),
             "input_sha256": hashes,
             "scope": "exploratory extension after the northeast audit; no causal attribution"}
@@ -294,7 +301,9 @@ def write_summary(results, differences):
              "El noreste ya se conocía: esta ampliación es exploratoria. Datos y métodos no implican causalidad ni cobertura de estados completos.", "",
              "Las pendientes mensuales primarias usan calendario + Niño 3.4 (M1), HAC(12), p e IC bootstrap-t de criba AR. "
              "Rx5day anual usa HAC(2). Holm se aplica a las nueve pruebas mensuales y a las tres anuales por separado. "
-             "Por eso el p de Holm del noreste aquí puede diferir del que muestra la app: la familia original tenía tres pruebas mensuales.", "",
+             "La app integra seis variables mensuales por caja (18 pruebas) y el índice anual (tres pruebas), "
+             "con HAC(12) mensual y HAC(2) anual. Esta auditoría regional tiene un alcance mensual menor (nueve pruebas); "
+             "sus p de Holm no son intercambiables con los de la app ni con la auditoría original de tres pruebas mensuales.", "",
              "| Caja | Serie | Pendiente [IC bootstrap-t 95 %] por década | p Holm | Estado |", "| --- | --- | --- | ---: | --- |"]
     for x in results.itertuples():
         lines.append(f"| {x.region_id} | {x.variable} | {val(x.slope_per_decade)} "

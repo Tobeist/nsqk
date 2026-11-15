@@ -16,6 +16,8 @@ Extensión del análisis revisado en los PR #1 y #2 a las siete series de cada u
 
 Reproducción: `python scripts/app_trends.py --start 1992 --end 2024 --output analysis/app/1992-2024.json`. La API usa el mismo comando mediante stdin, sin ejecutar texto de shell recibido del usuario. Los demás rangos se guardan en `.cache/trends/`, invalidada por los hashes de datos, código y protocolo.
 
+Las huellas usan `sha256-text-lf-v1`, identificado en `hashPolicy` del artefacto: normalizan únicamente CRLF a LF antes de calcular SHA-256 y guardan las rutas con separadores `/`. Así, la conversión de saltos de línea de un checkout de Git en Windows no cambia la identidad de las entradas respecto a macOS o Linux. Cambios de números, espacios o precisión sí invalidan la caché. Esta corrección de reproducibilidad se añadió después de la ejecución inicial; no cambia modelos, familias, semilla, pendientes, intervalos ni valores p.
+
 ## Ejecutar la app con cálculo de periodos
 
 Se necesita un servidor Node con Python 3.9–3.12; no es una exportación estática. Desde la raíz:
