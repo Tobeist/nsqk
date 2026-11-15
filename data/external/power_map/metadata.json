@@ -1,0 +1,230 @@
+{
+  "source": "NASA POWER monthly regional API",
+  "files": {
+    "power_t2m_nw_1992_2024.json": {
+      "request_url": "https://power.larc.nasa.gov/api/temporal/monthly/regional?latitude-min=20&latitude-max=30&longitude-min=-108&longitude-max=-98&parameters=T2M&community=SB&start=1992&end=2024&format=JSON",
+      "downloaded_utc": "2026-11-15T16:24:42+00:00",
+      "sha256": "2d0644cca52ea8f3d06eeece646eb2fd3e9f8825bf76b88e9377e8fac43eb21e",
+      "parameter": "T2M",
+      "units": "C",
+      "bbox_wsen": [
+        -108,
+        20,
+        -98,
+        30
+      ],
+      "grid_cells": 336,
+      "api_header": {
+        "title": "NASA/POWER Source Native Resolution Monthly and Annual",
+        "api": {
+          "version": "v2.10.0",
+          "name": "POWER Monthly and Annual API"
+        },
+        "sources": [
+          "MERRA2"
+        ],
+        "fill_value": -999.0,
+        "time_standard": "LST",
+        "start": "19920101",
+        "end": "20241231"
+      }
+    },
+    "power_t2m_sw_1992_2024.json": {
+      "request_url": "https://power.larc.nasa.gov/api/temporal/monthly/regional?latitude-min=14&latitude-max=20&longitude-min=-108&longitude-max=-98&parameters=T2M&community=SB&start=1992&end=2024&format=JSON",
+      "downloaded_utc": "2026-11-15T16:24:43+00:00",
+      "sha256": "75fec3531a1fcf00b2cff37fc6430015d3130cc338ace1af9e3f17ee9f204968",
+      "parameter": "T2M",
+      "units": "C",
+      "bbox_wsen": [
+        -108,
+        14,
+        -98,
+        20
+      ],
+      "grid_cells": 208,
+      "api_header": {
+        "title": "NASA/POWER Source Native Resolution Monthly and Annual",
+        "api": {
+          "version": "v2.10.0",
+          "name": "POWER Monthly and Annual API"
+        },
+        "sources": [
+          "MERRA2"
+        ],
+        "fill_value": -999.0,
+        "time_standard": "LST",
+        "start": "19920101",
+        "end": "20241231"
+      }
+    },
+    "power_t2m_se_1992_2024.json": {
+      "request_url": "https://power.larc.nasa.gov/api/temporal/monthly/regional?latitude-min=14&latitude-max=22&longitude-min=-98&longitude-max=-88&parameters=T2M&community=SB&start=1992&end=2024&format=JSON",
+      "downloaded_utc": "2026-11-15T16:24:47+00:00",
+      "sha256": "1078a9098c625c1132bfa54161b39fa3025f59a97ceae54b394729088bd5d12b",
+      "parameter": "T2M",
+      "units": "C",
+      "bbox_wsen": [
+        -98,
+        14,
+        -88,
+        22
+      ],
+      "grid_cells": 272,
+      "api_header": {
+        "title": "NASA/POWER Source Native Resolution Monthly and Annual",
+        "api": {
+          "version": "v2.10.0",
+          "name": "POWER Monthly and Annual API"
+        },
+        "sources": [
+          "MERRA2"
+        ],
+        "fill_value": -999.0,
+        "time_standard": "LST",
+        "start": "19920101",
+        "end": "20241231"
+      }
+    },
+    "power_t2m_ne_1992_2024.json": {
+      "request_url": "https://power.larc.nasa.gov/api/temporal/monthly/regional?latitude-min=22&latitude-max=30&longitude-min=-98&longitude-max=-88&parameters=T2M&community=SB&start=1992&end=2024&format=JSON",
+      "downloaded_utc": "2026-11-15T16:24:49+00:00",
+      "sha256": "9543dd67140cea0000c0520527009db72428972f6b6e304da8faa1fb70865369",
+      "parameter": "T2M",
+      "units": "C",
+      "bbox_wsen": [
+        -98,
+        22,
+        -88,
+        30
+      ],
+      "grid_cells": 272,
+      "api_header": {
+        "title": "NASA/POWER Source Native Resolution Monthly and Annual",
+        "api": {
+          "version": "v2.10.0",
+          "name": "POWER Monthly and Annual API"
+        },
+        "sources": [
+          "MERRA2"
+        ],
+        "fill_value": -999.0,
+        "time_standard": "LST",
+        "start": "19920101",
+        "end": "20241231"
+      }
+    },
+    "power_prectotcorr_nw_1992_2024.json": {
+      "request_url": "https://power.larc.nasa.gov/api/temporal/monthly/regional?latitude-min=20&latitude-max=30&longitude-min=-108&longitude-max=-98&parameters=PRECTOTCORR&community=SB&start=1992&end=2024&format=JSON",
+      "downloaded_utc": "2026-11-15T16:24:50+00:00",
+      "sha256": "67a2bcf393a8a0b980f397894ed06b780ee235fc559715e11a1f81212d1a2396",
+      "parameter": "PRECTOTCORR",
+      "units": "mm/day",
+      "bbox_wsen": [
+        -108,
+        20,
+        -98,
+        30
+      ],
+      "grid_cells": 336,
+      "api_header": {
+        "title": "NASA/POWER Source Native Resolution Monthly and Annual",
+        "api": {
+          "version": "v2.10.0",
+          "name": "POWER Monthly and Annual API"
+        },
+        "sources": [
+          "MERRA2"
+        ],
+        "fill_value": -999.0,
+        "time_standard": "LST",
+        "start": "19920101",
+        "end": "20241231"
+      }
+    },
+    "power_prectotcorr_sw_1992_2024.json": {
+      "request_url": "https://power.larc.nasa.gov/api/temporal/monthly/regional?latitude-min=14&latitude-max=20&longitude-min=-108&longitude-max=-98&parameters=PRECTOTCORR&community=SB&start=1992&end=2024&format=JSON",
+      "downloaded_utc": "2026-11-15T16:24:52+00:00",
+      "sha256": "7657bd3cc98536b2856e5f56549a125d17c0caedf4c9f212058ec059e709c46d",
+      "parameter": "PRECTOTCORR",
+      "units": "mm/day",
+      "bbox_wsen": [
+        -108,
+        14,
+        -98,
+        20
+      ],
+      "grid_cells": 208,
+      "api_header": {
+        "title": "NASA/POWER Source Native Resolution Monthly and Annual",
+        "api": {
+          "version": "v2.10.0",
+          "name": "POWER Monthly and Annual API"
+        },
+        "sources": [
+          "MERRA2"
+        ],
+        "fill_value": -999.0,
+        "time_standard": "LST",
+        "start": "19920101",
+        "end": "20241231"
+      }
+    },
+    "power_prectotcorr_se_1992_2024.json": {
+      "request_url": "https://power.larc.nasa.gov/api/temporal/monthly/regional?latitude-min=14&latitude-max=22&longitude-min=-98&longitude-max=-88&parameters=PRECTOTCORR&community=SB&start=1992&end=2024&format=JSON",
+      "downloaded_utc": "2026-11-15T16:24:55+00:00",
+      "sha256": "ea078f9dfefeee8a59bc687b633b8b71c89746d78fce0126cca88b020525178b",
+      "parameter": "PRECTOTCORR",
+      "units": "mm/day",
+      "bbox_wsen": [
+        -98,
+        14,
+        -88,
+        22
+      ],
+      "grid_cells": 272,
+      "api_header": {
+        "title": "NASA/POWER Source Native Resolution Monthly and Annual",
+        "api": {
+          "version": "v2.10.0",
+          "name": "POWER Monthly and Annual API"
+        },
+        "sources": [
+          "MERRA2"
+        ],
+        "fill_value": -999.0,
+        "time_standard": "LST",
+        "start": "19920101",
+        "end": "20241231"
+      }
+    },
+    "power_prectotcorr_ne_1992_2024.json": {
+      "request_url": "https://power.larc.nasa.gov/api/temporal/monthly/regional?latitude-min=22&latitude-max=30&longitude-min=-98&longitude-max=-88&parameters=PRECTOTCORR&community=SB&start=1992&end=2024&format=JSON",
+      "downloaded_utc": "2026-11-15T16:24:56+00:00",
+      "sha256": "ec5616c44256d5d993919ea20ccdb1c5913278f73493085db56f0b6695e0dd3e",
+      "parameter": "PRECTOTCORR",
+      "units": "mm/day",
+      "bbox_wsen": [
+        -98,
+        22,
+        -88,
+        30
+      ],
+      "grid_cells": 272,
+      "api_header": {
+        "title": "NASA/POWER Source Native Resolution Monthly and Annual",
+        "api": {
+          "version": "v2.10.0",
+          "name": "POWER Monthly and Annual API"
+        },
+        "sources": [
+          "MERRA2"
+        ],
+        "fill_value": -999.0,
+        "time_standard": "LST",
+        "start": "19920101",
+        "end": "20241231"
+      }
+    }
+  },
+  "notes": "Responses saved unmodified. YYYY13 keys are POWER annual means and are ignored; -999 is missing, never zero or interpolated."
+}
