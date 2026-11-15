@@ -26,6 +26,12 @@ Las variables sin archivos procesados siguen deshabilitadas. Ninguna caja equiva
 
 La conversación usa Claude desde el servidor y conserva el contexto de la caja, variable y periodo visibles. El servidor reconstruye las estadísticas antes de consultar Anthropic; el navegador no envía cifras que puedan sustituir el análisis. La significancia se calcula con p de Holm < 0.05 y se muestra por separado de la solidez de la conclusión. Configuración y límites: [docs/CLAUDE.md](docs/CLAUDE.md). Las fixtures sintéticas y la ruta `/demo` fueron retiradas del MVP.
 
+## Predicción mensual
+
+La pestaña **Predicción** permite comparar una red neuronal con rezagos, el patrón estacional y el modelo elegido por validación. Disponible para las seis variables mensuales de cada caja con el periodo completo 1992–2024. Las vistas separan la prueba retrospectiva 2021–2024 de la proyección de doce meses de 2025 con datos hasta diciembre de 2024; esta última no es un pronóstico meteorológico actual. El índice anual no tiene un modelo predictivo validado.
+
+El modelo se elige con 2016–2020, antes de medir su error en 2021–2024. La pantalla muestra error en las unidades originales, comparación con el patrón estacional y bandas orientativas; no porcentajes de “acierto” ni una garantía de cobertura. La red puede perder frente a un modelo simple. Datos, modelos, reglas y reproducción: [docs/FORECAST_PROTOCOL.md](docs/FORECAST_PROTOCOL.md). Las fuentes y el método de significancia se consultan a un clic, sin cargar de texto la vista principal.
+
 ## Mapa del área de estudio
 
 La vista «Estados» muestra fronteras reales de Natural Earth alrededor de la caja seleccionada. En el noreste intersecta Coahuila, Nuevo León, Tamaulipas y Texas; en Chihuahua interior intersecta Chihuahua; en el sur intersecta Chiapas, Tabasco, Veracruz y Oaxaca. Sólo el recuadro representa el análisis. La contribución efectiva de cada producto depende de sus celdas y máscaras; no hay resultados por estado completo. «Planeta 3D» conserva el globo como vista alterna.

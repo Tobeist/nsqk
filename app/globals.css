@@ -1263,6 +1263,9 @@ a {
   color: #b6c8d2;
   background: #14212d;
 }
+.temporal-view { display: flex; gap: 20px; margin-top: 18px; border-bottom: 1px solid var(--line); }
+.temporal-view button { min-height: 39px; padding: 6px 0; color: #a8bbc6; font-size: 13px; border-bottom: 2px solid transparent; }
+.temporal-view button[aria-pressed="true"] { color: var(--text); border-bottom-color: var(--cyan); }
 .audit-summary {
   margin: 0 0 20px;
   color: var(--text-secondary, #b1c1c9);
@@ -1272,6 +1275,27 @@ a {
 .audit-summary p { margin: 4px 0; }
 .audit-summary strong { color: inherit; font-variant-numeric: tabular-nums; }
 .audit-summary button { margin-top: 6px; }
+.result-source-links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px 12px;
+  margin: 12px 0 20px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.result-source-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #b2dacd;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.result-source-links a:hover { color: var(--text); }
+.chat-privacy { margin-top: 6px; color: #adc2c6; font-size: 12px; }
+.chat-privacy summary { cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 .method-preview {
   margin: 13px 0 0;
   color: #94a9b7;

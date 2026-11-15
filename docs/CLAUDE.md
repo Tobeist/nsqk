@@ -2,7 +2,7 @@
 
 La app consulta la API oficial de Anthropic desde `POST /api/chat`. El navegador envía la pregunta, la selección, la variable y hasta ocho mensajes previos. El servidor reconstruye el análisis del periodo a partir de los datos del repositorio; ignora cualquier estadística enviada por el cliente.
 
-Claude explica los hechos recibidos. El cálculo de significancia sigue siendo determinista: p de Holm < 0.05. Cada respuesta comienza con un resumen verificado de pendiente, intervalo individual, familia, p y significancia. Los resultados significativos con estado pendiente o sensible conservan esa reserva; la IA no los convierte en tendencias robustas ni establece causas.
+Claude explica los hechos recibidos en respuestas breves. El cálculo de significancia sigue siendo determinista: p de Holm < 0.05. Cada respuesta comienza con un resumen verificado de pendiente, p y significancia. Intervalo y familia permanecen en el contexto y la evidencia expandible. Los resultados significativos con estado pendiente o sensible conservan esa reserva; la IA no los convierte en tendencias robustas ni establece causas. Si se pregunta por predicción, recibe el experimento de la variable y caja activas, con error retrospectivo y proyección de 2025 usando datos hasta diciembre de 2024. No inventa un pronóstico actual ni extrapola el experimento a otro periodo.
 
 ## Configuración
 

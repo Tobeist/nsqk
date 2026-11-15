@@ -49,6 +49,7 @@ import {
 } from "@/lib/contracts";
 import { evidenceLabel, formatNumber, signed, uncertainEvidence } from "@/lib/format";
 import { getSignificance } from "@/lib/significance";
+import { getSourceLinks } from "@/lib/source-links";
 import {
   annualIndexId,
   createRealAnalysis,
@@ -68,6 +69,7 @@ import { createMapLayer, getMapLimit } from "@/lib/map-layer";
 import { RegionMap } from "./region-map";
 import { getStateNames } from "@/lib/geography";
 import { TrendChart } from "./chart";
+import { ForecastPanel } from "./forecast-panel";
 import { Modal } from "./modal";
 const Globe = dynamic(() => import("./globe"), {
   ssr: false,
@@ -103,6 +105,7 @@ export function Explorer() {
   const [family, setFamily] = useState<Family>("Calor");
   const [mobileTab, setMobileTab] = useState<MobileTab>("explore");
   const [rightTab, setRightTab] = useState<"results" | "chat">("results");
+  const [temporalView, setTemporalView] = useState<"history" | "forecast">("history");
   const [loading, setLoading] = useState(false);
   const [analysisError, setAnalysisError] = useState("");
   const [selectionMessage, setSelectionMessage] = useState("");
@@ -797,6 +800,11 @@ export function Explorer() {
                   </div>
                 ) : stat && result ? (
                   <>
+                    <div className="temporal-view" role="group" aria-label="Vista temporal">
+                      <button aria-pressed={temporalView === "history"} onClick={() => setTemporalView("history")}>Historial</button>
+                      <button aria-pressed={temporalView === "forecast"} onClick={() => setTemporalView("forecast")}>Predicción</button>
+                    </div>
+                    {temporalView === "history" && <>
                     <div className="result-summary">
                       <div className="variable-eyebrow">
                         <span style={{ color: activeVariable.color }}>
@@ -804,18 +812,16 @@ export function Explorer() {
                         </span>
                       </div>
                       <h3>
-                        {inconclusive
-                          ? stat.evidence?.status === "pending" ? "La señal requiere contraste independiente." : stat.evidence?.status === "sensitive" ? "La señal depende del periodo." : "La dirección aún no es concluyente."
-                          : stat.slopePerDecade > 0
-                            ? "Una señal de aumento en la serie."
-                            : "Una señal de disminución en la serie."}
+                        {stat.evidence?.status === "pending"
+                          ? `${stat.slopePerDecade >= 0 ? "Aumento" : "Descenso"} estimado, con reservas.`
+                          : stat.evidence?.status === "sensitive"
+                            ? "La señal depende del periodo."
+                            : significance.significant === false
+                              ? `${stat.slopePerDecade >= 0 ? "Aumento" : "Descenso"} estimado; evidencia insuficiente.`
+                              : `La serie muestra un ${stat.slopePerDecade >= 0 ? "aumento" : "descenso"}.`}
                       </h3>
-                      <p>
-                        {stat.evidence?.reasons[0] ?? "Revisa la evidencia y los supuestos del ajuste."}{" "}
-                        <span>
-                          Resultado exploratorio; revisa fuente y método.
-                        </span>
-                      </p>
+                      {stat.evidence?.status === "pending" && <p>Un posible salto en la serie necesita comprobarse.</p>}
+                      {stat.evidence?.status === "sensitive" && <p>La dirección cambia al revisar otros tramos.</p>}
                     </div>
                     <div className="metric-row">
                       <div>
@@ -840,35 +846,15 @@ export function Explorer() {
                         {significance.significant === true ? "Significativo" : significance.significant === false ? "No significativo" : "No evaluable"}
                       </span>
                     </div>
-                    <button
-                      className="interval-row"
-                      onClick={() => openEvidence("interval")}
-                    >
-                      <span>Intervalo individual del 95 %</span>
-                      <strong>
-                        {signed(
-                          stat.confidenceInterval[0],
-                          activeId === "surface-moisture" ? 3 : 2,
-                        )}{" "}
-                        a{" "}
-                        {signed(
-                          stat.confidenceInterval[1],
-                          activeId === "surface-moisture" ? 3 : 2,
-                        )}{" "}
-                        <span>{result.unit}/década</span>
-                      </strong>
-                      <CircleHelp size={13} />
-                    </button>
                     {stat.evidence && (
                       <div className="audit-summary">
-                        <p><strong>{significance.label}</strong></p>
-                        <p>p de Holm <strong>{formatNumber(stat.evidence.pAdjusted!, 4)}</strong> · umbral 0.05 · {stat.evidence.familySize} pruebas</p>
-                        <p>{evidenceLabel(stat)}. {significance.description}</p>
-                        {stat.evidence.baseline && <p>Sin ENSO: {signed(stat.evidence.baseline.slopePerDecade, 3)} · Con ENSO: {signed(stat.slopePerDecade, 3)} {result.unit}/década</p>}
-                        <button className="text-button" onClick={() => openEvidence("method")}>Ver método y comprobaciones <ArrowUpRight size={12} /></button>
+                        <p>Prueba: <strong>p = {formatNumber(stat.evidence.pAdjusted!, 4)}</strong> · criterio &lt; 0.05</p>
+                        <button className="text-button" onClick={() => openEvidence("interval")}>Cómo se calculó <CircleHelp size={12} /></button>
                       </div>
                     )}
-                    <div className="chart-heading">
+                    </>}
+                    <SourceLinks variableId={activeId} includeEnso={temporalView === "history"} />
+                    {temporalView === "history" ? <><div className="chart-heading">
                       <h4>La historia, año a año</h4>
                       <button
                         className="icon-button"
@@ -878,7 +864,8 @@ export function Explorer() {
                         <Expand size={15} />
                       </button>
                     </div>
-                    <TrendChart result={result} />
+                    <TrendChart result={result} /></> : <ForecastPanel regionId={analysis.region.id} variableId={activeId} start={analysis.selection.start} end={analysis.selection.end} />}
+                    {temporalView === "history" && <>
                     <div className="result-actions">
                       <button
                         className="secondary-button"
@@ -897,6 +884,7 @@ export function Explorer() {
                         CSV
                       </button>
                     </div>
+                    </>}
                     <details className="method-preview">
                       <summary>
                         <ChevronRight size={13} />
@@ -1134,9 +1122,9 @@ function ChatView({
       <div className="chat-notice">
         <span className="demo-pill">Claude</span>
         <p>
-          {connection === "checking" ? "Comprobando disponibilidad…" : connection === "unconfigured" ? "Claude necesita configurarse en el servidor para responder." : connection === "unavailable" ? "No se pudo comprobar la disponibilidad de Claude. Recarga la página para reintentar." : "Claude recibe tus preguntas y los datos de esta selección. La significancia se calcula con Holm; la IA explica el resultado."}
-          {connection === "configured" && <small>Modelo: {model}. Preguntas y contexto se envían a Anthropic.</small>}
+          {connection === "checking" ? "Comprobando disponibilidad…" : connection === "unconfigured" ? "Claude necesita configurarse para responder." : connection === "unavailable" ? "Claude no está disponible. Recarga para reintentar." : "Pregunta por la gráfica o por su resultado."}
         </p>
+        {connection === "configured" && <details className="chat-privacy"><summary>Datos compartidos</summary><small>Preguntas y datos de esta selección se envían a Anthropic. Modelo: {model}.</small></details>}
       </div>
       {disabled ? (
         <div className="error-box">
@@ -1244,6 +1232,16 @@ function ExplanationText({ text }: { text: string }) {
     )}</p>
   ));
 }
+function SourceLinks({ variableId, includeEnso = true }: { variableId: VariableId; includeEnso?: boolean }) {
+  const links = getSourceLinks(variableId).slice(0, includeEnso ? 2 : 1);
+  if (!links.length) return null;
+  return <div className="result-source-links" aria-label="Fuentes del análisis">
+    <span>Fuentes</span>
+    {links.map((link) => <a key={link.href} href={link.href} title={link.description} target="_blank" rel="noreferrer">
+      {link.label}<ExternalLink size={11} />
+    </a>)}
+  </div>;
+}
 function Evidence({
   analysis,
   variableId,
@@ -1300,6 +1298,7 @@ function Evidence({
           <dt>Fuente utilizada</dt>
           <dd>
             {r.source}
+            <SourceLinks variableId={variableId} />
             <small>
               Procesamiento local · actualizado {analysis.provenance.updatedAt}
             </small>
