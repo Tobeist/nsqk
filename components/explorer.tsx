@@ -9,6 +9,7 @@ import {
   ArrowUpRight,
   Check,
   ChevronDown,
+  ChevronRight,
   CircleHelp,
   Compass,
   Droplets,
@@ -21,9 +22,10 @@ import {
   MapPin,
   MessageCircle,
   Orbit,
-  SlidersHorizontal,
+  Plus,
   RotateCcw,
   Send,
+  ShieldCheck,
   Thermometer,
   TrendingUp,
   X,
@@ -45,7 +47,7 @@ import {
   type ChatMessage,
   type Selection,
 } from "@/lib/contracts";
-import { evidenceLabel, formatNumber, signed } from "@/lib/format";
+import { evidenceLabel, formatNumber, signed, uncertainEvidence } from "@/lib/format";
 import { getSignificance } from "@/lib/significance";
 import { getSourceLinks } from "@/lib/source-links";
 import {
@@ -65,13 +67,9 @@ import {
 } from "@/lib/adapters";
 import { createMapLayer, getMapLimit } from "@/lib/map-layer";
 import { RegionMap } from "./region-map";
+import { getStateNames } from "@/lib/geography";
 import { TrendChart } from "./chart";
-const ForecastPanel = dynamic(
-  () => import("./forecast-panel").then((m) => m.ForecastPanel),
-  {
-    loading: () => <p className="experiment-context">Cargando experimento…</p>,
-  },
-);
+import { ForecastPanel } from "./forecast-panel";
 import { Modal } from "./modal";
 const Globe = dynamic(() => import("./globe"), {
   ssr: false,
@@ -82,16 +80,12 @@ const Globe = dynamic(() => import("./globe"), {
     </div>
   ),
 });
-const families: Family[] = ["Calor", "Lluvia"];
-const initialSelection: Selection = {
-  ...realDefaultSelection,
-  variables: ["temperature"],
-};
+const families: Family[] = ["Calor", "Lluvia", "Suelo"];
 const FamilyIcon = { Calor: Thermometer, Lluvia: Droplets, Suelo: Leaf };
 const suggestions = [
-  "¿Qué cambió aquí?",
-  "¿Qué tan clara es la evidencia?",
-  "¿Qué debo tomar en cuenta?",
+  "¿Qué significa esta pendiente?",
+  "¿Es estadísticamente significativo?",
+  "¿Qué no puedo concluir?",
 ];
 const availableYears = Array.from(
   { length: lastDataYear - firstDataYear + 1 },
@@ -99,31 +93,30 @@ const availableYears = Array.from(
 );
 type MobileTab = "explore" | "results" | "chat";
 export function Explorer() {
-  const [draft, setDraft] = useState<Selection>(initialSelection);
+  const [draft, setDraft] = useState<Selection>(realDefaultSelection);
   const [analysis, setAnalysis] = useState<Analysis | null>(() =>
-    createRealAnalysis(initialSelection),
+    createRealAnalysis(realDefaultSelection),
   );
   const [history, setHistory] = useState<Analysis[]>(() => [
-    createRealAnalysis(initialSelection),
+    createRealAnalysis(realDefaultSelection),
   ]);
   const [activeId, setActiveId] = useState<VariableId>("temperature");
   const [mapView, setMapView] = useState<"regional" | "globe">("regional");
   const [family, setFamily] = useState<Family>("Calor");
-  const [mobileTab, setMobileTab] = useState<MobileTab>("results");
+  const [mobileTab, setMobileTab] = useState<MobileTab>("explore");
   const [rightTab, setRightTab] = useState<"results" | "chat">("results");
+  const [temporalView, setTemporalView] = useState<"history" | "forecast">("history");
   const [loading, setLoading] = useState(false);
   const [analysisError, setAnalysisError] = useState("");
   const [selectionMessage, setSelectionMessage] = useState("");
   const [modal, setModal] = useState<
-    "evidence" | "chart" | "compare" | "forecast" | "about" | null
+    "evidence" | "chart" | "compare" | "about" | null
   >(null);
   const [evidenceFocus, setEvidenceFocus] = useState("");
   const [threads, setThreads] = useState<Record<string, ChatMessage[]>>({});
   const [chatBusy, setChatBusy] = useState<Record<string, boolean>>({});
   const [chatErrors, setChatErrors] = useState<Record<string, string>>({});
-  const [claudeConnection, setClaudeConnection] = useState<
-    "checking" | "configured" | "unconfigured" | "unavailable"
-  >("checking");
+  const [claudeConnection, setClaudeConnection] = useState<"checking" | "configured" | "unconfigured" | "unavailable">("checking");
   const [claudeModel, setClaudeModel] = useState("");
   useEffect(() => {
     const controller = new AbortController();
@@ -134,17 +127,14 @@ export function Explorer() {
         setClaudeConnection(data.configured ? "configured" : "unconfigured");
         setClaudeModel(typeof data.model === "string" ? data.model : "");
       })
-      .catch(() => {
-        if (!controller.signal.aborted) setClaudeConnection("unavailable");
-      });
+      .catch(() => { if (!controller.signal.aborted) setClaudeConnection("unavailable"); });
     return () => controller.abort();
   }, []);
   const resultRef = useRef<HTMLDivElement>(null);
-  const studyRef = useRef<HTMLDivElement>(null);
-  const settingsRef = useRef<HTMLDetailsElement>(null);
   const regionRef = useRef<HTMLDivElement>(null);
   const requestRef = useRef<AbortController | null>(null);
   const region = getRegion(draft.regionId);
+  const stateNames = getStateNames(draft.regionId);
   const result = analysis?.results.find((r) => r.variableId === activeId);
   const activeVariable = getVariable(activeId);
   const dirty = analysis
@@ -178,14 +168,9 @@ export function Explorer() {
       );
       return;
     }
-    if (
-      id === annualIndexId &&
-      !draft.variables.includes(id) &&
-      draft.end - draft.start + 1 < minimumAnnualIndexYears
-    ) {
-      setSelectionMessage(
-        "RX5day anual de POWER requiere al menos 20 años. Amplía el periodo para seleccionarlo.",
-      );
+    if (id === annualIndexId && !draft.variables.includes(id) &&
+        draft.end - draft.start + 1 < minimumAnnualIndexYears) {
+      setSelectionMessage("RX5day anual de POWER requiere al menos 20 años. Amplía el periodo para seleccionarlo.");
       return;
     }
     setSelectionMessage("");
@@ -215,15 +200,12 @@ export function Explorer() {
         (id) => !analysis?.selection.variables.includes(id),
       );
       setActiveId(
-        newlyAdded ??
-          (snapshot.variables.includes(activeId)
-            ? activeId
-            : snapshot.variables[0]),
+        newlyAdded ?? (snapshot.variables.includes(activeId)
+          ? activeId
+          : snapshot.variables[0]),
       );
       setRightTab("results");
       setMobileTab("results");
-      if (settingsRef.current) settingsRef.current.open = false;
-      studyRef.current?.scrollTo({ top: 0 });
       scrollToSection();
       if (
         resultRef.current &&
@@ -267,16 +249,8 @@ export function Explorer() {
     setChatBusy((b) => ({ ...b, [key]: true }));
     setChatErrors((e) => ({ ...e, [key]: "" }));
     try {
-      const previous =
-        retry && messages.at(-1)?.role === "user"
-          ? messages.slice(0, -1)
-          : messages;
-      const response = await claudeChatAdapter.reply(
-        question,
-        context,
-        undefined,
-        previous,
-      );
+      const previous = retry && messages.at(-1)?.role === "user" ? messages.slice(0, -1) : messages;
+      const response = await claudeChatAdapter.reply(question, context, undefined, previous);
       setThreads((t) => ({
         ...t,
         [key]: [
@@ -302,12 +276,12 @@ export function Explorer() {
   const switchRight = (tab: "results" | "chat") => {
     setRightTab(tab);
     setMobileTab(tab);
-    resultRef.current?.scrollTo({ top: 0 });
     scrollToSection();
   };
   const mapLayer = createMapLayer(history, analysis, activeId);
   const mapLimit = mapLayer[0]?.limit ?? getMapLimit(activeId);
   const stat = result?.statistics;
+  const inconclusive = stat && uncertainEvidence(stat);
   const significance = getSignificance(result?.evidence);
   return (
     <div className="app-shell">
@@ -363,293 +337,172 @@ export function Explorer() {
           onClick={() => switchRight("chat")}
         >
           <MessageCircle size={16} />
-          Preguntar
+          Chat
         </button>
       </div>
       <main className="workspace">
         <aside
-          className={`study-panel ${mobileTab === "explore" ? "mobile-visible" : ""}`}
-          aria-label="Elegir lugar y datos"
+          className={`filters-panel ${mobileTab === "explore" ? "mobile-visible" : ""}`}
+          aria-label="Configurar análisis"
         >
-          <div className="study-scroll" ref={studyRef}>
-            <section className="earth-panel" aria-label="Área de estudio">
-              <h1>Área de estudio</h1>
-              <div className="region-selector" ref={regionRef}>
-                <div className="region-selector-label">
-                  <MapPin size={14} />
-                  <label htmlFor="region">Lugar de estudio</label>
-                  <span>{regions.length} áreas disponibles</span>
-                </div>
-                <div className="region-select-row">
-                  <span className="country-code">{region.countryCode}</span>
-                  <select
-                    id="region"
-                    value={draft.regionId}
-                    onChange={(e) => chooseRegion(e.target.value)}
+          <div className="filter-scroll">
+            <h1>Configurar análisis</h1>
+            <p className="panel-intro">Variables y periodo de estudio.</p>
+            <div className="section-title">
+              <h2>Variables ambientales</h2>
+              <span>{draft.variables.length}/3</span>
+            </div>
+            <div className="family-tabs" aria-label="Familia de variables">
+              {families.map((f) => {
+                const Icon = FamilyIcon[f];
+                return (
+                  <button
+                    key={f}
+                    className={family === f ? "selected" : ""}
+                    aria-pressed={family === f}
+                    onClick={() => setFamily(f)}
                   >
-                    {regions.map((r) => (
-                      <option key={r.id} value={r.id}>
-                        {r.name}
+                    <Icon size={15} />
+                    {f}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="variable-list">
+              {variables
+                .filter((v) => v.family === family && v.available)
+                .map((v) => (
+                  <VariableChoice
+                    key={v.id}
+                    variable={v}
+                    selected={draft.variables.includes(v.id)}
+                    onToggle={() => toggleVariable(v.id)}
+                  />
+                ))}
+              <details className="pending-variables">
+                <summary>
+                  <span>
+                    Ver{" "}
+                    {
+                      variables.filter(
+                        (v) => v.family === family && !v.available,
+                      ).length
+                    }{" "}
+                    variables por integrar
+                  </span>
+                  <ChevronDown size={13} />
+                </summary>
+                <div>
+                  {variables
+                    .filter((v) => v.family === family && !v.available)
+                    .map((v) => (
+                      <VariableChoice
+                        key={v.id}
+                        variable={v}
+                        selected={false}
+                        onToggle={() => {}}
+                      />
+                    ))}
+                </div>
+              </details>
+            </div>
+            {selectionMessage && (
+              <p role="status" className="field-message">
+                {selectionMessage}
+              </p>
+            )}
+            <div className="selected-summary">
+              {draft.variables.length > 0 ? (
+                draft.variables.map((id) => (
+                  <button
+                    key={id}
+                    onClick={() => toggleVariable(id)}
+                    title={`Quitar ${getVariable(id).name}`}
+                  >
+                    <span style={{ background: getVariable(id).color }} />
+                    {getVariable(id).short}
+                    <X size={11} />
+                  </button>
+                ))
+              ) : (
+                <span>Selecciona al menos una variable.</span>
+              )}
+            </div>
+            <div className="period-section">
+              <div className="section-title">
+                <h2>Periodo de estudio</h2>
+                <span className="quiet-icon">
+                  <Layers3 size={14} />
+                </span>
+              </div>
+              <div className="year-fields">
+                <label>
+                  Desde
+                  <select
+                    aria-label="Año inicial"
+                    value={draft.start}
+                    onChange={(e) => {
+                      setDraft((d) => ({ ...d, start: Number(e.target.value) }));
+                      setSelectionMessage("");
+                    }}
+                  >
+                    {availableYears.map((year) => (
+                      <option
+                        key={year}
+                        value={year}
+                        disabled={year > draft.end - minimumYearsForVariables(draft.variables) + 1}
+                      >
+                        {year}
                       </option>
                     ))}
                   </select>
-                  <ChevronDown size={17} />
-                </div>
-                <div className="region-detail">
-                  <span>{region.extent}</span>
-                  <span>Caja de 2° × 2°</span>
-                </div>
+                  <ChevronDown size={13} />
+                </label>
+                <span>—</span>
+                <label>
+                  Hasta
+                  <select
+                    aria-label="Año final"
+                    value={draft.end}
+                    onChange={(e) => {
+                      setDraft((d) => ({ ...d, end: Number(e.target.value) }));
+                      setSelectionMessage("");
+                    }}
+                  >
+                    {availableYears.map((year) => (
+                      <option
+                        key={year}
+                        value={year}
+                        disabled={year < draft.start + minimumYearsForVariables(draft.variables) - 1}
+                      >
+                        {year}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown size={13} />
+                </label>
               </div>
-              <details className="selection-settings" ref={settingsRef}>
-                <summary>
-                  <SlidersHorizontal size={16} />
-                  <span>
-                    Cambiar datos
-                    <small>
-                      {draft.variables.length === 1
-                        ? getVariable(draft.variables[0]).short
-                        : `${draft.variables.length} variables`}{" "}
-                      · {draft.start}–{draft.end}
-                    </small>
-                  </span>
-                  <ChevronDown size={16} />
-                </summary>
-                <div className="filters-panel">
-                  <div className="filter-scroll">
-                    <div className="section-title">
-                      <h2>Variables ambientales</h2>
-                      <span>{draft.variables.length}/3</span>
-                    </div>
-                    <div
-                      className="family-tabs"
-                      aria-label="Familia de variables"
-                    >
-                      {families.map((f) => {
-                        const Icon = FamilyIcon[f];
-                        return (
-                          <button
-                            key={f}
-                            className={family === f ? "selected" : ""}
-                            aria-pressed={family === f}
-                            onClick={() => setFamily(f)}
-                          >
-                            <Icon size={15} />
-                            {f === "Calor" ? "Temperatura" : f}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <div className="variable-list">
-                      {variables
-                        .filter((v) => v.family === family && v.available)
-                        .map((v) => (
-                          <VariableChoice
-                            key={v.id}
-                            variable={v}
-                            selected={draft.variables.includes(v.id)}
-                            onToggle={() => toggleVariable(v.id)}
-                          />
-                        ))}
-                      <details className="pending-variables">
-                        <summary>
-                          <span>
-                            Ver{" "}
-                            {
-                              variables.filter(
-                                (v) => v.family === family && !v.available,
-                              ).length
-                            }{" "}
-                            variables por integrar
-                          </span>
-                          <ChevronDown size={13} />
-                        </summary>
-                        <div>
-                          {variables
-                            .filter((v) => v.family === family && !v.available)
-                            .map((v) => (
-                              <VariableChoice
-                                key={v.id}
-                                variable={v}
-                                selected={false}
-                                onToggle={() => {}}
-                              />
-                            ))}
-                        </div>
-                      </details>
-                    </div>
-                    {selectionMessage && (
-                      <p role="status" className="field-message">
-                        {selectionMessage}
-                      </p>
-                    )}
-                    <div className="selected-summary">
-                      {draft.variables.length > 0 ? (
-                        draft.variables.map((id) => (
-                          <button
-                            key={id}
-                            onClick={() => toggleVariable(id)}
-                            title={`Quitar ${getVariable(id).name}`}
-                          >
-                            <span
-                              style={{ background: getVariable(id).color }}
-                            />
-                            {getVariable(id).short}
-                            <X size={11} />
-                          </button>
-                        ))
-                      ) : (
-                        <span>Selecciona al menos una variable.</span>
-                      )}
-                    </div>
-                    <div className="period-section">
-                      <div className="section-title">
-                        <h2>Periodo de estudio</h2>
-                        <span className="quiet-icon">
-                          <Layers3 size={14} />
-                        </span>
-                      </div>
-                      <div className="year-fields">
-                        <label>
-                          Desde
-                          <select
-                            aria-label="Año inicial"
-                            value={draft.start}
-                            onChange={(e) => {
-                              setDraft((d) => ({
-                                ...d,
-                                start: Number(e.target.value),
-                              }));
-                              setSelectionMessage("");
-                            }}
-                          >
-                            {availableYears.map((year) => (
-                              <option
-                                key={year}
-                                value={year}
-                                disabled={
-                                  year >
-                                  draft.end -
-                                    minimumYearsForVariables(draft.variables) +
-                                    1
-                                }
-                              >
-                                {year}
-                              </option>
-                            ))}
-                          </select>
-                          <ChevronDown size={13} />
-                        </label>
-                        <span>—</span>
-                        <label>
-                          Hasta
-                          <select
-                            aria-label="Año final"
-                            value={draft.end}
-                            onChange={(e) => {
-                              setDraft((d) => ({
-                                ...d,
-                                end: Number(e.target.value),
-                              }));
-                              setSelectionMessage("");
-                            }}
-                          >
-                            {availableYears.map((year) => (
-                              <option
-                                key={year}
-                                value={year}
-                                disabled={
-                                  year <
-                                  draft.start +
-                                    minimumYearsForVariables(draft.variables) -
-                                    1
-                                }
-                              >
-                                {year}
-                              </option>
-                            ))}
-                          </select>
-                          <ChevronDown size={13} />
-                        </label>
-                      </div>
-                      <div className="period-track">
-                        <span
-                          style={{
-                            left: `${((draft.start - firstDataYear) / availableYears.length) * 100}%`,
-                            width: `${((draft.end - draft.start + 1) / availableYears.length) * 100}%`,
-                          }}
-                        />
-                      </div>
-                      <p className="period-note">
-                        {draft.end >= draft.start
-                          ? draft.end - draft.start + 1
-                          : 0}{" "}
-                        años · mínimo{" "}
-                        {minimumYearsForVariables(draft.variables)} · datos{" "}
-                        {firstDataYear}–{lastDataYear}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </details>
-              {mapView === "regional" ? (
-                <RegionMap
-                  region={region}
-                  value={
-                    dirty
-                      ? undefined
-                      : mapLayer.find((entry) => entry.regionId === region.id)
-                  }
-                  variable={activeVariable}
+              <div className="period-track">
+                <span
+                  style={{
+                    left: `${((draft.start - firstDataYear) / availableYears.length) * 100}%`,
+                    width: `${((draft.end - draft.start + 1) / availableYears.length) * 100}%`,
+                  }}
                 />
-              ) : (
-                <Globe
-                  regionId={draft.regionId}
-                  onSelect={chooseRegion}
-                  layer={mapLayer}
-                />
-              )}
-              <p className="area-scope">
-                Sólo se analiza el recuadro; los estados sirven para ubicarlo.
+              </div>
+              <p className="period-note">
+                {draft.end >= draft.start ? draft.end - draft.start + 1 : 0}{" "}
+                años · mínimo {minimumYearsForVariables(draft.variables)} · datos {firstDataYear}–
+                {lastDataYear}
               </p>
-              <details className="map-scale-details">
-                <summary>
-                  Ver escala de colores <ChevronDown size={14} />
-                </summary>
-                <div className="map-legend" aria-label="Leyenda del mapa">
-                  <div>
-                    <span>Cambio por década · {activeVariable.short}</span>
-                    <strong>{activeVariable.unit}/década</strong>
-                  </div>
-                  <div className="map-color-ramp" />
-                  <div className="map-scale-labels">
-                    <span>
-                      {signed(
-                        -mapLimit,
-                        activeId === "surface-moisture" ? 3 : 1,
-                      )}
-                    </span>
-                    <span>0</span>
-                    <span>
-                      {signed(
-                        mapLimit,
-                        activeId === "surface-moisture" ? 3 : 1,
-                      )}
-                    </span>
-                  </div>
-                  <p>
-                    {analysis
-                      ? `${analysis.selection.start}–${analysis.selection.end} · ${mapLayer.filter((v) => v.state === "analyzed").length}/${regions.length} cajas analizadas`
-                      : "Analiza una selección para colorear su área."}
-                    <span>Datos NASA</span>
-                  </p>
-                  <div className="map-certainty">
-                    <i />
-                    Sin analizar / sin datos <span className="dash-swatch" />
-                    Evidencia no concluyente
-                  </div>
-                </div>
-              </details>
-            </section>
+            </div>
+            <div className="scope-note">
+              <ShieldCheck size={16} />
+              <p>
+                <strong>Una lectura con contexto.</strong> Magnitud e
+                incertidumbre, sin atribución causal ni pronósticos.
+              </p>
+            </div>
           </div>
           <div className="filter-bottom">
             <div className={`draft-status ${dirty ? "pending" : ""}`}>
@@ -679,9 +532,119 @@ export function Explorer() {
                 <button onClick={analyze}>Reintentar</button>
               </div>
             )}
-            <span className="local-note">Datos NASA · 1992–2024</span>
+            <span className="local-note">
+              Tendencia e intervalo recalculados con los datos elegidos
+            </span>
           </div>
         </aside>
+        <section
+          className={`earth-panel ${mobileTab === "explore" ? "mobile-visible" : ""}`}
+          aria-label="Explorador geográfico"
+        >
+          <div className="earth-heading">
+            <div>
+              <h2>Área de estudio</h2>
+              <p>Una caja que cruza {stateNames.length} {stateNames.length === 1 ? "estado" : "estados"}.</p>
+            </div>
+            <div className="map-view-switch" aria-label="Vista del mapa">
+              <button
+                aria-pressed={mapView === "regional"}
+                onClick={() => setMapView("regional")}
+              >
+                Estados
+              </button>
+              <button
+                aria-pressed={mapView === "globe"}
+                onClick={() => setMapView("globe")}
+              >
+                Planeta 3D
+              </button>
+            </div>
+          </div>
+          {mapView === "regional" ? (
+            <RegionMap region={region}
+              value={dirty ? undefined : mapLayer.find((entry) => entry.regionId === region.id)}
+              variable={activeVariable} />
+          ) : (
+            <Globe
+              regionId={draft.regionId}
+              onSelect={chooseRegion}
+              layer={mapLayer}
+            />
+          )}
+          <div className="states-context">
+            <div>
+              {stateNames.map((name) => (
+                <span key={name}>{name === "Texas" ? "Texas (EE. UU.)" : name}</span>
+              ))}
+            </div>
+            <p>
+              El color de la tendencia corresponde sólo al recuadro seleccionado. Sin resultados por estado.
+            </p>
+          </div>
+          <div className="map-legend" aria-label="Leyenda del mapa">
+            <div>
+              <span>Cambio por década · {activeVariable.short}</span>
+              <strong>{activeVariable.unit}/década</strong>
+            </div>
+            <div className="map-color-ramp" />
+            <div className="map-scale-labels">
+              <span>
+                {signed(-mapLimit, activeId === "surface-moisture" ? 3 : 1)}
+              </span>
+              <span>0</span>
+              <span>
+                {signed(mapLimit, activeId === "surface-moisture" ? 3 : 1)}
+              </span>
+            </div>
+            <p>
+              {analysis
+                ? `${analysis.selection.start}–${analysis.selection.end} · ${mapLayer.filter((v) => v.state === "analyzed").length}/${regions.length} cajas analizadas`
+                : "Analiza una selección para colorear su área."}
+              <span>Datos NASA</span>
+            </p>
+            <div className="map-certainty">
+              <i />
+              Sin analizar / sin datos <span className="dash-swatch" />
+              Evidencia no concluyente
+            </div>
+          </div>
+          <div className="region-selector" ref={regionRef}>
+            <div className="region-selector-label">
+              <MapPin size={14} />
+              <label htmlFor="region">REGIÓN DE ESTUDIO</label>
+              <span>{regions.length} cajas con datos</span>
+            </div>
+            <div className="region-select-row">
+              <span className="country-code">{region.countryCode}</span>
+              <select
+                id="region"
+                value={draft.regionId}
+                onChange={(e) => chooseRegion(e.target.value)}
+              >
+                {regions.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.name}
+                    </option>
+                  ))}
+              </select>
+              <ChevronDown size={17} />
+            </div>
+            <div className="region-detail">
+              <span>{region.extent}</span>
+              <span>Caja de 2° × 2°</span>
+            </div>
+          </div>
+          <div className="coverage">
+            <div>
+              <i className="coverage-on" />
+              México
+            </div>
+            <p>
+              Las tres cajas tienen datos procesados. Cada una representa sólo su recuadro.
+            </p>
+          </div>
+        </section>
         <aside
           id="analysis-panel"
           className={`analysis-panel ${mobileTab !== "explore" ? "mobile-visible" : ""}`}
@@ -694,15 +657,29 @@ export function Explorer() {
               onClick={() => switchRight("results")}
             >
               <TrendingUp size={15} />
-              Resultado
+              Análisis
             </button>
             <button
               className={rightTab === "chat" ? "active" : ""}
               onClick={() => switchRight("chat")}
             >
               <MessageCircle size={15} />
-              Preguntar a la IA
+              Conversación
               {messages.length > 0 && <span>{messages.length}</span>}
+            </button>
+            <button
+              className="icon-button new-analysis"
+              title="Limpiar análisis visible"
+              aria-label="Limpiar análisis visible"
+              onClick={() => {
+                requestRef.current?.abort();
+                setLoading(false);
+                setAnalysis(null);
+                setRightTab("results");
+                setMobileTab("results");
+              }}
+            >
+              <Plus size={16} />
             </button>
           </div>
           {dirty && analysis && (
@@ -723,7 +700,11 @@ export function Explorer() {
                 <div className="empty-orbit">
                   <Orbit size={40} strokeWidth={1} />
                 </div>
-                <h2>Explora un cambio ambiental.</h2>
+                <span className="section-kicker">TU SIGUIENTE HALLAZGO</span>
+                <h2>
+                  Haz tu primera pregunta
+                  <br />a los datos.
+                </h2>
                 <p>
                   Elige una región, al menos una variable y un periodo. Después,
                   pulsa Analizar.
@@ -732,7 +713,6 @@ export function Explorer() {
                   className="text-button"
                   onClick={() => {
                     setMobileTab("explore");
-                    if (settingsRef.current) settingsRef.current.open = true;
                     scrollToSection();
                   }}
                 >
@@ -758,27 +738,33 @@ export function Explorer() {
                     {analysis.selection.end - analysis.selection.start + 1} años
                   </p>
                 </div>
+                <div
+                  className="result-variable-tabs"
+                  aria-label="Variable activa del resultado"
+                >
+                  {analysis.results.map((r) => (
+                    <button
+                      key={r.variableId}
+                      aria-pressed={activeId === r.variableId}
+                      onClick={() => setActiveId(r.variableId)}
+                      className={activeId === r.variableId ? "active" : ""}
+                    >
+                      <i
+                        style={{ background: getVariable(r.variableId).color }}
+                      />
+                      {getVariable(r.variableId).short}
+                    </button>
+                  ))}
+                </div>
                 {analysis.results.length > 1 && (
-                  <div
-                    className="result-variable-tabs"
-                    aria-label="Variable activa del resultado"
+                  <button
+                    className="compare-series-button"
+                    onClick={() => setModal("compare")}
                   >
-                    {analysis.results.map((r) => (
-                      <button
-                        key={r.variableId}
-                        aria-pressed={activeId === r.variableId}
-                        onClick={() => setActiveId(r.variableId)}
-                        className={activeId === r.variableId ? "active" : ""}
-                      >
-                        <i
-                          style={{
-                            background: getVariable(r.variableId).color,
-                          }}
-                        />
-                        {getVariable(r.variableId).short}
-                      </button>
-                    ))}
-                  </div>
+                    <Layers3 size={13} />
+                    Comparar {analysis.results.length} series juntas
+                    <Expand size={12} />
+                  </button>
                 )}
                 {rightTab === "chat" ? (
                   <ChatView
@@ -786,9 +772,7 @@ export function Explorer() {
                     messages={messages}
                     busy={chatBusy[contextKey]}
                     error={chatErrors[contextKey]}
-                    disabled={
-                      !result?.statistics || claudeConnection !== "configured"
-                    }
+                    disabled={!result?.statistics || claudeConnection !== "configured"}
                     connection={claudeConnection}
                     model={claudeModel}
                     onSend={send}
@@ -797,20 +781,14 @@ export function Explorer() {
                       const last = messages.findLast((m) => m.role === "user");
                       if (last) send(last.text, true);
                     }}
-                    context={`${activeVariable.name} · ${analysis.region.name} · ${analysis.selection.start}–${analysis.selection.end}`}
+                    context={`${activeVariable.short} · ${analysis.selection.start}–${analysis.selection.end}`}
                   />
                 ) : result && result.status !== "ready" ? (
                   <div className="empty-state no-data">
                     <Layers3 size={35} />
-                    <h3>
-                      {result.status === "not-evaluable"
-                        ? "No se pudo validar este ajuste."
-                        : "Esta combinación aún no tiene datos."}
-                    </h3>
+                    <h3>{result.status === "not-evaluable" ? "No se pudo validar este ajuste." : "Esta combinación aún no tiene datos."}</h3>
                     <p>
-                      {result.status === "not-evaluable"
-                        ? result.evidence?.reasons.join(" ")
-                        : "Esta variable todavía no tiene una serie procesada para la caja seleccionada."}
+                      {result.status === "not-evaluable" ? result.evidence?.reasons.join(" ") : "Esta variable todavía no tiene una serie procesada para la caja seleccionada."}
                     </p>
                     <button
                       className="secondary-button"
@@ -822,120 +800,130 @@ export function Explorer() {
                   </div>
                 ) : stat && result ? (
                   <>
-                    <section
-                      className="reading-summary"
-                      aria-label="Cambio estimado y evidencia"
-                    >
-                      <h3>{activeVariable.name}</h3>
-                      <div className="reading-metrics">
-                        <div className="change-value">
-                          <span>Cambio cada 10 años</span>
-                          <strong style={{ color: activeVariable.color }}>
-                            {signed(
-                              stat.slopePerDecade,
-                              activeId === "surface-moisture" ? 3 : 2,
-                            )}{" "}
-                            <small>{result.unit}</small>
-                          </strong>
-                        </div>
-                        <div className="change-evidence">
-                          <span>¿Es significativo?</span>
-                          <strong
-                            className={
-                              significance.significant
-                                ? "is-significant"
-                                : "is-inconclusive"
-                            }
-                          >
-                            {significance.significant === true
-                              ? "Sí"
-                              : significance.significant === false
-                                ? "No"
-                                : "Sin evaluar"}
-                          </strong>
-                          <p>
-                            {stat.evidence?.status === "pending"
-                              ? "Un posible salto en la serie aún necesita comprobarse."
-                              : stat.evidence?.status === "sensitive"
-                                ? "La estimación cambia al elegir otros años."
-                                : significance.significant === false
-                                  ? "La evidencia no alcanza para confirmar este cambio."
-                                  : "El cambio supera la prueba estadística."}
-                          </p>
+                    <div className="temporal-view" role="group" aria-label="Vista temporal">
+                      <button aria-pressed={temporalView === "history"} onClick={() => setTemporalView("history")}>Historial</button>
+                      <button aria-pressed={temporalView === "forecast"} onClick={() => setTemporalView("forecast")}>Predicción</button>
+                    </div>
+                    {temporalView === "history" && <>
+                    <div className="result-summary">
+                      <div className="variable-eyebrow">
+                        <span style={{ color: activeVariable.color }}>
+                          {activeVariable.name}
+                        </span>
+                      </div>
+                      <h3>
+                        {stat.evidence?.status === "pending"
+                          ? `${stat.slopePerDecade >= 0 ? "Aumento" : "Descenso"} estimado, con reservas.`
+                          : stat.evidence?.status === "sensitive"
+                            ? "La señal depende del periodo."
+                            : significance.significant === false
+                              ? `${stat.slopePerDecade >= 0 ? "Aumento" : "Descenso"} estimado; evidencia insuficiente.`
+                              : `La serie muestra un ${stat.slopePerDecade >= 0 ? "aumento" : "descenso"}.`}
+                      </h3>
+                      {stat.evidence?.status === "pending" && <p>Un posible salto en la serie necesita comprobarse.</p>}
+                      {stat.evidence?.status === "sensitive" && <p>La dirección cambia al revisar otros tramos.</p>}
+                    </div>
+                    <div className="metric-row">
+                      <div>
+                        <span className="metric-label">CAMBIO POR DÉCADA</span>
+                        <div
+                          className="main-metric"
+                          style={{ color: activeVariable.color }}
+                        >
+                          {signed(
+                            stat.slopePerDecade,
+                            activeId === "surface-moisture" ? 3 : 2,
+                          )}
+                          <span>{result.unit}</span>
                         </div>
                       </div>
-                    </section>
-                    <div className="chart-heading">
-                      <h4>Evolución de los datos</h4>
+                      <span
+                        className={`evidence-status ${inconclusive ? "uncertain" : ""}`}
+                      >
+                        <span>
+                          {inconclusive ? "±" : <TrendingUp size={12} />}
+                        </span>
+                        {significance.significant === true ? "Significativo" : significance.significant === false ? "No significativo" : "No evaluable"}
+                      </span>
+                    </div>
+                    {stat.evidence && (
+                      <div className="audit-summary">
+                        <p>Prueba: <strong>p = {formatNumber(stat.evidence.pAdjusted!, 4)}</strong> · criterio &lt; 0.05</p>
+                        <button className="text-button" onClick={() => openEvidence("interval")}>Cómo se calculó <CircleHelp size={12} /></button>
+                      </div>
+                    )}
+                    </>}
+                    <SourceLinks variableId={activeId} includeEnso={temporalView === "history"} />
+                    {temporalView === "history" ? <><div className="chart-heading">
+                      <h4>La historia, año a año</h4>
                       <button
                         className="icon-button"
                         aria-label="Ampliar gráfica"
                         onClick={() => setModal("chart")}
                       >
-                        <Expand size={16} />
+                        <Expand size={15} />
                       </button>
                     </div>
-                    <TrendChart result={result} overview />
-                    <div className="reading-actions">
+                    <TrendChart result={result} /></> : <ForecastPanel regionId={analysis.region.id} variableId={activeId} start={analysis.selection.start} end={analysis.selection.end} />}
+                    {temporalView === "history" && <>
+                    <div className="result-actions">
                       <button
                         className="secondary-button"
-                        onClick={() => openEvidence("interval")}
+                        onClick={() => openEvidence()}
                       >
-                        <FileText size={15} /> Datos y método
+                        <FileText size={14} />
+                        Ver evidencia
+                        <ArrowUpRight size={13} />
                       </button>
                       <button
-                        className="text-button"
+                        className="download-button"
+                        onClick={download}
+                        aria-label="Descargar CSV del análisis visible"
+                      >
+                        <ArrowDownToLine size={15} />
+                        CSV
+                      </button>
+                    </div>
+                    </>}
+                    <details className="method-preview">
+                      <summary>
+                        <ChevronRight size={13} />
+                        Cómo leer este resultado
+                      </summary>
+                      <p>
+                        {evidenceLabel(stat)} bajo los supuestos del ajuste.
+                        La pendiente describe dirección y magnitud;
+                        el intervalo describe incertidumbre. No explica causas.{" "}
+                        {result.method.description}
+                      </p>
+                    </details>
+                    <div className="chat-invitation">
+                      <div className="chat-invitation-title">
+                        <MessageCircle size={18} />
+                        <h3>Pregunta sobre este análisis</h3>
+                        <span>DATOS NASA</span>
+                      </div>
+                      <p>Entiende la señal. Revisa sus límites.</p>
+                      <button
+                        onClick={() => {
+                          switchRight("chat");
+                          send(suggestions[0]);
+                        }}
+                      >
+                        {suggestions[0]}
+                        <ArrowUpRight size={14} />
+                      </button>
+                      <button
+                        className="chat-open"
                         onClick={() => switchRight("chat")}
                       >
-                        <MessageCircle size={15} /> Explicar este resultado
+                        Abrir conversación
+                        <ArrowRight size={14} />
                       </button>
-                      <SourceLinks variableId={activeId} />
+                      <span className="chat-disclaimer">
+                        {claudeConnection === "configured" ? "Claude · contexto del análisis visible" : claudeConnection === "checking" ? "Comprobando disponibilidad de Claude…" : "Claude no está disponible · revisa la conversación"}
+                      </span>
                     </div>
-                    <details className="advanced-tools">
-                      <summary>
-                        Herramientas avanzadas <ChevronDown size={15} />
-                      </summary>
-                      <div>
-                        <button onClick={() => setModal("forecast")}>
-                          Predicción experimental <ArrowUpRight size={14} />
-                        </button>
-                        {analysis.results.length > 1 && (
-                          <button onClick={() => setModal("compare")}>
-                            Comparar {analysis.results.length} variables{" "}
-                            <Layers3 size={14} />
-                          </button>
-                        )}
-                        <button
-                          onClick={download}
-                          aria-label="Descargar CSV del análisis visible"
-                        >
-                          Descargar datos CSV <ArrowDownToLine size={14} />
-                        </button>
-                        <button
-                          onClick={() => {
-                            setMapView((v) =>
-                              v === "regional" ? "globe" : "regional",
-                            );
-                            setMobileTab("explore");
-                            scrollToSection();
-                          }}
-                        >
-                          {mapView === "regional"
-                            ? "Explorar mapa en 3D"
-                            : "Volver al mapa regional"}{" "}
-                          <Orbit size={14} />
-                        </button>
-                        <button
-                          onClick={() => {
-                            requestRef.current?.abort();
-                            setLoading(false);
-                            setAnalysis(null);
-                          }}
-                        >
-                          Limpiar resultado <X size={14} />
-                        </button>
-                      </div>
-                    </details>
                   </>
                 ) : null}
               </>
@@ -960,18 +948,17 @@ export function Explorer() {
         </span>
         <span>
           Análisis regional exploratorio
-          <span className="footer-tag">
-            MX · {analysis?.region.name ?? region.name}
-          </span>
+          <span className="footer-tag">MX · {analysis?.region.name ?? region.name}</span>
         </span>
       </footer>
       {modal === "chart" && analysis && result && (
         <Modal
-          title="Evolución de los datos"
+          title="Serie temporal ampliada"
           wide
           onClose={() => setModal(null)}
         >
           <div className="expanded-context">
+            <span className="demo-pill">Datos NASA</span>
             <h3>{activeVariable.name}</h3>
             <p>
               {analysis.region.name} · {analysis.selection.start}–
@@ -985,14 +972,8 @@ export function Explorer() {
                 {signed(stat.slopePerDecade, 3)} {result.unit}/década
               </strong>
               <span>
-                {significance.significant
-                  ? "Significativo"
-                  : "No significativo"}
-                {stat.evidence?.status === "pending"
-                  ? " · Posible salto por comprobar"
-                  : stat.evidence?.status === "sensitive"
-                    ? " · Depende del periodo"
-                    : ""}
+                IC 95 %: {signed(stat.confidenceInterval[0], 3)} a{" "}
+                {signed(stat.confidenceInterval[1], 3)} · {evidenceLabel(stat)}
               </span>
             </div>
           )}
@@ -1008,25 +989,6 @@ export function Explorer() {
           </div>
         </Modal>
       )}
-      {modal === "forecast" && analysis && result && (
-        <Modal
-          title="Predicción experimental"
-          wide
-          onClose={() => setModal(null)}
-        >
-          <h3 className="experiment-heading">{activeVariable.name}</h3>
-          <p className="experiment-context">
-            {analysis.region.name}. Experimento con datos hasta 2024; no es un
-            pronóstico actual.
-          </p>
-          <ForecastPanel
-            regionId={analysis.region.id}
-            variableId={activeId}
-            start={analysis.selection.start}
-            end={analysis.selection.end}
-          />
-        </Modal>
-      )}
       {modal === "compare" && analysis && (
         <Modal
           title="Variables en el mismo periodo"
@@ -1034,6 +996,7 @@ export function Explorer() {
           onClose={() => setModal(null)}
         >
           <div className="expanded-context">
+            <span className="demo-pill">Datos NASA</span>
             <h3>{analysis.region.name}</h3>
             <p>
               {analysis.selection.start}–{analysis.selection.end} · Mismo eje
@@ -1062,7 +1025,11 @@ export function Explorer() {
         </Modal>
       )}
       {modal === "evidence" && analysis && result && (
-        <Modal title="Datos y método" wide onClose={() => setModal(null)}>
+        <Modal
+          title="Evidencia del análisis"
+          wide
+          onClose={() => setModal(null)}
+        >
           <Evidence
             analysis={analysis}
             variableId={activeId}
@@ -1073,7 +1040,7 @@ export function Explorer() {
       )}
       {modal === "about" && (
         <Modal
-          title="Acerca de Trend Detectives"
+          title="Un laboratorio en construcción"
           onClose={() => setModal(null)}
         >
           <div className="about-content">
@@ -1084,20 +1051,12 @@ export function Explorer() {
               Trend Detectives es un proyecto independiente para NASA Space Apps
               Challenge 2026. Esta interfaz no implica respaldo oficial de NASA.
             </p>
-            <h3>Para quién está pensado</h3>
-            <p>
-              Estudiantes, docentes y personas que quieren explorar datos
-              ambientales sin empezar por un programa estadístico. Los datos y
-              el método siguen disponibles para quienes quieran profundizar.
-            </p>
             <h3>Qué estás viendo</h3>
             <p>
-              Series NASA procesadas para tres cajas de México. La gráfica
-              muestra valores anuales; las pendientes e intervalos se calculan
-              según el método de cada variable. Las respuestas son explicaciones
-              con Claude sobre la caja, el periodo y la variable visibles. La
-              significancia la calcula el motor estadístico; Claude explica sus
-              resultados y límites.
+              Series NASA procesadas para tres cajas de México. La
+              gráfica muestra valores anuales; las pendientes e intervalos se
+              calculan según el método de cada variable. Las respuestas son
+              explicaciones con Claude sobre la caja, el periodo y la variable visibles. La significancia la calcula el motor estadístico; Claude explica sus resultados y límites.
             </p>
             <h3>El mapa sí tiene geografía real</h3>
             <p>
@@ -1157,48 +1116,30 @@ function ChatView({
     <div className="chat-view">
       <div className="chat-title">
         <MessageCircle size={20} />
-        <h3>Entiende este resultado</h3>
+        <h3>Pregunta sobre este análisis</h3>
       </div>
       <p className="chat-context-label">Contexto: {context}</p>
       <div className="chat-notice">
         <span className="demo-pill">Claude</span>
         <p>
-          {connection === "checking"
-            ? "Comprobando disponibilidad…"
-            : connection === "unconfigured"
-              ? "Claude necesita configurarse para responder."
-              : connection === "unavailable"
-                ? "Claude no está disponible. Recarga para reintentar."
-                : "Pregunta qué cambió o qué significa el resultado."}
+          {connection === "checking" ? "Comprobando disponibilidad…" : connection === "unconfigured" ? "Claude necesita configurarse para responder." : connection === "unavailable" ? "Claude no está disponible. Recarga para reintentar." : "Pregunta por la gráfica o por su resultado."}
         </p>
-        {connection === "configured" && (
-          <details className="chat-privacy">
-            <summary>Datos compartidos</summary>
-            <small>
-              Preguntas y datos de esta selección se envían a Anthropic. Modelo:{" "}
-              {model}.
-            </small>
-          </details>
-        )}
+        {connection === "configured" && <details className="chat-privacy"><summary>Datos compartidos</summary><small>Preguntas y datos de esta selección se envían a Anthropic. Modelo: {model}.</small></details>}
       </div>
       {disabled ? (
         <div className="error-box">
-          {connection !== "configured"
-            ? "La conversación estará disponible cuando Claude esté configurado y responda el servidor."
-            : "No hay un ajuste válido para conversar sobre esta combinación."}
+          {connection !== "configured" ? "La conversación estará disponible cuando Claude esté configurado y responda el servidor." : "No hay un ajuste válido para conversar sobre esta combinación."}
         </div>
       ) : (
         <>
-          {messages.length === 0 && (
-            <div className="suggested-questions">
-              {suggestions.map((q) => (
-                <button disabled={busy} key={q} onClick={() => onSend(q)}>
-                  {q}
-                  <ArrowUpRight size={13} />
-                </button>
-              ))}
-            </div>
-          )}
+          <div className="suggested-questions">
+            {suggestions.map((q) => (
+              <button disabled={busy} key={q} onClick={() => onSend(q)}>
+                {q}
+                <ArrowUpRight size={13} />
+              </button>
+            ))}
+          </div>
           <div
             className="messages"
             aria-live="polite"
@@ -1207,25 +1148,16 @@ function ChatView({
             {messages.map((m) => (
               <div className={`message ${m.role}`} key={m.id}>
                 <span className="message-role">
-                  {m.role === "user"
-                    ? "TÚ"
-                    : m.provider === "claude"
-                      ? "CLAUDE"
-                      : "EXPLICACIÓN LOCAL"}
+                  {m.role === "user" ? "TÚ" : m.provider === "claude" ? "CLAUDE" : "EXPLICACIÓN LOCAL"}
                 </span>
-                {m.provider === "claude" &&
-                m.verifiedSummary &&
-                m.explanation ? (
-                  <>
-                    <ExplanationText text={m.explanation} />
-                    <details className="verified-chat-summary">
-                      <summary>Ver resultado calculado</summary>
-                      <p>{m.verifiedSummary}</p>
-                    </details>
-                  </>
-                ) : (
-                  <p>{m.text}</p>
-                )}
+                {m.provider === "claude" && m.verifiedSummary && m.explanation ? <>
+                  <div className="verified-chat-summary">
+                    <span className="message-section-label">Resultado calculado</span>
+                    <p>{m.verifiedSummary}</p>
+                  </div>
+                  <span className="message-section-label">Explicación de Claude</span>
+                  <ExplanationText text={m.explanation} />
+                </> : <p>{m.text}</p>}
                 {m.evidence && (
                   <button onClick={() => onEvidence(m.evidence)}>
                     <FileText size={12} />
@@ -1285,55 +1217,30 @@ function ChatView({
         </div>
       </form>
       <p className="chat-limit">
-        La IA explica esta selección. Puedes verificarla en Datos y método.
+        Las respuestas pertenecen sólo a este análisis y esta variable. No son
+        asesoría científica validada.
       </p>
     </div>
   );
 }
 function ExplanationText({ text }: { text: string }) {
   // React escapes all content; support emphasis without accepting generated HTML.
-  return text
-    .split(/\n{2,}/)
-    .map((paragraph, index) => (
-      <p key={index}>
-        {paragraph
-          .split(/(\*\*[^*\n]+\*\*)/g)
-          .map((part, i) =>
-            part.startsWith("**") && part.endsWith("**") ? (
-              <strong key={i}>{part.slice(2, -2)}</strong>
-            ) : (
-              part
-            ),
-          )}
-      </p>
-    ));
+  return text.split(/\n{2,}/).map((paragraph, index) => (
+    <p key={index}>{paragraph.split(/(\*\*[^*\n]+\*\*)/g).map((part, i) =>
+      part.startsWith("**") && part.endsWith("**")
+        ? <strong key={i}>{part.slice(2, -2)}</strong> : part,
+    )}</p>
+  ));
 }
-function SourceLinks({
-  variableId,
-  includeEnso = true,
-}: {
-  variableId: VariableId;
-  includeEnso?: boolean;
-}) {
+function SourceLinks({ variableId, includeEnso = true }: { variableId: VariableId; includeEnso?: boolean }) {
   const links = getSourceLinks(variableId).slice(0, includeEnso ? 2 : 1);
   if (!links.length) return null;
-  return (
-    <div className="result-source-links" aria-label="Fuentes del análisis">
-      <span>Fuentes</span>
-      {links.map((link) => (
-        <a
-          key={link.href}
-          href={link.href}
-          title={link.description}
-          target="_blank"
-          rel="noreferrer"
-        >
-          {link.label}
-          <ExternalLink size={11} />
-        </a>
-      ))}
-    </div>
-  );
+  return <div className="result-source-links" aria-label="Fuentes del análisis">
+    <span>Fuentes</span>
+    {links.map((link) => <a key={link.href} href={link.href} title={link.description} target="_blank" rel="noreferrer">
+      {link.label}<ExternalLink size={11} />
+    </a>)}
+  </div>;
 }
 function Evidence({
   analysis,
@@ -1354,9 +1261,8 @@ function Evidence({
       <div className="evidence-intro">
         <span className="demo-pill">Datos NASA</span>
         <p>
-          Estos resultados provienen de datos NASA procesados para{" "}
-          {analysis.region.name}. Son exploratorios y no permiten atribuir
-          causas.
+          Estos resultados provienen de datos NASA procesados para {analysis.region.name}.
+          Son exploratorios y no permiten atribuir causas.
         </p>
       </div>
       <dl className="evidence-grid">
@@ -1379,15 +1285,11 @@ function Evidence({
         <div>
           <dt>Periodo y frecuencia</dt>
           <dd>
-            {analysis.selection.start}–{analysis.selection.end} ·{" "}
-            {r.sampleUnit === "meses"
-              ? "modelo mensual; gráfica anual"
-              : "modelo y gráfica anuales"}
+            {analysis.selection.start}–{analysis.selection.end} · {r.sampleUnit === "meses" ? "modelo mensual; gráfica anual" : "modelo y gráfica anuales"}
             <small>
-              {s?.sampleSize ?? 0} {r.sampleUnit} en el modelo ·{" "}
-              {r.series.length} años en la tabla ·{" "}
-              {r.series.filter((d) => d.value === null).length} faltantes
-              anuales
+              {s?.sampleSize ?? 0} {r.sampleUnit} en el modelo · {r.series.length} años
+              en la tabla · {r.series.filter((d) => d.value === null).length}{" "}
+              faltantes anuales
             </small>
             <small>{r.annualLabel}</small>
           </dd>
@@ -1429,67 +1331,18 @@ function Evidence({
             </strong>
           </div>
           <p>
-            {evidenceLabel(s)} bajo este modelo. Un intervalo que cruza cero no
-            confirma la dirección y tampoco demuestra ausencia de cambio.
+            {evidenceLabel(s)} bajo este modelo. Un intervalo que cruza
+            cero no confirma la dirección y tampoco demuestra ausencia de
+            cambio.
           </p>
-          <p>
-            <strong>{getSignificance(r.evidence).label}.</strong>{" "}
-            {getSignificance(r.evidence).description}
-          </p>
-          {s.evidence && (
-            <>
-              <div>
-                <span>p bootstrap-t / p de Holm</span>
-                <strong>
-                  {formatNumber(s.evidence.pValue!, 4)} /{" "}
-                  {formatNumber(s.evidence.pAdjusted!, 4)}
-                </strong>
-              </div>
-              <p>
-                Familia de {s.evidence.familySize} pruebas, independiente de las
-                variables visibles. El IC individual puede excluir cero aunque
-                la evidencia tras Holm sea inconclusa.
-              </p>
-              {s.evidence.baseline && (
-                <div>
-                  <span>Pendiente sin ENSO / con ENSO</span>
-                  <strong>
-                    {signed(s.evidence.baseline.slopePerDecade, 4)} /{" "}
-                    {signed(s.slopePerDecade, 4)} {r.unit}/década
-                  </strong>
-                </div>
-              )}
-              {s.evidence.diagnostics && (
-                <p>
-                  Autocorrelación residual (un rezago):{" "}
-                  {formatNumber(s.evidence.diagnostics.residualAcf1, 3)}. AR(
-                  {s.evidence.arOrder});{" "}
-                  {analysis.provenance.audit?.replicates.toLocaleString(
-                    "es-MX",
-                  )}{" "}
-                  réplicas.{" "}
-                  {s.evidence.diagnostics.steps.length > 0
-                    ? `Escalones exploratorios compatibles: ${s.evidence.diagnostics.steps.map((d) => d.date).join(", ")}; requieren contraste, no prueban causas.`
-                    : "Sin escalón compatible en las fechas exploratorias evaluadas; no descarta otros cambios de nivel."}
-                </p>
-              )}
-              {s.evidence.diagnostics && (
-                <p>
-                  IC diagnóstico por bloques:{" "}
-                  {signed(s.evidence.diagnostics.blockInterval[0], 4)} a{" "}
-                  {signed(s.evidence.diagnostics.blockInterval[1], 4)} {r.unit}
-                  /década. Sensibilidad HAC:{" "}
-                  {s.evidence.diagnostics.hacSensitivity
-                    .map(
-                      (h) =>
-                        `${h.lags} rezagos [${signed(h.interval[0], 3)}, ${signed(h.interval[1], 3)}]`,
-                    )
-                    .join("; ")}
-                  .
-                </p>
-              )}
-            </>
-          )}
+          <p><strong>{getSignificance(r.evidence).label}.</strong> {getSignificance(r.evidence).description}</p>
+          {s.evidence && <>
+            <div><span>p bootstrap-t / p de Holm</span><strong>{formatNumber(s.evidence.pValue!, 4)} / {formatNumber(s.evidence.pAdjusted!, 4)}</strong></div>
+            <p>Familia de {s.evidence.familySize} pruebas, independiente de las variables visibles. El IC individual puede excluir cero aunque la evidencia tras Holm sea inconclusa.</p>
+            {s.evidence.baseline && <div><span>Pendiente sin ENSO / con ENSO</span><strong>{signed(s.evidence.baseline.slopePerDecade, 4)} / {signed(s.slopePerDecade, 4)} {r.unit}/década</strong></div>}
+            {s.evidence.diagnostics && <p>Autocorrelación residual (un rezago): {formatNumber(s.evidence.diagnostics.residualAcf1, 3)}. AR({s.evidence.arOrder}); {analysis.provenance.audit?.replicates.toLocaleString("es-MX")} réplicas. {s.evidence.diagnostics.steps.length > 0 ? `Escalones exploratorios compatibles: ${s.evidence.diagnostics.steps.map((d) => d.date).join(", ")}; requieren contraste, no prueban causas.` : "Sin escalón compatible en las fechas exploratorias evaluadas; no descarta otros cambios de nivel."}</p>}
+            {s.evidence.diagnostics && <p>IC diagnóstico por bloques: {signed(s.evidence.diagnostics.blockInterval[0], 4)} a {signed(s.evidence.diagnostics.blockInterval[1], 4)} {r.unit}/década. Sensibilidad HAC: {s.evidence.diagnostics.hacSensitivity.map((h) => `${h.lags} rezagos [${signed(h.interval[0], 3)}, ${signed(h.interval[1], 3)}]`).join("; ")}.</p>}
+          </>}
         </div>
       )}
       <div

@@ -1,12 +1,5 @@
 "use client";
-import {
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import { useId, useMemo, useState, useSyncExternalStore } from "react";
 import { line, scaleLinear, extent, curveLinear } from "d3";
 import { getVariable } from "@/lib/catalog";
 import { formatNumber } from "@/lib/format";
@@ -20,12 +13,10 @@ export function TrendChart({
   result,
   large = false,
   comparison = false,
-  overview = false,
 }: {
   result: VariableResult;
   large?: boolean;
   comparison?: boolean;
-  overview?: boolean;
 }) {
   const narrow = useSyncExternalStore(
     subscribeNarrow,
@@ -34,34 +25,9 @@ export function TrendChart({
   );
   const [hover, setHover] = useState<number | null>(null);
   const [showTrend, setShowTrend] = useState(true);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [containerWidth, setContainerWidth] = useState<number | null>(null);
-  useEffect(() => {
-    if (!overview || !containerRef.current) return;
-    const observer = new ResizeObserver(([entry]) => {
-      const width = Math.round(entry.contentRect.width);
-      if (width > 0) setContainerWidth(width);
-    });
-    observer.observe(containerRef.current);
-    return () => observer.disconnect();
-  }, [overview]);
   const id = useId().replaceAll(":", "");
-  const w = overview
-      ? (containerWidth ?? (narrow ? 350 : 900))
-      : (large || comparison) && !narrow
-        ? 1000
-        : 420,
-    h = comparison
-      ? 240
-      : large
-        ? narrow
-          ? 290
-          : 320
-        : overview
-          ? w < 500
-            ? 250
-            : Math.max(190, Math.min(300, Math.round(w * 0.22)))
-          : 220,
+  const w = (large || comparison) && !narrow ? 1000 : 420,
+    h = comparison ? 240 : large ? (narrow ? 290 : 420) : 220,
     m = { left: 52, right: 16, top: 26, bottom: 34 };
   const { x, y, seriesPath, trendPath } = useMemo(() => {
     const values = result.series
@@ -99,18 +65,9 @@ export function TrendChart({
   const point = (index: number) =>
     setHover(Math.max(0, Math.min(result.series.length - 1, index)));
   return (
-    <div
-      ref={containerRef}
-      className={`trend-chart ${large ? "large" : ""} ${overview ? "overview" : ""}`}
-    >
+    <div className={`trend-chart ${large ? "large" : ""}`}>
       <div className="chart-unit">
-        {result.unit}{" "}
-        <span>
-          ·{" "}
-          {result.sampleUnit === "meses"
-            ? "Promedio por año"
-            : "Máximo de cada año"}
-        </span>
+        {result.unit} <span>· {result.annualLabel}</span>
       </div>
       <svg
         viewBox={`0 0 ${w} ${h}`}
@@ -152,7 +109,7 @@ export function TrendChart({
             </text>
           </g>
         ))}
-        {x.ticks(overview && w < 380 ? 3 : 5).map((t) => (
+        {x.ticks(5).map((t) => (
           <text key={t} x={x(t)} y={h - 10} textAnchor="middle">
             {t}
           </text>
@@ -211,7 +168,7 @@ export function TrendChart({
       <div className="chart-legend">
         <span>
           <i style={{ background: color }} />
-          Datos por año
+          Serie anual
         </span>
         <button
           onClick={() => setShowTrend((v) => !v)}
@@ -219,7 +176,7 @@ export function TrendChart({
           className={!showTrend ? "muted" : ""}
         >
           <i className="dashed" />
-          {showTrend ? "Cambio estimado" : "Mostrar cambio estimado"}
+          {showTrend ? "Tendencia lineal" : "Mostrar tendencia"}
         </button>
       </div>
       <p className="sr-only" aria-live="polite">
