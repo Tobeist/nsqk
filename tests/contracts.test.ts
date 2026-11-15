@@ -1,6 +1,7 @@
+// Historical HAC calculation checks. Production inference is tested in app-evidence.test.ts.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createRealAnalysis, realDefaultSelection } from "../lib/real-data";
+import { createReferenceAnalysis as createRealAnalysis, realDefaultSelection } from "../lib/real-data";
 import { analysisCsv, localEvidenceChatAdapter, toChatContext } from "../lib/adapters";
 import temperature from "../data/results/power_t2m_region_1992_2024.json";
 import precipitation from "../data/results/giovanni_gpcp_1992_2024.json";
@@ -16,7 +17,7 @@ import southTemperature from "../data/results/mx-south-humid/power_t2m_region_19
 import southGpcp from "../data/results/mx-south-humid/giovanni_gpcp_1992_2024.json";
 import southAnnual from "../data/results/mx-south-humid/power_rx5day_annual_region_1992_2024.json";
 
-test("MVP uses the three processed NASA series and their monthly statistics", () => {
+test("Reference: MVP uses the three processed NASA series and their monthly statistics", () => {
   const analysis = createRealAnalysis(realDefaultSelection);
   assert.equal(analysis.mode, "real");
   assert.equal(analysis.results.length, 3);
@@ -39,7 +40,7 @@ test("MVP uses the three processed NASA series and their monthly statistics", ()
   }
 });
 
-test("selected years recalculate the annual series, trend, interval and explanation", async () => {
+test("Reference: selected years recalculate the annual series, trend, interval and explanation", async () => {
   const selection = { ...realDefaultSelection, start: 2000, end: 2014 };
   const analysis = createRealAnalysis(selection);
   const full = createRealAnalysis(realDefaultSelection);
@@ -60,7 +61,7 @@ test("selected years recalculate the annual series, trend, interval and explanat
   assert.match(reply.text, /180 meses/);
 });
 
-test("three added POWER monthly variables reproduce the versioned statistics", () => {
+test("Reference: three added POWER monthly variables reproduce the versioned statistics", () => {
   const analysis = createRealAnalysis({
     ...realDefaultSelection,
     variables: ["temperature-min", "temperature-max", "precipitation-power"],
@@ -76,7 +77,7 @@ test("three added POWER monthly variables reproduce the versioned statistics", (
   assert.match(analysisCsv(analysis, "precipitation-power"), /NASA POWER PRECTOTCORR/);
 });
 
-test("derived annual RX5day keeps its annual HAC(3) method and 20-year minimum", async () => {
+test("Reference: derived annual RX5day keeps its annual HAC(3) method and 20-year minimum", async () => {
   const selection = { ...realDefaultSelection, variables: ["rain5", "rain5-power-annual"] as Array<"rain5" | "rain5-power-annual"> };
   const full = createRealAnalysis(selection);
   const monthly = full.results[0];
@@ -102,7 +103,7 @@ test("derived annual RX5day keeps its annual HAC(3) method and 20-year minimum",
   assert.doesNotMatch(reply.text, /meses, estacionalidad/);
 });
 
-test("unsupported region, short or unavailable time window, or pending variable cannot reuse the northeast result", () => {
+test("Reference: unsupported region, short or unavailable time window, or pending variable cannot reuse the northeast result", () => {
   assert.throws(() => createRealAnalysis({ ...realDefaultSelection, regionId: "mx-northwest" }));
   assert.throws(() => createRealAnalysis({ ...realDefaultSelection, start: 2016 }));
   assert.throws(() => createRealAnalysis({ ...realDefaultSelection, start: 1991 }));
@@ -110,7 +111,7 @@ test("unsupported region, short or unavailable time window, or pending variable 
   assert.throws(() => createRealAnalysis({ ...realDefaultSelection, variables: ["surface-moisture"] }));
 });
 
-test("Chihuahua and south use their own seven processed series", () => {
+test("Reference: Chihuahua and south use their own seven processed series", () => {
   const expected = [
     ["mx-chihuahua-interior", chihuahuaTemperature, chihuahuaGpcp, chihuahuaAnnual],
     ["mx-south-humid", southTemperature, southGpcp, southAnnual],
@@ -141,7 +142,7 @@ test("Chihuahua and south use their own seven processed series", () => {
   }
 });
 
-test("download and local explanation identify the actual source", async () => {
+test("Reference: download and local explanation identify the actual source", async () => {
   const analysis = createRealAnalysis(realDefaultSelection);
   const csv = analysisCsv(analysis, "precipitation");
   assert.match(csv, /"real"/);

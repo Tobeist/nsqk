@@ -1,10 +1,11 @@
+// Historical HAC calculation checks. Production inference is tested in app-evidence.test.ts.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createRealAnalysis, realDefaultSelection } from "../lib/real-data";
+import { createReferenceAnalysis as createRealAnalysis, realDefaultSelection } from "../lib/real-data";
 import { createMapLayer, getMapLimit } from "../lib/map-layer";
 import { getIntersectedStates, getStateNames, intersectedStates, stateNames } from "../lib/geography";
 import { regions } from "../lib/catalog";
-test("RX5Day legend covers executed slopes, including a shorter high-magnitude period", () => {
+test("Reference: RX5Day legend covers executed slopes, including a shorter high-magnitude period", () => {
   for (const [start, end] of [
     [1992, 2024],
     [2000, 2014],
@@ -20,7 +21,7 @@ test("RX5Day legend covers executed slopes, including a shorter high-magnitude p
   }
 });
 
-test("all three study boxes have geographic intersections inside their own bounds", () => {
+test("Reference: all three study boxes have geographic intersections inside their own bounds", () => {
   for (const region of regions) {
     const [west, south, east, north] = region.bbox;
     const states = getIntersectedStates(region.id);
@@ -37,7 +38,7 @@ test("all three study boxes have geographic intersections inside their own bound
   assert.deepEqual(getStateNames("mx-chihuahua-interior"), ["Chihuahua"]);
   assert.deepEqual(getStateNames("mx-south-humid"), ["Chiapas", "Estado de Veracruz", "Oaxaca", "Tabasco"]);
 });
-test("state highlights describe the requested footprint and never expand the analyzed area", () => {
+test("Reference: state highlights describe the requested footprint and never expand the analyzed area", () => {
   assert.deepEqual(
     [...stateNames].sort(),
     ["Coahuila", "Nuevo León", "Tamaulipas", "Texas"].sort(),

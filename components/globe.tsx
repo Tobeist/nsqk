@@ -27,6 +27,7 @@ import { Crosshair, Minus, Plus, RotateCcw } from "lucide-react";
 import { studyStateFeatures, type StateFeature } from "@/lib/geography";
 import { getRegion, regions, type Region } from "@/lib/catalog";
 import type { MapRegionValue } from "@/lib/map-layer";
+import { uncertainEvidence } from "@/lib/format";
 import type { OrbitControls as OrbitControlsType } from "three-stdlib";
 const position = (
   lat: number,
@@ -90,9 +91,7 @@ function RegionMark({
   const fill = new BufferGeometry();
   fill.setAttribute("position", new Float32BufferAttribute(positions, 3));
   const crosses =
-    value?.statistics &&
-    value.statistics.confidenceInterval[0] <= 0 &&
-    value.statistics.confidenceInterval[1] >= 0;
+    value?.statistics && uncertainEvidence(value.statistics);
   return (
     <group>
       {value?.state === "analyzed" && (

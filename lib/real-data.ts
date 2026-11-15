@@ -23,6 +23,8 @@ import { getRegion, regions, type VariableId } from "./catalog";
 import { selectionKey, type Analysis, type Selection, type VariableResult } from "./contracts";
 import { seasonalTrend } from "./seasonal-trend";
 import { annualTrend } from "./annual-trend";
+import auditedFullPeriod from "../analysis/app/1992-2024.json";
+import type { TrendBundle } from "./trend-evidence";
 
 export const firstDataYear = 1992;
 export const lastDataYear = 2024;
@@ -216,7 +218,7 @@ function createAnnualResult(selection: Selection): VariableResult {
   };
 }
 
-export function createRealAnalysis(selection: Selection): Analysis {
+export function validateSelection(selection: Selection) {
   if (!regions.some((region) => region.id === selection.regionId) || !regionData[selection.regionId] ||
       !Number.isInteger(selection.start) || !Number.isInteger(selection.end) ||
       selection.start < firstDataYear || selection.end > lastDataYear ||
@@ -226,6 +228,11 @@ export function createRealAnalysis(selection: Selection): Analysis {
       selection.variables.some((id) => !isMonthlyVariable(id) && id !== annualIndexId)) {
     throw new Error("Selecciona una de las tres cajas, hasta tres variables integradas y un periodo válido: mínimo diez años, o veinte si incluye RX5day anual de POWER.");
   }
+}
+
+// Reference calculation retained for regression/parity checks, never used as app inference.
+export function createReferenceAnalysis(selection: Selection): Analysis {
+  validateSelection(selection);
   const results = selection.variables.map((id) =>
     id === annualIndexId ? createAnnualResult(selection) : createMonthlyResult(id as MonthlyVariableId, selection),
   );
@@ -246,4 +253,57 @@ export function createRealAnalysis(selection: Selection): Analysis {
       ],
     },
   };
+}
+
+export const defaultTrendBundle = auditedFullPeriod as unknown as TrendBundle;
+
+export function createRealAnalysis(selection: Selection, bundle: TrendBundle = defaultTrendBundle): Analysis {
+  validateSelection(selection);
+  if (bundle.start !== selection.start || bundle.end !== selection.end ||
+      bundle.version !== "app-seasonal-enso-sieve-v1" || bundle.replicates !== 4999) {
+    throw new Error("Falta calcular la auditoría para este periodo. Vuelve a analizar la selección.");
+  }
+  const analysis = createReferenceAnalysis(selection);
+  analysis.id = `${bundle.version}:${bundle.fingerprint}:${selectionKey(selection)}`;
+  analysis.provenance.audit = {
+    version: bundle.version, fingerprint: bundle.fingerprint,
+    replicates: bundle.replicates, seed: bundle.seed,
+  };
+  analysis.provenance.limitations = [
+    "Resultados para la caja y el periodo elegidos; no representan estados completos ni atribuyen causas.",
+    "Calendario mensual y Niño 3.4 controlan variación estacional y ENSO; no todos los factores naturales. El índice anual no ajusta ENSO.",
+    "IC95% individuales por bootstrap-t AR; la certeza usa p de Holm sobre 18 series mensuales o tres anuales. Elegir periodos después de ver los resultados introduce sesgo adicional.",
+    "Diagnósticos de escalones exploratorios; sus fechas no establecen un cambio físico ni de procesamiento. Los productos y sus agregaciones no son intercambiables.",
+  ];
+  analysis.results = analysis.results.map((result) => {
+    const evidence = bundle.results[selection.regionId]?.[result.variableId];
+    if (!evidence) throw new Error(`No hay auditoría de ${result.variableId} para esta caja y periodo.`);
+    result.evidence = evidence;
+    const annual = result.sampleUnit === "años";
+    result.method = {
+      id: `${bundle.version}:${annual ? "annual" : "monthly"}`,
+      name: annual ? "Regresión anual · bootstrap-t AR · Holm(3)" : "Regresión mensual + ENSO · bootstrap-t AR · Holm(18)",
+      description: `${selection.start}–${selection.end}: ${annual ? "máximos anuales, tiempo lineal y HAC(2), sin ajuste ENSO" : "tiempo lineal, once indicadores de mes, Niño 3.4 contemporáneo y HAC(12)"}. Incertidumbre con ${bundle.replicates.toLocaleString("es-MX")} réplicas de bootstrap-t AR; IC95% individual y p ajustado por Holm. ${annual ? "La recta conserva la pendiente anual." : "La gráfica resume los datos en medias anuales; la recta es una guía centrada en ellas con la pendiente mensual ajustada, no una predicción."}`,
+    };
+    result.limitations = [...result.limitations.filter((s) => !s.includes("tres rezagos")), ...evidence.reasons];
+    if (evidence.status === "not-evaluable") {
+      return { ...result, statistics: null, trend: [], status: "not-evaluable" as const };
+    }
+    const slope = evidence.slopePerDecade;
+    const ci = evidence.confidenceInterval;
+    if (slope === undefined || !Number.isFinite(slope) || !ci || ci.some((v) => !Number.isFinite(v)) ||
+        evidence.pAdjusted === undefined || evidence.sampleSize !== result.statistics?.sampleSize) {
+      throw new Error("Resultado de auditoría incompleto o incompatible con la serie.");
+    }
+    const centerYear = (selection.start + selection.end) / 2;
+    const mean = result.series.reduce((sum, row) => sum + row.value!, 0) / result.series.length;
+    const intercept = mean - slope / 10 * centerYear;
+    result.statistics = {
+      slopePerDecade: slope, confidenceInterval: ci, confidenceLevel: .95,
+      intercept, sampleSize: evidence.sampleSize!, evidence,
+    };
+    result.trend = result.series.map(({ year }) => ({ year, value: intercept + slope / 10 * year }));
+    return result;
+  });
+  return analysis;
 }

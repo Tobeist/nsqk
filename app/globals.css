@@ -1231,6 +1231,15 @@ a {
   color: #b6c8d2;
   background: #14212d;
 }
+.audit-summary {
+  margin: 0 0 20px;
+  color: var(--text-secondary, #b1c1c9);
+  font-size: 12px;
+  line-height: 1.65;
+}
+.audit-summary p { margin: 4px 0; }
+.audit-summary strong { color: inherit; font-variant-numeric: tabular-nums; }
+.audit-summary button { margin-top: 6px; }
 .method-preview {
   margin: 13px 0 0;
   color: #94a9b7;
