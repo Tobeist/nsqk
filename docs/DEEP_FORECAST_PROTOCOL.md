@@ -73,3 +73,27 @@ Optuna TPE, semilla 20261114, **30 ensayos**. Criterio: MAE medio de los 60 mese
 
 - Diebold–Mariano: p = 0.76. **No se cumple la regla de publicación** y la red no se despliega. Detalle en `analysis/deep/deep_results.json` y en [`memory.md`](../memory.md).
 - **Corrección previa a evaluar:** la escala de Niño 3.4 incluía noviembre y diciembre del año de origen, que aún no se conocen al emitir el pronóstico. La detectó `tests/test_deep_forecast.py`; la corrida se detuvo antes de evaluar la prueba y se repitió corregida.
+
+## Corrección v2 (después de la primera ejecución)
+
+Revisión del equipo: en v1, las ventanas de entrenamiento y las de parada temprana compartían hasta 11 meses objetivo. La parada temprana medía en parte meses ya vistos en entrenamiento. No hubo uso de observaciones posteriores al origen.
+
+Corrección:
+- La parada temprana usa solo ventanas cuyos 12 meses objetivo caen en los últimos 24 meses del entrenamiento.
+- El entrenamiento usa ventanas cuyos objetivos terminan antes de ese bloque.
+- Las 11 ventanas intermedias se descartan.
+
+`tests/test_deep_forecast.py` comprueba que no hay meses objetivo compartidos. Se repiten la búsqueda (mismo espacio, ensayos, semillas y regla de segunda ronda) y la evaluación.
+
+**La prueba 2021–2024 ya se vio una vez en v1**, así que la evaluación v2 no es ciega. Los resultados de v1 se conservan en `analysis/deep/v1_overlapping_early_stop/`.
+
+### Resultado v2
+
+| Conjunto | Red v2 | Modelo desplegado |
+| --- | ---: | ---: |
+| Validación, MAE (ensamble) | 0.943 | 0.958 |
+| Prueba 2021–2024, MAE | 1.307 | 1.348 |
+
+- Mejora de 3.0 % frente al modelo desplegado.
+- Diebold–Mariano: p = 0.35. **Tampoco se cumple la regla de publicación** y la red no se despliega.
+- Configuración congelada: `analysis/deep/deep_frozen_config.json`.
