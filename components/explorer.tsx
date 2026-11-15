@@ -71,6 +71,7 @@ import { getStateNames } from "@/lib/geography";
 import { TrendChart } from "./chart";
 import { ForecastPanel } from "./forecast-panel";
 import { Modal } from "./modal";
+import { NasaMaps } from "./nasa-maps";
 const Globe = dynamic(() => import("./globe"), {
   ssr: false,
   loading: () => (
@@ -101,7 +102,7 @@ export function Explorer() {
     createRealAnalysis(realDefaultSelection),
   ]);
   const [activeId, setActiveId] = useState<VariableId>("temperature");
-  const [mapView, setMapView] = useState<"regional" | "globe">("regional");
+  const [mapView, setMapView] = useState<"regional" | "nasa2d" | "globe">("regional");
   const [family, setFamily] = useState<Family>("Calor");
   const [mobileTab, setMobileTab] = useState<MobileTab>("explore");
   const [rightTab, setRightTab] = useState<"results" | "chat">("results");
@@ -554,6 +555,12 @@ export function Explorer() {
                 Estados
               </button>
               <button
+                aria-pressed={mapView === "nasa2d"}
+                onClick={() => setMapView("nasa2d")}
+              >
+                Mapa NASA 2D
+              </button>
+              <button
                 aria-pressed={mapView === "globe"}
                 onClick={() => setMapView("globe")}
               >
@@ -561,7 +568,9 @@ export function Explorer() {
               </button>
             </div>
           </div>
-          {mapView === "regional" ? (
+          {mapView === "nasa2d" ? (
+            <NasaMaps />
+          ) : mapView === "regional" ? (
             <RegionMap region={region}
               value={dirty ? undefined : mapLayer.find((entry) => entry.regionId === region.id)}
               variable={activeVariable} />
@@ -572,6 +581,7 @@ export function Explorer() {
               layer={mapLayer}
             />
           )}
+          {mapView !== "nasa2d" && <>
           <div className="states-context">
             <div>
               {stateNames.map((name) => (
@@ -609,6 +619,7 @@ export function Explorer() {
               Evidencia no concluyente
             </div>
           </div>
+          </>}
           <div className="region-selector" ref={regionRef}>
             <div className="region-selector-label">
               <MapPin size={14} />
