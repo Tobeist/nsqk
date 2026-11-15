@@ -8,10 +8,17 @@ import numpy as np
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-import forecast_experiment as fx  # noqa: E402
-import grouping_audit as ga  # noqa: E402
+# The full historical audit needs requirements.txt (matplotlib, shapely, ...), not the API's requirements-analysis.txt.
+try:
+    import forecast_experiment as fx  # noqa: E402
+    import grouping_audit as ga  # noqa: E402
+    MISSING = None
+except ModuleNotFoundError as error:
+    MISSING = error.name
 
 
+
+@unittest.skipIf(MISSING, f"requiere requirements.txt (falta {MISSING})")
 class AggregationTest(unittest.TestCase):
     def setUp(self):
         days = pd.date_range("1999-01-01", "2001-12-31", freq="D")  # includes the 2000 leap year
@@ -36,6 +43,7 @@ class AggregationTest(unittest.TestCase):
         self.assertNotIn(1999 * 10 + 0, b.index)  # DJF 1999 lacks December 1998
 
 
+@unittest.skipIf(MISSING, f"requiere requirements.txt (falta {MISSING})")
 class LeakageTest(unittest.TestCase):
     def test_simple_forecasts_ignore_test_period_values(self):
         data = fx.dataset()
@@ -56,6 +64,7 @@ if __name__ == "__main__":
     unittest.main()
 
 
+@unittest.skipIf(MISSING, f"requiere requirements.txt (falta {MISSING})")
 class SingleOutputTest(unittest.TestCase):
     """After `python scripts/run_analysis.py`, every summary must use the same valid (bootstrap-t) Holm p-values."""
 

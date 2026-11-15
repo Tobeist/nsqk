@@ -34,4 +34,11 @@ En Windows o con otro entorno, configura `PYTHON_BIN` con la ruta del ejecutable
 
 Las peticiones simultáneas del mismo periodo comparten el cálculo; se admiten dos periodos en proceso y un máximo de 120 segundos por cálculo. La caché se escribe de forma atómica y no depende de las variables que se muestran. Los p de Holm controlan la familia del periodo elegido, no la búsqueda entre muchos periodos elegidos después de mirar resultados.
 
-Comprobaciones: `.venv/bin/python -m unittest tests/test_app_trends.py tests/test_trend_lib.py tests/test_region_routes.py`, `npm test`, `npm run typecheck`, `npm run lint` y `npm run build`. La prueba de frescura compara todos los hashes del artefacto con las entradas actuales. Las pruebas de referencia HAC anteriores se conservan por separado; no alimentan las etiquetas de la app.
+Comprobaciones, con el `.venv` anterior (la API y `npm test` lo usan automáticamente si existe; si no, `PYTHON_BIN` o `python3`):
+
+```bash
+.venv/bin/python -m unittest tests/test_app_trends.py tests/test_trend_lib.py tests/test_region_routes.py
+npm test && npm run typecheck && npm run lint && npm run build
+```
+
+`tests/test_app_forecast.py` requiere además `requirements-forecast.txt`. `tests/test_region_audit.py` y `tests/test_v2_procedures.py` validan la auditoría histórica y necesitan el entorno completo de `requirements.txt` (matplotlib, shapely, prophet…). Sin él, se omiten indicando el módulo que falta, en lugar de fallar al importar. Si el motor Python falla, el servidor registra el código de salida y el final de stderr; el navegador sólo recibe un mensaje genérico. La prueba de frescura compara todos los hashes del artefacto con las entradas actuales. Las pruebas de referencia HAC anteriores se conservan por separado; no alimentan las etiquetas de la app.
