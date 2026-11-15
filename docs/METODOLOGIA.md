@@ -141,3 +141,6 @@ La gráfica y el CSV usan las medias simples de los doce meses de cada año sele
 
 El RX5day **anual derivado de POWER** usa directamente sus máximos anuales, con un mínimo de veinte años consecutivos como `scripts/analyze_annual.py`. `lib/annual-trend.ts` recalcula la regresión anual lineal y la covarianza HAC de Bartlett con tres rezagos. La ventana completa reproduce pendiente e IC del resultado Python a una tolerancia de `1e-9`. La evidencia, el CSV y el chat local muestran el método y tamaño de muestra de la variable activa. El índice anual y el RX5Day mensual de Giovanni no se consideran intercambiables.
 
+## 14. Auditoría estadística de tendencias
+
+La auditoría reproducible de las tres series integradas en la app (T2M de POWER, GPCP y `RX5Day` de Giovanni) está en [`analysis/`](../analysis/README.md) y se define en el [plan](ANALISIS_TENDENCIAS_PLAN.md). Reproduce a precisión de máquina las pendientes, los intervalos y los valores p de las secciones 7, 10 y 12, y los compara con la app (`tests/python-parity.test.ts`). Añade el control por Niño 3.4, bootstrap por bloques, rupturas, ventanas preespecificadas y corrección de Holm. No sustituye ninguna cifra anterior ni cambia el significado de los campos de `data/results/`.

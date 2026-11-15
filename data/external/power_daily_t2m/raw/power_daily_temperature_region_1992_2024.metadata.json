@@ -1,0 +1,1309 @@
+{
+ "source": "NASA POWER daily regional API, community SB, time-standard UTC (same convention as data/raw/power_daily_prectotcorr)",
+ "variables": {
+  "T2M": "daily mean 2 m air temperature, C",
+  "T2M_MAX": "daily maximum 2 m air temperature, C"
+ },
+ "bbox_wsen": [
+  -101,
+  25,
+  -99,
+  27
+ ],
+ "period": [
+  1992,
+  2024
+ ],
+ "grid_cells": 15,
+ "aggregation": "cos(latitude)-weighted mean of returned grid-cell centres; fill value -999 excluded",
+ "downloaded_utc": "2026-11-14T23:39:50+00:00",
+ "requests": [
+  {
+   "variable": "T2M",
+   "year": 1992,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M&community=SB&format=JSON&start=19920101&end=19921231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "19920101",
+    "end": "19921231"
+   }
+  },
+  {
+   "variable": "T2M_MAX",
+   "year": 1992,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M_MAX&community=SB&format=JSON&start=19920101&end=19921231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2",
+     "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "19920101",
+    "end": "19921231"
+   }
+  },
+  {
+   "variable": "T2M",
+   "year": 1993,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M&community=SB&format=JSON&start=19930101&end=19931231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "19930101",
+    "end": "19931231"
+   }
+  },
+  {
+   "variable": "T2M_MAX",
+   "year": 1993,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M_MAX&community=SB&format=JSON&start=19930101&end=19931231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2",
+     "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "19930101",
+    "end": "19931231"
+   }
+  },
+  {
+   "variable": "T2M",
+   "year": 1994,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M&community=SB&format=JSON&start=19940101&end=19941231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "19940101",
+    "end": "19941231"
+   }
+  },
+  {
+   "variable": "T2M_MAX",
+   "year": 1994,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M_MAX&community=SB&format=JSON&start=19940101&end=19941231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2",
+     "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "19940101",
+    "end": "19941231"
+   }
+  },
+  {
+   "variable": "T2M",
+   "year": 1995,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M&community=SB&format=JSON&start=19950101&end=19951231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "19950101",
+    "end": "19951231"
+   }
+  },
+  {
+   "variable": "T2M_MAX",
+   "year": 1995,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M_MAX&community=SB&format=JSON&start=19950101&end=19951231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2",
+     "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "19950101",
+    "end": "19951231"
+   }
+  },
+  {
+   "variable": "T2M",
+   "year": 1996,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M&community=SB&format=JSON&start=19960101&end=19961231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "19960101",
+    "end": "19961231"
+   }
+  },
+  {
+   "variable": "T2M_MAX",
+   "year": 1996,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M_MAX&community=SB&format=JSON&start=19960101&end=19961231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2",
+     "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "19960101",
+    "end": "19961231"
+   }
+  },
+  {
+   "variable": "T2M",
+   "year": 1997,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M&community=SB&format=JSON&start=19970101&end=19971231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "19970101",
+    "end": "19971231"
+   }
+  },
+  {
+   "variable": "T2M_MAX",
+   "year": 1997,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M_MAX&community=SB&format=JSON&start=19970101&end=19971231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2",
+     "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "19970101",
+    "end": "19971231"
+   }
+  },
+  {
+   "variable": "T2M",
+   "year": 1998,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M&community=SB&format=JSON&start=19980101&end=19981231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "19980101",
+    "end": "19981231"
+   }
+  },
+  {
+   "variable": "T2M_MAX",
+   "year": 1998,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M_MAX&community=SB&format=JSON&start=19980101&end=19981231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2",
+     "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "19980101",
+    "end": "19981231"
+   }
+  },
+  {
+   "variable": "T2M",
+   "year": 1999,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M&community=SB&format=JSON&start=19990101&end=19991231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "19990101",
+    "end": "19991231"
+   }
+  },
+  {
+   "variable": "T2M_MAX",
+   "year": 1999,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M_MAX&community=SB&format=JSON&start=19990101&end=19991231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2",
+     "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "19990101",
+    "end": "19991231"
+   }
+  },
+  {
+   "variable": "T2M",
+   "year": 2000,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M&community=SB&format=JSON&start=20000101&end=20001231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20000101",
+    "end": "20001231"
+   }
+  },
+  {
+   "variable": "T2M_MAX",
+   "year": 2000,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M_MAX&community=SB&format=JSON&start=20000101&end=20001231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2",
+     "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20000101",
+    "end": "20001231"
+   }
+  },
+  {
+   "variable": "T2M",
+   "year": 2001,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M&community=SB&format=JSON&start=20010101&end=20011231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20010101",
+    "end": "20011231"
+   }
+  },
+  {
+   "variable": "T2M_MAX",
+   "year": 2001,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M_MAX&community=SB&format=JSON&start=20010101&end=20011231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2",
+     "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20010101",
+    "end": "20011231"
+   }
+  },
+  {
+   "variable": "T2M",
+   "year": 2002,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M&community=SB&format=JSON&start=20020101&end=20021231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20020101",
+    "end": "20021231"
+   }
+  },
+  {
+   "variable": "T2M_MAX",
+   "year": 2002,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M_MAX&community=SB&format=JSON&start=20020101&end=20021231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2",
+     "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20020101",
+    "end": "20021231"
+   }
+  },
+  {
+   "variable": "T2M",
+   "year": 2003,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M&community=SB&format=JSON&start=20030101&end=20031231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20030101",
+    "end": "20031231"
+   }
+  },
+  {
+   "variable": "T2M_MAX",
+   "year": 2003,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M_MAX&community=SB&format=JSON&start=20030101&end=20031231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2",
+     "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20030101",
+    "end": "20031231"
+   }
+  },
+  {
+   "variable": "T2M",
+   "year": 2004,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M&community=SB&format=JSON&start=20040101&end=20041231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20040101",
+    "end": "20041231"
+   }
+  },
+  {
+   "variable": "T2M_MAX",
+   "year": 2004,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M_MAX&community=SB&format=JSON&start=20040101&end=20041231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2",
+     "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20040101",
+    "end": "20041231"
+   }
+  },
+  {
+   "variable": "T2M",
+   "year": 2005,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M&community=SB&format=JSON&start=20050101&end=20051231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20050101",
+    "end": "20051231"
+   }
+  },
+  {
+   "variable": "T2M_MAX",
+   "year": 2005,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M_MAX&community=SB&format=JSON&start=20050101&end=20051231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2",
+     "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20050101",
+    "end": "20051231"
+   }
+  },
+  {
+   "variable": "T2M",
+   "year": 2006,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M&community=SB&format=JSON&start=20060101&end=20061231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20060101",
+    "end": "20061231"
+   }
+  },
+  {
+   "variable": "T2M_MAX",
+   "year": 2006,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M_MAX&community=SB&format=JSON&start=20060101&end=20061231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2",
+     "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20060101",
+    "end": "20061231"
+   }
+  },
+  {
+   "variable": "T2M",
+   "year": 2007,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M&community=SB&format=JSON&start=20070101&end=20071231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20070101",
+    "end": "20071231"
+   }
+  },
+  {
+   "variable": "T2M_MAX",
+   "year": 2007,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M_MAX&community=SB&format=JSON&start=20070101&end=20071231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2",
+     "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20070101",
+    "end": "20071231"
+   }
+  },
+  {
+   "variable": "T2M",
+   "year": 2008,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M&community=SB&format=JSON&start=20080101&end=20081231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20080101",
+    "end": "20081231"
+   }
+  },
+  {
+   "variable": "T2M_MAX",
+   "year": 2008,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M_MAX&community=SB&format=JSON&start=20080101&end=20081231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2",
+     "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20080101",
+    "end": "20081231"
+   }
+  },
+  {
+   "variable": "T2M",
+   "year": 2009,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M&community=SB&format=JSON&start=20090101&end=20091231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20090101",
+    "end": "20091231"
+   }
+  },
+  {
+   "variable": "T2M_MAX",
+   "year": 2009,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M_MAX&community=SB&format=JSON&start=20090101&end=20091231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2",
+     "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20090101",
+    "end": "20091231"
+   }
+  },
+  {
+   "variable": "T2M",
+   "year": 2010,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M&community=SB&format=JSON&start=20100101&end=20101231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20100101",
+    "end": "20101231"
+   }
+  },
+  {
+   "variable": "T2M_MAX",
+   "year": 2010,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M_MAX&community=SB&format=JSON&start=20100101&end=20101231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2",
+     "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20100101",
+    "end": "20101231"
+   }
+  },
+  {
+   "variable": "T2M",
+   "year": 2011,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M&community=SB&format=JSON&start=20110101&end=20111231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20110101",
+    "end": "20111231"
+   }
+  },
+  {
+   "variable": "T2M_MAX",
+   "year": 2011,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M_MAX&community=SB&format=JSON&start=20110101&end=20111231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2",
+     "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20110101",
+    "end": "20111231"
+   }
+  },
+  {
+   "variable": "T2M",
+   "year": 2012,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M&community=SB&format=JSON&start=20120101&end=20121231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20120101",
+    "end": "20121231"
+   }
+  },
+  {
+   "variable": "T2M_MAX",
+   "year": 2012,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M_MAX&community=SB&format=JSON&start=20120101&end=20121231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2",
+     "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20120101",
+    "end": "20121231"
+   }
+  },
+  {
+   "variable": "T2M",
+   "year": 2013,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M&community=SB&format=JSON&start=20130101&end=20131231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20130101",
+    "end": "20131231"
+   }
+  },
+  {
+   "variable": "T2M_MAX",
+   "year": 2013,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M_MAX&community=SB&format=JSON&start=20130101&end=20131231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2",
+     "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20130101",
+    "end": "20131231"
+   }
+  },
+  {
+   "variable": "T2M",
+   "year": 2014,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M&community=SB&format=JSON&start=20140101&end=20141231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20140101",
+    "end": "20141231"
+   }
+  },
+  {
+   "variable": "T2M_MAX",
+   "year": 2014,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M_MAX&community=SB&format=JSON&start=20140101&end=20141231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2",
+     "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20140101",
+    "end": "20141231"
+   }
+  },
+  {
+   "variable": "T2M",
+   "year": 2015,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M&community=SB&format=JSON&start=20150101&end=20151231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20150101",
+    "end": "20151231"
+   }
+  },
+  {
+   "variable": "T2M_MAX",
+   "year": 2015,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M_MAX&community=SB&format=JSON&start=20150101&end=20151231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2",
+     "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20150101",
+    "end": "20151231"
+   }
+  },
+  {
+   "variable": "T2M",
+   "year": 2016,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M&community=SB&format=JSON&start=20160101&end=20161231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20160101",
+    "end": "20161231"
+   }
+  },
+  {
+   "variable": "T2M_MAX",
+   "year": 2016,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M_MAX&community=SB&format=JSON&start=20160101&end=20161231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2",
+     "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20160101",
+    "end": "20161231"
+   }
+  },
+  {
+   "variable": "T2M",
+   "year": 2017,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M&community=SB&format=JSON&start=20170101&end=20171231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20170101",
+    "end": "20171231"
+   }
+  },
+  {
+   "variable": "T2M_MAX",
+   "year": 2017,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M_MAX&community=SB&format=JSON&start=20170101&end=20171231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2",
+     "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20170101",
+    "end": "20171231"
+   }
+  },
+  {
+   "variable": "T2M",
+   "year": 2018,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M&community=SB&format=JSON&start=20180101&end=20181231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20180101",
+    "end": "20181231"
+   }
+  },
+  {
+   "variable": "T2M_MAX",
+   "year": 2018,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M_MAX&community=SB&format=JSON&start=20180101&end=20181231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2",
+     "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20180101",
+    "end": "20181231"
+   }
+  },
+  {
+   "variable": "T2M",
+   "year": 2019,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M&community=SB&format=JSON&start=20190101&end=20191231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20190101",
+    "end": "20191231"
+   }
+  },
+  {
+   "variable": "T2M_MAX",
+   "year": 2019,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M_MAX&community=SB&format=JSON&start=20190101&end=20191231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2",
+     "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20190101",
+    "end": "20191231"
+   }
+  },
+  {
+   "variable": "T2M",
+   "year": 2020,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M&community=SB&format=JSON&start=20200101&end=20201231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20200101",
+    "end": "20201231"
+   }
+  },
+  {
+   "variable": "T2M_MAX",
+   "year": 2020,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M_MAX&community=SB&format=JSON&start=20200101&end=20201231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2",
+     "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20200101",
+    "end": "20201231"
+   }
+  },
+  {
+   "variable": "T2M",
+   "year": 2021,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M&community=SB&format=JSON&start=20210101&end=20211231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20210101",
+    "end": "20211231"
+   }
+  },
+  {
+   "variable": "T2M_MAX",
+   "year": 2021,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M_MAX&community=SB&format=JSON&start=20210101&end=20211231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2",
+     "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20210101",
+    "end": "20211231"
+   }
+  },
+  {
+   "variable": "T2M",
+   "year": 2022,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M&community=SB&format=JSON&start=20220101&end=20221231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20220101",
+    "end": "20221231"
+   }
+  },
+  {
+   "variable": "T2M_MAX",
+   "year": 2022,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M_MAX&community=SB&format=JSON&start=20220101&end=20221231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2",
+     "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20220101",
+    "end": "20221231"
+   }
+  },
+  {
+   "variable": "T2M",
+   "year": 2023,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M&community=SB&format=JSON&start=20230101&end=20231231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20230101",
+    "end": "20231231"
+   }
+  },
+  {
+   "variable": "T2M_MAX",
+   "year": 2023,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M_MAX&community=SB&format=JSON&start=20230101&end=20231231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2",
+     "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20230101",
+    "end": "20231231"
+   }
+  },
+  {
+   "variable": "T2M",
+   "year": 2024,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M&community=SB&format=JSON&start=20240101&end=20241231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20240101",
+    "end": "20241231"
+   }
+  },
+  {
+   "variable": "T2M_MAX",
+   "year": 2024,
+   "request_url": "https://power.larc.nasa.gov/api/temporal/daily/regional?latitude-min=25&latitude-max=27&longitude-min=-101&longitude-max=-99&parameters=T2M_MAX&community=SB&format=JSON&start=20240101&end=20241231&time-standard=UTC",
+   "api_header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+     "version": "v2.10.3",
+     "name": "POWER Daily API"
+    },
+    "sources": [
+     "MERRA2",
+     "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "UTC",
+    "start": "20240101",
+    "end": "20241231"
+   }
+  }
+ ]
+}

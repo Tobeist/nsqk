@@ -1,0 +1,8 @@
+{
+ "t2m_daily_utc_vs_monthly_power_max_abs_diff": 0.16876000000000246,
+ "t2m_daily_utc_vs_monthly_power_mean_abs_diff": 0.03815171908113923,
+ "prectotcorr_daily_utc_vs_monthly_power_max_abs_diff": 1.2512228794148617,
+ "prectotcorr_daily_utc_vs_monthly_power_mean_abs_diff": 0.026005639437965515,
+ "note": "Daily series use UTC days; the monthly POWER API header declares LST.",
+ "rx5day_annual_vs_repository_max_abs_diff": 4.919158052274497e-05
+}

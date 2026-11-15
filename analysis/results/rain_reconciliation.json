@@ -1,0 +1,52 @@
+{
+ "cells": 15,
+ "weights": "cos(latitude) of cell centres",
+ "units": "mm/day, monthly mean of daily rates (each day weight 1)",
+ "a_monthly_api_vs_daily_lst": {
+  "max_abs": 0.002325468785575824,
+  "mean_abs": 0.000562706514599681,
+  "p99_abs": 0.001966533216191768,
+  "share_months_abs_gt_0.1": 0.0,
+  "top5": {
+   "1995-07": -0.0023,
+   "2016-02": -0.0023,
+   "2015-11": -0.0021,
+   "2008-03": 0.0021,
+   "1992-11": -0.002
+  }
+ },
+ "a_cellwise_monthly_api_vs_daily_lst_max_abs": 0.005000000000000782,
+ "b_daily_utc_vs_daily_lst_monthly": {
+  "max_abs": 1.2522650235423014,
+  "mean_abs": 0.02584592118635973,
+  "p99_abs": 0.29459408779414836,
+  "share_months_abs_gt_0.1": 0.05555555555555555,
+  "top5": {
+   "2010-06": -1.2523,
+   "2010-07": 1.212,
+   "2009-11": -0.5233,
+   "2009-12": 0.5062,
+   "2011-06": -0.2835
+  }
+ },
+ "b_cellwise_daily_utc_vs_lst_monthly_max_abs": 2.6459999999999995,
+ "c_monthly_api_vs_daily_utc": {
+  "max_abs": 1.2512402296401137,
+  "mean_abs": 0.026005513599077594,
+  "p99_abs": 0.2961636742065044,
+  "share_months_abs_gt_0.1": 0.05555555555555555,
+  "top5": {
+   "2010-06": 1.2512,
+   "2010-07": -1.2117,
+   "2009-11": 0.5235,
+   "2009-12": -0.5052,
+   "2011-06": 0.2852
+  }
+ },
+ "processed_region_csv_vs_recomputed_monthly_max_abs": 4.9999450892901365e-05,
+ "daily_utc_vs_lst_same_day_regional_max_abs_mm": 36.104187252568394,
+ "annual_total_mm_utc_vs_lst_max_abs": 1.0599284437356573,
+ "Rx5day_UTC_ols_slope_per_decade": 15.964088333780836,
+ "Rx5day_LST_ols_slope_per_decade": 15.928233300821756,
+ "Rx5day_UTC_vs_LST_max_abs_mm": 3.5876448642403034
+}

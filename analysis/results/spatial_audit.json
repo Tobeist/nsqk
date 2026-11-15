@@ -1,0 +1,53 @@
+{
+ "boundaries": "Natural Earth admin-1, 1:10m · public domain",
+ "note": "Geometric overlap of footprints with state polygons (unweighted); the 0.5-degree products are not clipped at borders.",
+ "requested_box": {
+  "bounds_wsen": [
+   -101.0,
+   25.0,
+   -99.0,
+   27.0
+  ],
+  "area_deg2": 4.0,
+  "share_by_state": {
+   "Texas": 0.0323,
+   "Coahuila": 0.1205,
+   "Tamaulipas": 0.0685,
+   "Nuevo León": 0.7787
+  },
+  "share_outside_listed_states": 0.0
+ },
+ "merra2_cells_footprint": {
+  "bounds_wsen": [
+   -100.9375,
+   24.75,
+   -99.0625,
+   27.25
+  ],
+  "area_deg2": 4.6875,
+  "share_by_state": {
+   "Texas": 0.0398,
+   "Coahuila": 0.1013,
+   "Tamaulipas": 0.0752,
+   "Nuevo León": 0.7838
+  },
+  "share_outside_listed_states": 0.0
+ },
+ "gpcp_cells_footprint": {
+  "bounds_wsen": [
+   -101.0,
+   25.0,
+   -99.0,
+   27.0
+  ],
+  "area_deg2": 4.0,
+  "share_by_state": {
+   "Texas": 0.0323,
+   "Coahuila": 0.1205,
+   "Tamaulipas": 0.0685,
+   "Nuevo León": 0.7787
+  },
+  "share_outside_listed_states": 0.0
+ },
+ "merra2_cells": 15
+}
