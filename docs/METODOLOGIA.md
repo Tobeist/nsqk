@@ -1,10 +1,10 @@
 # Metodología de datos y análisis — Climate Paradox
 
-**Estado:** cuatro variables mensuales y una serie diaria de NASA POWER, más dos series mensuales oficiales exportadas desde Giovanni: GPCP y `RX5Day`. Este documento describe lo que ya ejecutamos y distingue los análisis pendientes. No representa todavía un protocolo validado para las nueve variables del producto.
+**Estado:** cuatro variables mensuales y una serie diaria de NASA POWER, más dos series mensuales oficiales exportadas desde Giovanni: GPCP y `RX5Day`, procesadas para tres cajas de estudio en 1992–2024. Este documento describe el método aplicado primero a la caja noreste y distingue los análisis pendientes. No representa todavía un protocolo validado para las nueve variables del producto.
 
 ## 1. Pregunta y alcance inicial
 
-Queremos medir cómo cambió la temperatura media mensual en una caja de prueba del noreste de México y establecer un pipeline reproducible que después permita comparar promedios y extremos. La caja con datos procesados es **[-101, 25, -99, 27]** (oeste, sur, este, norte). Es un área rectangular de validación técnica; no representa la región Norte-Noreste formada por estados completos. También se [fijaron dos cajas adicionales](REGIONES.md) antes de estudiar sus tendencias; todavía no se han descargado ni procesado sus series.
+Queremos medir cómo cambió la temperatura media mensual en una caja de prueba del noreste de México y establecer un pipeline reproducible que después permita comparar promedios y extremos. La primera caja es **[-101, 25, -99, 27]** (oeste, sur, este, norte). Es un área rectangular de validación técnica; no representa la región Norte-Noreste formada por estados completos. También se [fijaron y procesaron dos cajas adicionales](REGIONES.md) antes de comparar sus tendencias. Sus archivos están en subcarpetas identificadas por región y pueden analizarse en la aplicación.
 
 Usamos enero de 2010 a diciembre de 2012 para verificar extracción y estructura, y enero de 1992 a diciembre de 2024 para el primer análisis histórico. Elegimos el periodo antes de calcular la tendencia. Los tres años de prueba no se usan para inferencia de tendencias.
 
@@ -140,4 +140,10 @@ Los seis JSON mensuales integrados conservan enero de 1992 a diciembre de 2024 s
 La gráfica y el CSV usan las medias simples de los doce meses de cada año seleccionado. La recta mostrada conserva la pendiente mensual y se centra en la media de esos resúmenes anuales; sirve de guía visual. Las anomalías almacenadas conservan la referencia fija 1992–2021, pero no entran en el ajuste de tendencias por periodo. Cada periodo elegido constituye un análisis exploratorio nuevo; seleccionar varios hasta encontrar un intervalo que excluya cero requiere control de pruebas múltiples antes de presentar un hallazgo firme.
 
 El RX5day **anual derivado de POWER** usa directamente sus máximos anuales, con un mínimo de veinte años consecutivos como `scripts/analyze_annual.py`. `lib/annual-trend.ts` recalcula la regresión anual lineal y la covarianza HAC de Bartlett con tres rezagos. La ventana completa reproduce pendiente e IC del resultado Python a una tolerancia de `1e-9`. La evidencia, el CSV y el chat local muestran el método y tamaño de muestra de la variable activa. El índice anual y el RX5Day mensual de Giovanni no se consideran intercambiables.
+
+## 14. Aplicación a Chihuahua interior y la caja sur
+
+Repetimos el flujo anterior para `mx-chihuahua-interior` (`[-107, 28, -105, 30]`) y `mx-south-humid` (`[-94, 16, -92, 18]`) con el mismo periodo 1992–2024. Los scripts aceptan `--region` y guardan originales, procesados y resultados en subcarpetas con ese ID. Antes del análisis, comprueban que el ID y la caja de los metadatos coincidan con la ruta solicitada. Se ejecutaron cuatro consultas mensuales POWER por caja y 33 consultas diarias POWER por caja, una por año. También se exportaron por Giovanni GPCP y RX5Day para cada caja.
+
+Las cuatro series mensuales POWER y las dos de Giovanni tienen 396 meses consecutivos sin valores faltantes en cada caja. Las respuestas mensuales POWER contienen 20 centros de celda válidos en Chihuahua y 15 en la caja sur. El índice anual derivado de los datos diarios tiene 33 valores por caja. Giovanni guarda en sus CSV una caja efectiva específica del producto; sus límites figuran en el [glosario](DATASETS.md) y en los metadatos procesados. La interfaz recalcula tendencias con la región, variable y periodo seleccionados. Los resultados son **exploratorios**: todavía no hay prueba directa de la diferencia entre pendientes regionales ni corrección por comparaciones múltiples.
 

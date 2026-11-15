@@ -1,6 +1,6 @@
 # Glosario de datos y variables
 
-**Actualizado:** 14 de noviembre de 2026. Las series disponibles proceden de [NASA POWER Monthly Regional API](https://power.larc.nasa.gov/docs/services/api/temporal/monthly/) para la caja de prueba `[-101, 25, -99, 27]` (oeste, sur, este, norte). POWER informa MERRA-2 como fuente meteorológica. La caja no representa una de las cinco regiones completas propuestas para la aplicación.
+**Actualizado:** 14 de noviembre de 2026. Hay series de [NASA POWER Monthly Regional API](https://power.larc.nasa.gov/docs/services/api/temporal/monthly/), POWER Daily y Giovanni para las [tres cajas de estudio](REGIONES.md). POWER informa MERRA-2 como fuente meteorológica. Las cajas son rectángulos de análisis y no representan regiones administrativas completas. Las tres pueden seleccionarse en la interfaz.
 
 ## Fuentes
 
@@ -28,7 +28,13 @@ En la interfaz actual están habilitadas T2M, T2M_MIN, T2M_MAX, PRECTOTCORR mens
 
 **MERRA-2 `M2SMNXEDI_2_RX5Day` — Lluvia máxima en un intervalo de cinco días.** Índice mensual en mm por cinco días, promediado espacialmente por Giovanni para 1992–2024. No es la misma operación que nuestro máximo **anual** calculado con datos diarios de POWER. Su CSV original informa valor de relleno `-9999`. [CSV original](../data/raw/giovanni/rx5day_1992_2024.csv) · [CSV limpio](../data/processed/giovanni_rx5day_1992_2024.csv) · [Resultado](../data/results/giovanni_rx5day_1992_2024.json). También conservamos la [prueba 2010–2012](../data/raw/giovanni/rx5day_2010_2012.csv).
 
-Las cuatro series históricas cubren **396 meses**, con **15 celdas válidas por mes** y sin faltantes. Los CSV de cada punto de malla y los archivos `*.metadata.json` están en [`data/processed/`](../data/processed/). El [JSON de prueba 2010–2012](../data/raw/power_t2m_2010_2012.json) también se conserva.
+En la caja noreste, las cuatro series POWER históricas cubren **396 meses**, con **15 celdas válidas por mes** y sin faltantes. Los CSV de cada punto de malla y los archivos `*.metadata.json` están en [`data/processed/`](../data/processed/). El [JSON de prueba 2010–2012](../data/raw/power_t2m_2010_2012.json) también se conserva.
+
+## Cobertura de las tres cajas
+
+Las mismas siete variables están procesadas para **Chihuahua interior** (`[-107, 28, -105, 30]`) y la **caja sur** (`[-94, 16, -92, 18]`). Los originales, las series y los resultados de cada una están en [datos crudos de Chihuahua](../data/raw/mx-chihuahua-interior/), [procesados de Chihuahua](../data/processed/mx-chihuahua-interior/), [resultados de Chihuahua](../data/results/mx-chihuahua-interior/), [datos crudos del sur](../data/raw/mx-south-humid/), [procesados del sur](../data/processed/mx-south-humid/) y [resultados del sur](../data/results/mx-south-humid/). Cada serie mensual cubre 396 meses de 1992–2024 sin faltantes; el RX5day anual derivado de POWER cubre 33 años. Los datos mensuales POWER contienen 20 celdas en Chihuahua y 15 en el sur. Se conservan 33 respuestas JSON diarias por caja.
+
+Los archivos de Giovanni contienen series **ya promediadas espacialmente**, no una malla que podamos volver a recortar. La caja efectiva GPCP es `[-106.75, 28.25, -105.25, 29.75]` en Chihuahua y `[-93.75, 16.25, -92.25, 17.75]` en el sur; para RX5Day es `[-106.875, 28, -105, 30]` y `[-93.75, 16, -92.5, 18]`, respectivamente. Estos límites están en los metadatos originales de Giovanni. Los tres productos no cubren exactamente los mismos centros de celda; las diferencias entre sus tendencias requieren un análisis de comparabilidad antes de interpretarse como diferencias climáticas.
 
 ## Campos y resultados derivados
 

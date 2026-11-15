@@ -4,6 +4,8 @@ out/
 .env*
 !.env.example
 *.tsbuildinfo
+__pycache__/
+*.py[cod]
 .DS_Store
 .agents/skills/stageshow/node_modules/
 .agents/skills/stageshow/playground/dist/

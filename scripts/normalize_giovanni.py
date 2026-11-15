@@ -6,6 +6,8 @@ import json
 import math
 from pathlib import Path
 
+from study_regions import DEFAULT_REGION, check_region_path, region_ids, study_box
+
 
 VARIABLES = {
     "GPCPMON_3_3_sat_gauge_precip": ("gpcp_mm_day", "mm/day"),
@@ -13,7 +15,12 @@ VARIABLES = {
 }
 
 
-def run(source: Path, output: Path, metadata_path: Path, variable: str) -> None:
+def run(source: Path, output: Path, metadata_path: Path, variable: str,
+        region_id: str = DEFAULT_REGION, data_root: Path = Path("data")) -> None:
+    bbox = study_box(region_id)
+    check_region_path(source, data_root, "raw", region_id)
+    check_region_path(output, data_root, "processed", region_id)
+    check_region_path(metadata_path, data_root, "processed", region_id)
     with source.open(encoding="utf-8-sig", newline="") as handle:
         raw_rows = list(csv.reader(handle))
     header_index = next((i for i, row in enumerate(raw_rows) if row and row[0].strip() == "time"), None)
@@ -25,7 +32,11 @@ def run(source: Path, output: Path, metadata_path: Path, variable: str) -> None:
     metadata = {row[0].rstrip(":").strip(): row[1].strip() for row in raw_rows[:header_index] if len(row) == 2 and row[0].strip()}
     if variable not in metadata.get("URL to Reproduce Results", ""):
         raise ValueError("Variable mismatch in reproduction URL")
-    if metadata.get("User Bounding Box") != "-101,25,-99,27":
+    try:
+        user_bbox = tuple(float(part.strip()) for part in metadata["User Bounding Box"].split(","))
+    except (KeyError, ValueError) as exc:
+        raise ValueError("Missing or invalid Giovanni user bounding box") from exc
+    if user_bbox != bbox:
         raise ValueError("Unexpected user bounding box")
     fill_key = f"Fill Value ({expected_column})"
     fill = float(metadata[fill_key])
@@ -62,6 +73,7 @@ def run(source: Path, output: Path, metadata_path: Path, variable: str) -> None:
     metadata_path.parent.mkdir(parents=True, exist_ok=True)
     metadata_path.write_text(json.dumps({
         "source": "NASA Giovanni area-averaged time series CSV",
+        "region_id": region_id, "bbox_wsen": bbox,
         "variable": variable, "units": units,
         "source_file": str(source), "original_metadata": metadata,
         "months": len(rows), "missing_months": missing,
@@ -76,5 +88,7 @@ if __name__ == "__main__":
     parser.add_argument("output", type=Path)
     parser.add_argument("metadata", type=Path)
     parser.add_argument("--variable", required=True, choices=VARIABLES)
+    parser.add_argument("--region", choices=region_ids(), default=DEFAULT_REGION)
+    parser.add_argument("--data-root", type=Path, default=Path("data"))
     args = parser.parse_args()
-    run(args.source, args.output, args.metadata, args.variable)
+    run(args.source, args.output, args.metadata, args.variable, args.region, args.data_root)

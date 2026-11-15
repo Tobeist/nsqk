@@ -9,8 +9,13 @@ from pathlib import Path
 import numpy as np
 import statsmodels.api as sm
 
+from study_regions import DEFAULT_REGION, check_region_path, check_source_metadata, region_ids, study_box
 
-def run(source: Path, output: Path) -> None:
+def run(source: Path, output: Path, region_id: str = DEFAULT_REGION,
+        data_root: Path = Path("data")) -> None:
+    check_region_path(source, data_root, "processed", region_id)
+    check_region_path(output, data_root, "results", region_id)
+    check_source_metadata(source, region_id)
     rows = list(csv.DictReader(source.open(encoding="utf-8", newline="")))
     dates = [r["date"] for r in rows]
     if len(set(dates)) != len(dates) or dates != sorted(dates):
@@ -44,7 +49,8 @@ def run(source: Path, output: Path) -> None:
         annual[int(year)].append(float(value))
     result = {
         "source": "NASA POWER monthly regional T2M; API reports MERRA2",
-        "region_bbox_wsen": [-101, 25, -99, 27],
+        "region_id": region_id,
+        "region_bbox_wsen": study_box(region_id),
         "period": [int(years[0]), int(years[-1])],
         "units": "degC",
         "baseline": "1992-2021 calendar-month means",
@@ -67,5 +73,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("source", type=Path)
     parser.add_argument("output", type=Path)
+    parser.add_argument("--region", choices=region_ids(), default=DEFAULT_REGION)
+    parser.add_argument("--data-root", type=Path, default=Path("data"))
     args = parser.parse_args()
-    run(args.source, args.output)
+    run(args.source, args.output, args.region, args.data_root)

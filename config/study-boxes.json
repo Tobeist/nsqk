@@ -12,13 +12,13 @@
       "id": "mx-chihuahua-interior",
       "name": "Chihuahua interior",
       "bbox": [-107, 28, -105, 30],
-      "data_status": "defined"
+      "data_status": "processed"
     },
     {
       "id": "mx-south-humid",
       "name": "Caja sur (Chiapas–Tabasco)",
       "bbox": [-94, 16, -92, 18],
-      "data_status": "defined"
+      "data_status": "processed"
     }
   ]
 }

@@ -24,8 +24,8 @@ import {
   ShapeUtils,
 } from "three";
 import { Crosshair, Minus, Plus, RotateCcw } from "lucide-react";
-import { intersectedStates, type StateFeature } from "@/lib/geography";
-import { regions, type Region } from "@/lib/catalog";
+import { studyStateFeatures, type StateFeature } from "@/lib/geography";
+import { getRegion, regions, type Region } from "@/lib/catalog";
 import type { MapRegionValue } from "@/lib/map-layer";
 import type { OrbitControls as OrbitControlsType } from "three-stdlib";
 const position = (
@@ -221,17 +221,19 @@ function Earth() {
     </group>
   );
 }
-function Controls({ action }: { action: { type: string; tick: number } }) {
+function Controls({ action, region }: { action: { type: string; tick: number }; region: Region }) {
   const ref = useRef<OrbitControlsType>(null);
+  const previousRegion = useRef(region.id);
   const { camera, invalidate } = useThree();
   useEffect(() => {
-    if (action.type === "reset")
-      camera.position.copy(new Vector3(...position(26, -103, 5.8)));
-    if (action.type === "in") camera.position.multiplyScalar(0.85);
-    if (action.type === "out") camera.position.multiplyScalar(1.18);
+    if (action.type === "reset" || previousRegion.current !== region.id) {
+      camera.position.copy(new Vector3(...position(region.lat, region.lon, 5.8)));
+      previousRegion.current = region.id;
+    } else if (action.type === "in") camera.position.multiplyScalar(0.85);
+    else if (action.type === "out") camera.position.multiplyScalar(1.18);
     ref.current?.update();
     invalidate();
-  }, [action, camera, invalidate]);
+  }, [action, camera, invalidate, region]);
   return (
     <OrbitControls
       ref={ref}
@@ -284,6 +286,7 @@ export default function Globe({
   forceFallback?: boolean;
   layer?: MapRegionValue[];
 }) {
+  const selectedRegion = getRegion(regionId);
   const [supported] = useState(() => {
     if (typeof document === "undefined") return true;
     try {
@@ -304,10 +307,10 @@ export default function Globe({
             style={{ position: "absolute", inset: 0 }}
             dpr={[1, 1.6]}
             frameloop="demand"
-            camera={{ position: position(26, -103, 5.8), fov: 42 }}
+            camera={{ position: position(selectedRegion.lat, selectedRegion.lon, 5.8), fov: 42 }}
             gl={{ antialias: true, alpha: true }}
             fallback={<Fallback />}
-            aria-label="Globo terrestre interactivo. Arrastra para rotar y usa la rueda para acercar. La caja noreste de México tiene datos disponibles."
+            aria-label="Globo terrestre interactivo con tres cajas de estudio en México. Arrastra para rotar y usa la rueda para acercar."
           >
             <ambientLight intensity={1.7} />
             <directionalLight
@@ -322,7 +325,7 @@ export default function Globe({
             />
             <Suspense fallback={null}>
               <Earth />
-              {intersectedStates.map((f) => (
+              {studyStateFeatures.map((f) => (
                 <StateSurface key={f.properties.id} feature={f} />
               ))}
               {regions.map((region) => (
@@ -335,7 +338,7 @@ export default function Globe({
                 />
               ))}
             </Suspense>
-            <Controls action={action} />
+            <Controls action={action} region={selectedRegion} />
           </Canvas>
         </GlobeBoundary>
       )}
@@ -358,8 +361,8 @@ export default function Globe({
         </button>
         <span />
         <button
-          title="Volver a Norteamérica"
-          aria-label="Volver a Norteamérica"
+          title="Volver a la región seleccionada"
+          aria-label="Volver a la región seleccionada"
           onClick={() =>
             setAction((a) => ({ type: "reset", tick: a.tick + 1 }))
           }
@@ -369,7 +372,7 @@ export default function Globe({
         </button>
       </div>
       <div className="globe-coordinate">
-        <Crosshair size={13} /> 26° N &nbsp; 103° O <span>VISTA INICIAL</span>
+        <Crosshair size={13} /> {selectedRegion.lat}° N &nbsp; {Math.abs(selectedRegion.lon)}° O <span>CAJA SELECCIONADA</span>
       </div>
     </div>
   );

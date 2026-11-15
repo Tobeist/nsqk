@@ -17,7 +17,7 @@ export const localEvidenceChatAdapter: ChatAdapter = {
     if (!s) return { text: "No hay datos para esta selección.", evidence: "method" };
     const q = question.toLowerCase();
     if (/causa|niño|enso|pdo|futuro|pron[oó]st|clim[aá]tico/.test(q))
-      return { text: "Este análisis describe la serie y su incertidumbre. No permite atribuir causas, aislar ENSO/PDO ni pronosticar. La caja estudiada tampoco representa todo el noreste de México.", evidence: "method" };
+      return { text: "Este análisis describe la serie y su incertidumbre. No permite atribuir causas, aislar ENSO/PDO ni pronosticar. La caja estudiada no representa estados completos ni todo México.", evidence: "method" };
     if (/evidencia|intervalo|significativ|significancia|confian|segur|clara/.test(q))
       return { text: `El intervalo del 95 % es ${signed(s.confidenceInterval[0], 3)} a ${signed(s.confidenceInterval[1], 3)} ${context.unit}/década. ${evidenceLabel(s)} en esta caja y periodo. Un intervalo que incluye cero no demuestra ausencia de cambio. Son resultados exploratorios sin corrección por múltiples pruebas.`, evidence: "interval" };
     return { text: `La pendiente estimada es ${signed(s.slopePerDecade, 3)} ${context.unit} por década para ${context.selection.start}–${context.selection.end}. Se estimó con ${s.sampleSize} ${context.sampleUnit} mediante ${context.method.name}. La gráfica muestra ${context.annualLabel}. ${context.sources.limitations[0]}`, evidence: "slope" };

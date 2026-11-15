@@ -1,0 +1,25 @@
+{
+  "source": "NASA Giovanni area-averaged time series CSV",
+  "region_id": "mx-south-humid",
+  "bbox_wsen": [
+    -94,
+    16,
+    -92,
+    18
+  ],
+  "variable": "M2SMNXEDI_2_RX5Day",
+  "units": "mm per 5 days",
+  "source_file": "data\\raw\\mx-south-humid\\giovanni\\rx5day_1992_2024.csv",
+  "original_metadata": {
+    "Title": "Time Series, Area-Averaged of highest precipitation amount for a five-day interval monthly 0.5 x 0.625 (monthly)",
+    "User Start Date": "1992-01-01T00:00:00Z",
+    "User End Date": "2024-12-31T23:59:59Z",
+    "User Bounding Box": "-94,16,-92,18",
+    "Data Bounding Box": "-93.75,16,-92.5,18",
+    "URL to Reproduce Results": "https://giovanni.gsfc.nasa.gov/giovanni/#service=ArAvTs&starttime=1992-01-01T00:00:00Z&endtime=2024-12-31T23:59:59Z&bbox=-94,16,-92,18&data=M2SMNXEDI_2_RX5Day&portal=GIOVANNI&format=json",
+    "Fill Value (mean_M2SMNXEDI_2_RX5Day)": "-9999"
+  },
+  "months": 396,
+  "missing_months": 0,
+  "note": "Unit from Giovanni plot description; original CSV contains no machine-readable units field. Spatial averaging performed by Giovanni, not our POWER pipeline."
+}

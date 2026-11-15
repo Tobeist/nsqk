@@ -5,7 +5,21 @@ import precipitation from "../data/results/giovanni_gpcp_1992_2024.json";
 import precipitationPower from "../data/results/power_prectotcorr_region_1992_2024.json";
 import rain5 from "../data/results/giovanni_rx5day_1992_2024.json";
 import rain5PowerAnnual from "../data/results/power_rx5day_annual_region_1992_2024.json";
-import { getRegion, type VariableId } from "./catalog";
+import chihuahuaTemperature from "../data/results/mx-chihuahua-interior/power_t2m_region_1992_2024.json";
+import chihuahuaTemperatureMin from "../data/results/mx-chihuahua-interior/power_t2m_min_region_1992_2024.json";
+import chihuahuaTemperatureMax from "../data/results/mx-chihuahua-interior/power_t2m_max_region_1992_2024.json";
+import chihuahuaPrecipitation from "../data/results/mx-chihuahua-interior/giovanni_gpcp_1992_2024.json";
+import chihuahuaPrecipitationPower from "../data/results/mx-chihuahua-interior/power_prectotcorr_region_1992_2024.json";
+import chihuahuaRain5 from "../data/results/mx-chihuahua-interior/giovanni_rx5day_1992_2024.json";
+import chihuahuaRain5PowerAnnual from "../data/results/mx-chihuahua-interior/power_rx5day_annual_region_1992_2024.json";
+import southTemperature from "../data/results/mx-south-humid/power_t2m_region_1992_2024.json";
+import southTemperatureMin from "../data/results/mx-south-humid/power_t2m_min_region_1992_2024.json";
+import southTemperatureMax from "../data/results/mx-south-humid/power_t2m_max_region_1992_2024.json";
+import southPrecipitation from "../data/results/mx-south-humid/giovanni_gpcp_1992_2024.json";
+import southPrecipitationPower from "../data/results/mx-south-humid/power_prectotcorr_region_1992_2024.json";
+import southRain5 from "../data/results/mx-south-humid/giovanni_rx5day_1992_2024.json";
+import southRain5PowerAnnual from "../data/results/mx-south-humid/power_rx5day_annual_region_1992_2024.json";
+import { getRegion, regions, type VariableId } from "./catalog";
 import { selectionKey, type Analysis, type Selection, type VariableResult } from "./contracts";
 import { seasonalTrend } from "./seasonal-trend";
 import { annualTrend } from "./annual-trend";
@@ -28,6 +42,7 @@ export const realDefaultSelection: Selection = {
 };
 
 type MonthlyResult = {
+  region_id?: string;
   n_months: number;
   monthly: Array<{ date: string; value?: number; t2m_c?: number }>;
 };
@@ -35,7 +50,6 @@ type MonthlyVariableId =
   | "temperature" | "temperature-min" | "temperature-max"
   | "precipitation" | "precipitation-power" | "rain5";
 type MonthlySource = {
-  data: MonthlyResult;
   unit: string;
   source: string;
   limitations: string[];
@@ -43,28 +57,56 @@ type MonthlySource = {
 
 const monthlySources: Record<MonthlyVariableId, MonthlySource> = {
   temperature: {
-    data: temperature, unit: "°C", source: "NASA POWER T2M · MERRA-2",
+    unit: "°C", source: "NASA POWER T2M · MERRA-2",
     limitations: ["POWER T2M no se ha cotejado directamente con Giovanni T2M."],
   },
   "temperature-min": {
-    data: temperatureMin, unit: "°C", source: "NASA POWER T2M_MIN · MERRA-2",
+    unit: "°C", source: "NASA POWER T2M_MIN · MERRA-2",
     limitations: ["T2M_MIN mensual no cuenta noches cálidas ni tropicales."],
   },
   "temperature-max": {
-    data: temperatureMax, unit: "°C", source: "NASA POWER T2M_MAX · MERRA-2",
+    unit: "°C", source: "NASA POWER T2M_MAX · MERRA-2",
     limitations: ["T2M_MAX mensual no cuenta días ni duración de olas de calor."],
   },
   precipitation: {
-    data: precipitation, unit: "mm/día", source: "NASA Giovanni · GPCP satélite + pluviómetros",
+    unit: "mm/día", source: "NASA Giovanni · GPCP satélite + pluviómetros",
     limitations: ["GPCP combina satélite y pluviómetros; no equivale a PRECTOTCORR de POWER."],
   },
   "precipitation-power": {
-    data: precipitationPower, unit: "mm/día", source: "NASA POWER PRECTOTCORR · MERRA-2",
+    unit: "mm/día", source: "NASA POWER PRECTOTCORR · MERRA-2",
     limitations: ["PRECTOTCORR es una tasa media mensual corregida; no equivale a GPCP ni a un acumulado mensual."],
   },
   rain5: {
-    data: rain5, unit: "mm", source: "NASA Giovanni · MERRA-2 M2SMNXEDI RX5Day mensual",
+    unit: "mm", source: "NASA Giovanni · MERRA-2 M2SMNXEDI RX5Day mensual",
     limitations: ["RX5Day de Giovanni es un índice mensual; no equivale al máximo anual derivado de POWER."],
+  },
+};
+
+type AnnualResult = { region_id?: string; annual: Array<{ year: number; rx5day_mm: number }> };
+type RegionData = { monthly: Record<MonthlyVariableId, MonthlyResult>; annual: AnnualResult };
+const regionData: Record<string, RegionData> = {
+  "mx-northeast": {
+    monthly: {
+      temperature, "temperature-min": temperatureMin, "temperature-max": temperatureMax,
+      precipitation, "precipitation-power": precipitationPower, rain5,
+    },
+    annual: rain5PowerAnnual,
+  },
+  "mx-chihuahua-interior": {
+    monthly: {
+      temperature: chihuahuaTemperature, "temperature-min": chihuahuaTemperatureMin,
+      "temperature-max": chihuahuaTemperatureMax, precipitation: chihuahuaPrecipitation,
+      "precipitation-power": chihuahuaPrecipitationPower, rain5: chihuahuaRain5,
+    },
+    annual: chihuahuaRain5PowerAnnual,
+  },
+  "mx-south-humid": {
+    monthly: {
+      temperature: southTemperature, "temperature-min": southTemperatureMin,
+      "temperature-max": southTemperatureMax, precipitation: southPrecipitation,
+      "precipitation-power": southPrecipitationPower, rain5: southRain5,
+    },
+    annual: southRain5PowerAnnual,
   },
 };
 
@@ -74,8 +116,9 @@ function isMonthlyVariable(id: VariableId): id is MonthlyVariableId {
 
 function createMonthlyResult(id: MonthlyVariableId, selection: Selection): VariableResult {
   const entry = monthlySources[id];
-  const data = entry.data;
-  if (data.n_months !== 396 || data.monthly.length !== 396) {
+  const data = regionData[selection.regionId].monthly[id];
+  if ((data.region_id ?? "mx-northeast") !== selection.regionId ||
+      data.n_months !== 396 || data.monthly.length !== 396) {
     throw new Error(`Resultado incompleto para ${id}`);
   }
   const monthly = data.monthly.filter((row) => {
@@ -131,10 +174,12 @@ function createAnnualResult(selection: Selection): VariableResult {
   if (years < minimumAnnualIndexYears) {
     throw new Error("RX5day anual de POWER requiere al menos veinte años completos.");
   }
-  const annual = rain5PowerAnnual.annual.filter((row) =>
+  const data = regionData[selection.regionId].annual;
+  const annual = data.annual.filter((row) =>
     row.year >= selection.start && row.year <= selection.end,
   );
-  if (rain5PowerAnnual.annual.length !== 33 || annual.length !== years ||
+  if ((data.region_id ?? "mx-northeast") !== selection.regionId ||
+      data.annual.length !== 33 || annual.length !== years ||
       annual.some((row, i) => row.year !== selection.start + i || !Number.isFinite(row.rx5day_mm))) {
     throw new Error("Serie anual de POWER incompleta o inválida.");
   }
@@ -172,14 +217,14 @@ function createAnnualResult(selection: Selection): VariableResult {
 }
 
 export function createRealAnalysis(selection: Selection): Analysis {
-  if (selection.regionId !== "mx-northeast" ||
+  if (!regions.some((region) => region.id === selection.regionId) || !regionData[selection.regionId] ||
       !Number.isInteger(selection.start) || !Number.isInteger(selection.end) ||
       selection.start < firstDataYear || selection.end > lastDataYear ||
       selection.end - selection.start + 1 < minimumYearsForVariables(selection.variables) ||
       selection.variables.length < 1 || selection.variables.length > 3 ||
       new Set(selection.variables).size !== selection.variables.length ||
       selection.variables.some((id) => !isMonthlyVariable(id) && id !== annualIndexId)) {
-    throw new Error("Selecciona la caja disponible, hasta tres variables integradas y un periodo válido: mínimo diez años, o veinte si incluye RX5day anual de POWER.");
+    throw new Error("Selecciona una de las tres cajas, hasta tres variables integradas y un periodo válido: mínimo diez años, o veinte si incluye RX5day anual de POWER.");
   }
   const results = selection.variables.map((id) =>
     id === annualIndexId ? createAnnualResult(selection) : createMonthlyResult(id as MonthlyVariableId, selection),
@@ -193,9 +238,9 @@ export function createRealAnalysis(selection: Selection): Analysis {
     provenance: {
       source: "NASA POWER (T2M, PRECTOTCORR, índice derivado) y NASA Giovanni (GPCP, RX5Day)",
       updatedAt: "2026-11-14",
-      resolution: "Caja 101–99° O, 25–27° N. POWER y Giovanni usan mallas y agregaciones distintas; no representa todo el noreste de México.",
+      resolution: `Caja [${getRegion(selection.regionId).bbox.join(", ")}]. POWER y Giovanni usan mallas y agregaciones distintas; no representa estados completos.`,
       limitations: [
-        "Resultados exploratorios para una sola caja; no son tendencias de una región administrativa.",
+        "Resultados exploratorios para una caja de estudio; no son tendencias de una región administrativa.",
         "Sin corrección por múltiples pruebas, ENSO/PDO ni atribución causal.",
         "Las variables proceden de productos y escalas temporales distintos; no se comparan sus pendientes numéricamente de forma directa.",
       ],

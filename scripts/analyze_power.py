@@ -9,8 +9,13 @@ from pathlib import Path
 import numpy as np
 import statsmodels.api as sm
 
+from study_regions import DEFAULT_REGION, check_region_path, check_source_metadata, region_ids, study_box
 
-def run(source: Path, output: Path, product_source: str = "POWER") -> None:
+def run(source: Path, output: Path, product_source: str = "POWER",
+        region_id: str = DEFAULT_REGION, data_root: Path = Path("data")) -> None:
+    check_region_path(source, data_root, "processed", region_id)
+    check_region_path(output, data_root, "results", region_id)
+    check_source_metadata(source, region_id)
     with source.open(encoding="utf-8", newline="") as handle:
         reader = csv.DictReader(handle)
         columns = [c for c in reader.fieldnames if c not in ("date", "valid_grid_cells")]
@@ -45,7 +50,8 @@ def run(source: Path, output: Path, product_source: str = "POWER") -> None:
     result = {
         "source": "NASA POWER monthly regional API" if product_source == "POWER" else "NASA Giovanni area-averaged monthly CSV",
         "measurement": column,
-        "bbox_wsen": [-101, 25, -99, 27],
+        "region_id": region_id,
+        "bbox_wsen": study_box(region_id),
         "period": [int(years[0]), int(years[-1])],
         "baseline": "1992-2021 monthly climatology",
         "method": "OLS with linear time and 11 month indicators; HAC covariance with 12 monthly lags",
@@ -67,5 +73,7 @@ if __name__ == "__main__":
     parser.add_argument("source", type=Path)
     parser.add_argument("output", type=Path)
     parser.add_argument("--product-source", choices=("POWER", "Giovanni"), default="POWER")
+    parser.add_argument("--region", choices=region_ids(), default=DEFAULT_REGION)
+    parser.add_argument("--data-root", type=Path, default=Path("data"))
     args = parser.parse_args()
-    run(args.source, args.output, args.product_source)
+    run(args.source, args.output, args.product_source, args.region, args.data_root)

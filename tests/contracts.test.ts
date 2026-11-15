@@ -9,6 +9,12 @@ import temperatureMin from "../data/results/power_t2m_min_region_1992_2024.json"
 import temperatureMax from "../data/results/power_t2m_max_region_1992_2024.json";
 import precipitationPower from "../data/results/power_prectotcorr_region_1992_2024.json";
 import rain5PowerAnnual from "../data/results/power_rx5day_annual_region_1992_2024.json";
+import chihuahuaTemperature from "../data/results/mx-chihuahua-interior/power_t2m_region_1992_2024.json";
+import chihuahuaGpcp from "../data/results/mx-chihuahua-interior/giovanni_gpcp_1992_2024.json";
+import chihuahuaAnnual from "../data/results/mx-chihuahua-interior/power_rx5day_annual_region_1992_2024.json";
+import southTemperature from "../data/results/mx-south-humid/power_t2m_region_1992_2024.json";
+import southGpcp from "../data/results/mx-south-humid/giovanni_gpcp_1992_2024.json";
+import southAnnual from "../data/results/mx-south-humid/power_rx5day_annual_region_1992_2024.json";
 
 test("MVP uses the three processed NASA series and their monthly statistics", () => {
   const analysis = createRealAnalysis(realDefaultSelection);
@@ -102,6 +108,37 @@ test("unsupported region, short or unavailable time window, or pending variable 
   assert.throws(() => createRealAnalysis({ ...realDefaultSelection, start: 1991 }));
   assert.throws(() => createRealAnalysis({ ...realDefaultSelection, end: 2025 }));
   assert.throws(() => createRealAnalysis({ ...realDefaultSelection, variables: ["surface-moisture"] }));
+});
+
+test("Chihuahua and south use their own seven processed series", () => {
+  const expected = [
+    ["mx-chihuahua-interior", chihuahuaTemperature, chihuahuaGpcp, chihuahuaAnnual],
+    ["mx-south-humid", southTemperature, southGpcp, southAnnual],
+  ] as const;
+  for (const [regionId, temperatureSource, gpcpSource, annualSource] of expected) {
+    const temperatureAnalysis = createRealAnalysis({
+      ...realDefaultSelection, regionId,
+      variables: ["temperature", "temperature-min", "temperature-max"],
+    });
+    const rainAnalysis = createRealAnalysis({
+      ...realDefaultSelection, regionId,
+      variables: ["precipitation", "precipitation-power", "rain5"],
+    });
+    const annualAnalysis = createRealAnalysis({
+      ...realDefaultSelection, regionId, variables: ["rain5-power-annual"],
+    });
+    assert.equal(temperatureAnalysis.region.id, regionId);
+    assert.equal(temperatureAnalysis.provenance.resolution.includes(temperatureAnalysis.region.bbox.join(", ")), true);
+    for (const result of [...temperatureAnalysis.results, ...rainAnalysis.results]) {
+      assert.equal(result.statistics?.sampleSize, 396);
+      assert.equal(result.series.length, 33);
+    }
+    assert.ok(Math.abs(temperatureAnalysis.results[0].statistics!.slopePerDecade - temperatureSource.trend_c_per_decade) < 1e-9);
+    assert.ok(Math.abs(rainAnalysis.results[0].statistics!.slopePerDecade - gpcpSource.trend_per_decade) < 1e-9);
+    assert.ok(Math.abs(annualAnalysis.results[0].statistics!.slopePerDecade - annualSource.trend_mm_per_decade) < 1e-9);
+    assert.equal(annualAnalysis.results[0].statistics?.sampleSize, 33);
+    assert.match(analysisCsv(rainAnalysis, "precipitation"), new RegExp(regionId));
+  }
 });
 
 test("download and local explanation identify the actual source", async () => {

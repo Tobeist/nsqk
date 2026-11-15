@@ -9,27 +9,29 @@ from pathlib import Path
 
 import requests
 
+from study_regions import DEFAULT_REGION, data_dir, region_ids, study_box
 
 URL = "https://power.larc.nasa.gov/api/temporal/daily/regional"
-BBOX = (-101, 25, -99, 27)
 VARIABLE = "PRECTOTCORR"
 
 
-def run(start: int, end: int, output: Path) -> None:
-    raw_dir = output / "raw" / "power_daily_prectotcorr"
+def run(start: int, end: int, output: Path, region_id: str = DEFAULT_REGION) -> None:
+    bbox = study_box(region_id)
+    raw_dir = data_dir(output, "raw", region_id) / "power_daily_prectotcorr"
     raw_dir.mkdir(parents=True, exist_ok=True)
-    grid_path = output / "processed" / f"power_prectotcorr_daily_grid_{start}_{end}.csv"
-    index_path = output / "processed" / f"power_rx5day_annual_grid_{start}_{end}.csv"
-    region_path = output / "processed" / f"power_rx5day_annual_region_{start}_{end}.csv"
-    metadata_path = output / "processed" / f"power_rx5day_annual_region_{start}_{end}.metadata.json"
+    processed = data_dir(output, "processed", region_id)
+    grid_path = processed / f"power_prectotcorr_daily_grid_{start}_{end}.csv"
+    index_path = processed / f"power_rx5day_annual_grid_{start}_{end}.csv"
+    region_path = processed / f"power_rx5day_annual_region_{start}_{end}.csv"
+    metadata_path = processed / f"power_rx5day_annual_region_{start}_{end}.metadata.json"
     grid_path.parent.mkdir(parents=True, exist_ok=True)
     cell_rows, annual_rows, region_rows, requests_used = [], [], [], []
     reference_cells = None
 
     for year in range(start, end + 1):
         params = {
-            "latitude-min": BBOX[1], "latitude-max": BBOX[3],
-            "longitude-min": BBOX[0], "longitude-max": BBOX[2],
+            "latitude-min": bbox[1], "latitude-max": bbox[3],
+            "longitude-min": bbox[0], "longitude-max": bbox[2],
             "parameters": VARIABLE, "community": "SB", "format": "JSON",
             "start": f"{year}0101", "end": f"{year}1231", "time-standard": "UTC",
         }
@@ -54,7 +56,7 @@ def run(start: int, end: int, output: Path) -> None:
         year_rows = []
         for feature in data["features"]:
             lon, lat = feature["geometry"]["coordinates"][:2]
-            if not (BBOX[0] <= lon <= BBOX[2] and BBOX[1] <= lat <= BBOX[3]):
+            if not (bbox[0] <= lon <= bbox[2] and bbox[1] <= lat <= bbox[3]):
                 raise ValueError(f"Cell outside bbox in {year}")
             cells.add((lat, lon))
             values = feature["properties"]["parameter"][VARIABLE]
@@ -91,7 +93,7 @@ def run(start: int, end: int, output: Path) -> None:
             writer.writerows(rows)
     metadata_path.write_text(json.dumps({
         "source": "NASA POWER daily regional API; PRECTOTCORR, UTC",
-        "bbox_wsen": BBOX, "period": [start, end], "units_raw": "mm/day", "units_index": "mm",
+        "region_id": region_id, "bbox_wsen": bbox, "period": [start, end], "units_raw": "mm/day", "units_index": "mm",
         "grid_cells": len(reference_cells), "daily_rows": len(cell_rows),
         "index_definition": "For each grid cell and calendar year: maximum sum over five consecutive daily precipitation values; windows do not cross year boundaries. Regional index is cosine-latitude-weighted mean of cellwise annual maxima.",
         "warning": "Derived POWER index, not Giovanni M2SMNXEDI RX5Day; daily POWER processing and definitions may differ.",
@@ -105,7 +107,8 @@ if __name__ == "__main__":
     parser.add_argument("--start", type=int, default=1992)
     parser.add_argument("--end", type=int, default=2024)
     parser.add_argument("--output", type=Path, default=Path("data"))
+    parser.add_argument("--region", choices=region_ids(), default=DEFAULT_REGION)
     args = parser.parse_args()
     if args.start > args.end:
         parser.error("--start must not exceed --end")
-    run(args.start, args.end, args.output)
+    run(args.start, args.end, args.output, args.region)

@@ -65,7 +65,7 @@ import {
 } from "@/lib/adapters";
 import { createMapLayer, getMapLimit } from "@/lib/map-layer";
 import { RegionMap } from "./region-map";
-import { stateNames } from "@/lib/geography";
+import { getStateNames } from "@/lib/geography";
 import { TrendChart } from "./chart";
 import { Modal } from "./modal";
 const Globe = dynamic(() => import("./globe"), {
@@ -116,6 +116,7 @@ export function Explorer() {
   const regionRef = useRef<HTMLDivElement>(null);
   const requestRef = useRef<AbortController | null>(null);
   const region = getRegion(draft.regionId);
+  const stateNames = getStateNames(draft.regionId);
   const result = analysis?.results.find((r) => r.variableId === activeId);
   const activeVariable = getVariable(activeId);
   const dirty = analysis
@@ -128,7 +129,7 @@ export function Explorer() {
     setModal("evidence");
   };
   function chooseRegion(id: string) {
-    if (id !== "mx-northeast") return;
+    if (!regions.some((candidate) => candidate.id === id)) return;
     setDraft((d) => ({ ...d, regionId: id }));
     setSelectionMessage("");
     if (
@@ -523,7 +524,7 @@ export function Explorer() {
           <div className="earth-heading">
             <div>
               <h2>Área de estudio</h2>
-              <p>Una caja que cruza {stateNames.length} estados.</p>
+              <p>Una caja que cruza {stateNames.length} {stateNames.length === 1 ? "estado" : "estados"}.</p>
             </div>
             <div className="map-view-switch" aria-label="Vista del mapa">
               <button
@@ -541,7 +542,9 @@ export function Explorer() {
             </div>
           </div>
           {mapView === "regional" ? (
-            <RegionMap value={mapLayer[0]} variable={activeVariable} />
+            <RegionMap region={region}
+              value={dirty ? undefined : mapLayer.find((entry) => entry.regionId === region.id)}
+              variable={activeVariable} />
           ) : (
             <Globe
               regionId={draft.regionId}
@@ -556,7 +559,7 @@ export function Explorer() {
               ))}
             </div>
             <p>
-              El color de la tendencia corresponde sólo al recuadro, que cruza parte de Texas. Sin resultados por estado.
+              El color de la tendencia corresponde sólo al recuadro seleccionado. Sin resultados por estado.
             </p>
           </div>
           <div className="map-legend" aria-label="Leyenda del mapa">
@@ -576,7 +579,7 @@ export function Explorer() {
             </div>
             <p>
               {analysis
-                ? `${analysis.selection.start}–${analysis.selection.end} · ${mapLayer.filter((v) => v.state === "analyzed").length}/1 caja analizada`
+                ? `${analysis.selection.start}–${analysis.selection.end} · ${mapLayer.filter((v) => v.state === "analyzed").length}/${regions.length} cajas analizadas`
                 : "Analiza una selección para colorear su área."}
               <span>Datos NASA</span>
             </p>
@@ -590,7 +593,7 @@ export function Explorer() {
             <div className="region-selector-label">
               <MapPin size={14} />
               <label htmlFor="region">REGIÓN DE ESTUDIO</label>
-              <span>1 caja con datos</span>
+              <span>{regions.length} cajas con datos</span>
             </div>
             <div className="region-select-row">
               <span className="country-code">{region.countryCode}</span>
@@ -599,9 +602,7 @@ export function Explorer() {
                 value={draft.regionId}
                 onChange={(e) => chooseRegion(e.target.value)}
               >
-                {regions
-                  .filter((r) => r.id === "mx-northeast")
-                  .map((r) => (
+                {regions.map((r) => (
                     <option key={r.id} value={r.id}>
                       {r.name}
                     </option>
@@ -620,7 +621,7 @@ export function Explorer() {
               México
             </div>
             <p>
-              La caja noreste tiene datos procesados. No representa todo México.
+              Las tres cajas tienen datos procesados. Cada una representa sólo su recuadro.
             </p>
           </div>
         </section>
@@ -936,7 +937,7 @@ export function Explorer() {
         </span>
         <span>
           Análisis regional exploratorio
-          <span className="footer-tag">MX · caja noreste</span>
+          <span className="footer-tag">MX · {analysis?.region.name ?? region.name}</span>
         </span>
       </footer>
       {modal === "chart" && analysis && result && (
@@ -1041,7 +1042,7 @@ export function Explorer() {
             </p>
             <h3>Qué estás viendo</h3>
             <p>
-              Series NASA procesadas para una caja del noreste de México. La
+              Series NASA procesadas para tres cajas de México. La
               gráfica muestra valores anuales; las pendientes e intervalos se
               calculan según el método de cada variable. Las respuestas son
               explicaciones locales, sin llamadas a Claude.
@@ -1056,12 +1057,12 @@ export function Explorer() {
               >
                 Natural Earth (dominio público)
               </a>
-              . Sólo una caja tiene datos climáticos; no representa fronteras
+              . Las cajas tienen datos climáticos; no representan fronteras
               administrativas ni cobertura nacional.
             </p>
             <h3>Lo que sigue</h3>
             <p>
-              Añadir más regiones con agregación espacial validada y más
+              Comparar regiones con control de incertidumbre y añadir más
               variables oficiales de NASA.
             </p>
           </div>
@@ -1219,8 +1220,8 @@ function Evidence({
       <div className="evidence-intro">
         <span className="demo-pill">Datos NASA</span>
         <p>
-          Estos resultados provienen de datos NASA procesados para una caja de
-          prueba. Son exploratorios y no permiten atribuir causas.
+          Estos resultados provienen de datos NASA procesados para {analysis.region.name}.
+          Son exploratorios y no permiten atribuir causas.
         </p>
       </div>
       <dl className="evidence-grid">

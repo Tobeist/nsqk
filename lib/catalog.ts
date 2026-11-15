@@ -193,5 +193,25 @@ export const regions: Region[] = [
     lon: -100,
     extent: "25–27° N · 101–99° O",
   },
+  {
+    id: "mx-chihuahua-interior",
+    name: "Chihuahua interior",
+    country: "México",
+    countryCode: "MX",
+    bbox: [-107, 28, -105, 30],
+    lat: 29,
+    lon: -106,
+    extent: "28–30° N · 107–105° O",
+  },
+  {
+    id: "mx-south-humid",
+    name: "Caja sur · Chiapas–Tabasco",
+    country: "México",
+    countryCode: "MX",
+    bbox: [-94, 16, -92, 18],
+    lat: 17,
+    lon: -93,
+    extent: "16–18° N · 94–92° O",
+  },
 ];
 export const getRegion = (id: string) => regions.find((r) => r.id === id)!;

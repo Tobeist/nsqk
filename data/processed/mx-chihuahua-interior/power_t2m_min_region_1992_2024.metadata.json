@@ -1,0 +1,38 @@
+{
+  "request_url": "https://power.larc.nasa.gov/api/temporal/monthly/regional?latitude-min=28&latitude-max=30&longitude-min=-107&longitude-max=-105&parameters=T2M_MIN&community=SB&start=1992&end=2024&format=JSON",
+  "source": "NASA POWER monthly regional API",
+  "region_id": "mx-chihuahua-interior",
+  "parameter": "T2M_MIN",
+  "units": "C",
+  "bbox_wsen": [
+    -107,
+    28,
+    -105,
+    30
+  ],
+  "period": [
+    1992,
+    2024
+  ],
+  "grid_cells": 20,
+  "months": 396,
+  "missing_grid_values": 0,
+  "aggregation": "cos(latitude)-weighted mean of returned grid-cell centers inside bbox; no land mask or polygon clipping",
+  "time": "calendar month; POWER annual keys YYYY13 excluded",
+  "api_header": {
+    "title": "NASA/POWER Source Native Resolution Monthly and Annual",
+    "api": {
+      "version": "v2.10.0",
+      "name": "POWER Monthly and Annual API"
+    },
+    "sources": [
+      "MERRA2",
+      "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "LST",
+    "start": "19920101",
+    "end": "20241231"
+  },
+  "comparison_warning": "POWER processing and grid values are not interchangeable with corresponding Giovanni or GPCP products without validation"
+}

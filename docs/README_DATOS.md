@@ -1,8 +1,10 @@
 # Climate Paradox — primera extracción T2M
 
-La [metodología de datos y análisis](docs/METODOLOGIA.md) documenta las decisiones aplicadas, las limitaciones y las validaciones pendientes.
+La [metodología de datos y análisis](METODOLOGIA.md) documenta las decisiones aplicadas, las limitaciones y las validaciones pendientes.
 
-El [glosario de datos y variables](docs/DATASETS.md) explica los archivos disponibles, sus campos y los productos que faltan.
+El [glosario de datos y variables](DATASETS.md) explica los archivos disponibles, sus campos y los productos que faltan.
+
+Las [tres cajas de estudio](REGIONES.md) tienen originales, series procesadas y resultados en rutas separadas por región. Las tres pueden analizarse en la interfaz.
 
 También se descargaron de POWER `T2M_MIN`, `T2M_MAX` y `PRECTOTCORR` para 1992–2024. Consulte la metodología antes de comparar esas series con los índices de extremos de Giovanni o con GPCP.
 
@@ -30,6 +32,6 @@ El JSON de resultados contiene la serie mensual, anomalías contra la climatolog
 
 POWER devuelve un valor anual con clave `YYYY13`: se excluye de la serie mensual. `T2M` viene en °C; los valores faltantes (`-999`) quedan vacíos. El promedio regional pondera cada centro de celda por `cos(latitud)`. Es una aproximación para la caja, sin recorte por fronteras estatales ni máscara de tierra. La caja de prueba no representa por sí sola toda la región Norte-Noreste.
 
-Giovanni reconoció la consulta del producto oficial y encontró granulos mensuales, pero su flujo indicó que requiere iniciar sesión en Earthdata. Una petición directa al OPeNDAP del mismo producto respondió HTTP 401. Por ello, el archivo POWER se mantiene identificado como fuente distinta. No se calculan conclusiones de tendencia con el periodo de prueba de tres años.
+Giovanni requiere una sesión Earthdata para estas exportaciones. Una petición directa al OPeNDAP sin esa sesión respondió HTTP 401. Por ello, el archivo POWER se mantiene identificado como fuente distinta. No se calculan conclusiones de tendencia con el periodo de prueba de tres años.
 
 Fuentes: [POWER Monthly API](https://power.larc.nasa.gov/docs/services/api/temporal/monthly/), [fuentes meteorológicas de POWER](https://power.larc.nasa.gov/docs/methodology/data/sources_meteorology/), [Giovanni](https://giovanni.gsfc.nasa.gov/giovanni/).
