@@ -1,19 +1,17 @@
-# Resumen del análisis de tendencias
+# Resumen final
 
-Generado por `scripts/trend_audit.py`. Reglas y definiciones: `docs/ANALISIS_TENDENCIAS_PLAN.md`. Cifras: pendiente por década [IC 95 % individual].
+Salida única generada por `scripts/final_summary.py` a partir de las tablas de esta carpeta. Valores p de Holm sobre bootstrap-t con criba AR (plan v3); intervalos bootstrap-t del 95 % individuales. Estados: sustentado, sensible, inconcluso (evidencia insuficiente, no ausencia de cambio), pendiente (pasa las pruebas, pero un escalón en una fecha de cambio de procesamiento documentada lo explica igual) y no evaluable.
 
-| Variable | M0 base (F1) | p original / Holm | M1 con Niño 3.4 (F2) | p original / Holm | Bootstrap bloque 12 | Clase |
-| --- | --- | --- | --- | --- | --- | --- |
-| Temperatura media a 2 m (NASA POWER, MERRA-2) (°C) | +0.271 [+0.0607, +0.48] | 0.0115 / 0.0345 | +0.267 [+0.0531, +0.481] | 0.0144 / 0.0433 | +0.271 [+0.0541, +0.495] | B |
-| Precipitación media (GPCP satélite + pluviómetros, Giovanni) (mm/día) | +0.0985 [-0.0258, +0.223] | 0.121 / 0.241 | +0.101 [-0.0164, +0.218] | 0.0917 / 0.183 | +0.0985 [-0.0343, +0.229] | C |
-| RX5Day mensual (MERRA-2, Giovanni) (mm/5 días) | +0.778 [-2.58, +4.14] | 0.65 / 0.65 | +0.855 [-2.43, +4.14] | 0.61 / 0.61 | +0.778 [-2.81, +4.16] | C |
+| Resultado | Estimación [IC 95 %] | p Holm | Estado | Nota |
+| --- | --- | ---: | --- | --- |
+| Tendencia mensual: Temperatura media a 2 m (NASA POWER, MERRA-2) | +0.267 [+0.0112, +0.523] °C/década | 0.132 | **inconcluso** | IC individual sin cero; escalón documentado que ajusta igual: 2011-01 (+0.521) |
+| Tendencia mensual: Precipitación media (GPCP satélite + pluviómetros, Giovanni) | +0.101 [-0.0316, +0.233] mm/día/década | 0.246 | **inconcluso** | IC individual con cero; escalón documentado que ajusta igual: 2001-01 (+0.395) |
+| Tendencia mensual: RX5Day mensual (MERRA-2, Giovanni) | +0.855 [-2.83, +4.54] mm/5 días/década | 0.633 | **inconcluso** | IC individual con cero |
+| Extremo anual TX90p (POWER diario) | +1.53 [-1.41, +4.47] % de días/década | 0.547 | **inconcluso** |  |
+| Extremo anual CDD (POWER diario) | -1.32 [-9.5, +6.86] días/década | 0.742 | **inconcluso** |  |
+| Extremo anual Rx5day (POWER diario) | +16 [+5.09, +26.8] mm/década | 0.0198 | **pendiente** | escalón documentado que ajusta igual: 2001-01 (+39.1); falta un producto diario independiente de MERRA-2 |
+| Predicción mensual a 12 meses: t2m | — | — | **sustentado** | ningún modelo complejo mejora de forma consistente; se mantiene el más simple |
+| Predicción mensual a 12 meses: gpcp | — | — | **sustentado** | ningún modelo complejo mejora de forma consistente; se mantiene el más simple |
+| Predicción mensual a 12 meses: rx5d | — | — | **pendiente** | mejora pequeña de PROPHET_ENSO_OPER (habilidad +4.0% externa, +5.7% reservado); no se adopta |
 
-Clases: **A** = Evidencia consistente de tendencia dentro de los análisis realizados; **B** = Resultado sensible al periodo, al modelo o a los controles; **C** = Evidencia insuficiente; **D** = Datos o supuestos que impiden una conclusión confiable.
-
-La pendiente mensual coincide con la pendiente de MCO de los promedios anuales (diferencia máxima 4.2e-15); los intervalos difieren porque usan 396 meses con HAC frente a 33 promedios.
-
-Cobertura espacial de la caja solicitada: Texas 3.2%, Coahuila 12.0%, Tamaulipas 6.9%, Nuevo León 77.9%. Huella de las celdas MERRA-2: Texas 4.0%; GPCP: Texas 3.2%.
-
-Los p de Holm de esta tabla usan la aproximación normal del HAC; los p válidos por bootstrap-t con criba AR, que reemplazan a la calibración retirada de la versión anterior, están en `uncertainty_validation.csv`.
-
-Informes: [t2m](informe_t2m.md), [gpcp](informe_gpcp.md), [rx5d](informe_rx5d.md).
+Informe metodológico: `docs/INFORME_TENDENCIAS.md`. Informes por variable: [t2m](informe_t2m.md), [gpcp](informe_gpcp.md), [rx5d](informe_rx5d.md).

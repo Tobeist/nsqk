@@ -1,10 +1,10 @@
 {
  "t2m": {
-  "class": "B",
+  "class": "C",
   "checks": {
-   "F1_holm_lt_0.05": true,
-   "F2_holm_lt_0.05": true,
-   "M1_L0_ci_excludes_0": true,
+   "F1_holm_lt_0.05": false,
+   "F2_holm_lt_0.05": false,
+   "M1_L0_boot_t_ci_excludes_0": true,
    "boot12_ci_excludes_0": true,
    "hac6_hac12_hac24_exclude_0": true,
    "same_sign_W1_W2_W3": false
@@ -18,7 +18,7 @@
   "checks": {
    "F1_holm_lt_0.05": false,
    "F2_holm_lt_0.05": false,
-   "M1_L0_ci_excludes_0": false,
+   "M1_L0_boot_t_ci_excludes_0": false,
    "boot12_ci_excludes_0": false,
    "hac6_hac12_hac24_exclude_0": false,
    "same_sign_W1_W2_W3": false
@@ -32,7 +32,7 @@
   "checks": {
    "F1_holm_lt_0.05": false,
    "F2_holm_lt_0.05": false,
-   "M1_L0_ci_excludes_0": false,
+   "M1_L0_boot_t_ci_excludes_0": false,
    "boot12_ci_excludes_0": false,
    "hac6_hac12_hac24_exclude_0": false,
    "same_sign_W1_W2_W3": false

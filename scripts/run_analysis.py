@@ -6,7 +6,7 @@ from pathlib import Path
 
 SCRIPTS = Path(__file__).resolve().parent
 STEPS = ["trend_audit.py", "grouping_audit.py", "uncertainty_validation.py", "rain_reconciliation.py", "form_of_change.py",
-         "simulation_study.py", "forecast_experiment.py"]
+         "simulation_study.py", "forecast_experiment.py", "final_summary.py"]
 
 if __name__ == "__main__":
     for step in STEPS:

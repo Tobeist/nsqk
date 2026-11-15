@@ -162,7 +162,10 @@ def summarize(perf):
 
         def consistent(r):
             return bool(m[o].mean() < r[o].mean() and (m[o] < r[o]).sum() >= 4 and m[h].mean() < r[h].mean())
+        def better_outer(r):  # uses only the outer folds; the reserved period never feeds a decision
+            return bool(m[o].mean() < r[o].mean() and (m[o] < r[o]).sum() >= 4)
         summary.append({"variable": key, "model": model, "operational": bool(g.operational.iloc[0]),
+                        "gate_outer_only_vs_ols_trend": better_outer(ref["OLS_TREND"]),
                         "mae_outer_mean": outer.mae.mean(), "mae_holdout_mean": hold.mae.mean(),
                         "rmse_outer_mean": outer.rmse.mean(), "rmse_holdout_mean": hold.rmse.mean(),
                         "bias_outer_mean": outer.bias.mean(), "bias_holdout_mean": hold.bias.mean(),
@@ -207,8 +210,9 @@ def main(trials, workers):
     best, trial_log = run_tuning(PROPHETS, list(ta.VARS), workers, trials)
     rows = evaluate(data, list(ta.VARS), SIMPLE + PROPHETS, best)
     summary = summarize(pd.DataFrame(rows))
-    # Pre-registered gate: a small network is tried only where some Prophet passes the consistency rule against OLS_TREND.
-    gated = sorted(set(summary[summary.model.isin(PROPHETS) & summary.consistent_vs_ols_trend].variable))
+    # Network gate: only outer folds decide (lower mean MAE than OLS_TREND and lower in >= 4 of 5 folds); the reserved
+    # 2021-2024 period is not used. Correction to the first version, which also used the reserved period.
+    gated = sorted(set(summary[summary.model.isin(PROPHETS) & summary.gate_outer_only_vs_ols_trend].variable))
     if gated:
         mlp_best, mlp_trials = run_tuning((MLP,), gated, workers, trials)
         best.update(mlp_best)

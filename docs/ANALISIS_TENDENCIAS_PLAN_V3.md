@@ -49,3 +49,10 @@ Tabla explícita: un pronóstico emitido a comienzos de enero del año Y usa Ni�
 ## 6. Entrega
 
 Commit en `analysis/trend-audit`, integración con `origin/main` sin reescribir trabajo ajeno, pruebas, instalación limpia de `requirements.txt` en un entorno nuevo y push de la rama (sin force). Tabla final: **sustentado**, **sensible** o **pendiente**.
+
+## 7. Correcciones posteriores a la revisión del PR #1
+
+- **Salida única.** Holm de F1 y F2 (`trend_results.csv`), la clasificación A–D (`classification.json`), los informes por variable, la familia B (`extremes_trends.csv`) y `SUMMARY.md` usan ahora los mismos p del bootstrap-t con criba AR (mismas semillas que `uncertainty_validation.csv`). El criterio "IC de M1 excluye cero" usa el IC bootstrap-t. `SUMMARY.md` y `final_status.csv` los escribe solo `scripts/final_summary.py`. Una prueba unitaria comprueba que coinciden.
+- **Regla añadida después de ver resultados:** un resultado que pase las pruebas se marca **pendiente** si un escalón en una fecha documentada de cambio de procesamiento ajusta igual o mejor (ΔAIC ≤ 0 frente a la recta y p del escalón < 0.05).
+- **ENSO:** la proporción atribuida a ENSO es el incremento de R² de las anomalías al añadir ENSO sobre calendario + tendencia (`enso_increment_of_anomaly_variance`), no el R² total, que incluye la tendencia.
+- **Puerta de la red neuronal:** decide solo con las particiones externas 2016–2020 (MAE medio menor que OLS_TREND y menor en al menos 4 de 5). El periodo reservado ya no participa en ninguna decisión; solo se informa.

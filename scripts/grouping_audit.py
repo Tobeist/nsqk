@@ -188,12 +188,15 @@ def variance_decomposition(frame_monthly, enso):
                  "calendario+tendencia+Niño3.4": np.column_stack([X, n34]),
                  "calendario+tendencia+Niño3.4 por estación": np.column_stack([X, seasons])}
         total = sm.OLS(y, np.ones((len(y), 1))).fit().ssr
-        prev = 0.0
+        anomaly_ssr = sm.OLS(y, specs["calendario"]).fit().ssr
+        trend_r2 = 1 - sm.OLS(y, specs["calendario+tendencia"]).fit().ssr / anomaly_ssr
         for name, Z in specs.items():
-            r2 = 1 - sm.OLS(y, Z).fit().ssr / total
-            anom_r2 = 1 - sm.OLS(y, Z).fit().ssr / sm.OLS(y, specs["calendario"]).fit().ssr
-            rows.append({"variable": key, "model": name, "r2_total": r2, "r2_of_anomaly_variance": anom_r2, "increment_r2_total": r2 - prev})
-            prev = r2
+            ssr = sm.OLS(y, Z).fit().ssr
+            anom_r2 = 1 - ssr / anomaly_ssr
+            # Share of anomaly variance added by ENSO terms over calendar + trend (the trend's own share is not ENSO's).
+            enso_increment = anom_r2 - trend_r2 if "Niño" in name else float("nan")
+            rows.append({"variable": key, "model": name, "r2_total": 1 - ssr / total, "r2_of_anomaly_variance": anom_r2,
+                         "enso_increment_of_anomaly_variance": enso_increment})
     return rows
 
 
@@ -307,12 +310,20 @@ def main(reps):
         y = extremes[name].to_numpy()
         b = tl.annual_bootstrap(y, 3, reps, (ta.SEED, 50, i))
         ts = tl.theil_sen_bootstrap(y[:, None], 3, reps, (ta.SEED, 51, i))
+        # Valid p for Holm: sieve bootstrap-t, same seeds as uncertainty_validation.py ("principal").
+        X = np.column_stack([np.ones(len(y)), np.arange(len(y))])
+        res = tl.fit_hac(y, X, 2)
+        tstats, _ = tl.simulate_t(y, X, X[:, :1], np.zeros(len(y), int), 1, 2, 3,
+                                  {"order": "aic", "innov": "resample", "monthly_scale": False}, ta.SIEVE_REPS, (ta.SEED, 601, i, 0))
+        p_sieve, q = tl.sieve_pvalue(tstats, res.params[1] / res.bse[1])
         trends.append({"index": name, "years": len(y), "slope_per_decade": 10 * b["est"], "ci_low": 10 * b["lo"], "ci_high": 10 * b["hi"],
-                       "p_bootstrap": b["p"], "theil_sen_per_decade": 10 * ts["est"], "theil_sen_ci_low": 10 * ts["lo"], "theil_sen_ci_high": 10 * ts["hi"]})
-    for r, p in zip(trends, multipletests([r["p_bootstrap"] for r in trends], method="holm")[1]):
+                       "p_block_bootstrap": b["p"], "p_bootstrap_t": p_sieve,
+                       "ci_boot_t_low": 10 * (res.params[1] - q * res.bse[1]), "ci_boot_t_high": 10 * (res.params[1] + q * res.bse[1]),
+                       "theil_sen_per_decade": 10 * ts["est"], "theil_sen_ci_low": 10 * ts["lo"], "theil_sen_ci_high": 10 * ts["hi"]})
+    for r, p in zip(trends, multipletests([r["p_bootstrap_t"] for r in trends], method="holm")[1]):
         r["p_holm_family_B"] = p
         excl = lambda lo, hi: lo > 0 or hi < 0
-        consistent = p < 0.05 and excl(r["ci_low"], r["ci_high"]) and np.sign(r["theil_sen_per_decade"]) == np.sign(r["slope_per_decade"])
+        consistent = p < 0.05 and excl(r["ci_boot_t_low"], r["ci_boot_t_high"]) and np.sign(r["theil_sen_per_decade"]) == np.sign(r["slope_per_decade"])
         r["class"] = "consistente" if consistent else ("sensible a decisiones" if p < 0.05 or excl(r["theil_sen_ci_low"], r["theil_sen_ci_high"]) else "inconcluso")
     decomposition = variance_decomposition(frame_monthly, enso)
     for name, table in (("aggregation_identity", identity), ("grouping_trends", grouping_rows), ("grouping_definitions", definitions),

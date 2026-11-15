@@ -2,6 +2,8 @@
 
 Reproducción: `python scripts/run_analysis.py` (≈ 5 min; semilla 20261114). Planes previos a cada ejecución: [v1](ANALISIS_TENDENCIAS_PLAN.md), [v2](ANALISIS_TENDENCIAS_PLAN_V2.md) y [v3](ANALISIS_TENDENCIAS_PLAN_V3.md); lo añadido o retirado después de ver resultados está marcado en cada uno. Tablas y figuras: [`analysis/`](../analysis/README.md). Caja `[-101, 25, -99, 27]`: 78 % Nuevo León, 12 % Coahuila, 7 % Tamaulipas y 3 % Texas (4 % de la huella de las celdas MERRA-2); no es una medición completa de ningún estado.
 
+**Salida única:** la tabla de la sección 1 coincide con `analysis/results/final_status.csv` y `SUMMARY.md`, que genera `scripts/final_summary.py`; todos los p de Holm proceden del bootstrap-t con criba AR.
+
 **Método que se conserva:** regresión mensual MCO con efectos de mes y Niño 3.4 contemporáneo (M1), mostrada junto al modelo actual sin ENSO (M0). La pendiente es HAC(12); los **valores p e intervalos válidos** salen del bootstrap-t con criba autorregresiva (sección 2). No se añaden modelos.
 
 ## 1. Tabla final
@@ -9,15 +11,15 @@ Reproducción: `python scripts/run_analysis.py` (≈ 5 min; semilla 20261114). P
 | Resultado | Cifras | Estado |
 | --- | --- | --- |
 | El calendario domina la varianza mensual | R² del calendario: T2M 0.94, GPCP 0.39, RX5Day 0.25 | **Sustentado** |
-| ENSO casi no cambia las pendientes y su efecto depende de la estación | T2M: 0.2706 → 0.2673 °C/década; corr(t, Niño 3.4) = −0.02; ENSO estacional explica 10 % de la varianza de las anomalías de T2M y 5–6 % en lluvia | **Sustentado** (asociación, no causa) |
+| ENSO casi no cambia las pendientes y su efecto depende de la estación | T2M: 0.2706 → 0.2673 °C/década; corr(t, Niño 3.4) = −0.02. Añadir ENSO con coeficientes por estación sobre calendario + tendencia suma **6.6 puntos** de la varianza de las anomalías de T2M (el 10.2 % total incluye 3.5 de la tendencia), 5.2 en GPCP y 5.4 en RX5Day | **Sustentado** (asociación, no causa) |
 | Agrupar en bloques no cambia la tendencia de la media | WLS por días: 0.27287–0.27296 °C/década en bloques de 1–14 días; mismo producto y días | **Sustentado** |
 | Lluvia diaria y mensual de POWER coinciden con el mismo estándar horario | mensual API frente a diario LST: ≤ 0.0023 mm/día | **Sustentado** |
 | Los IC HAC nominales del 95 % son estrechos | cobertura real 90–93 % según la variable | **Sustentado** bajo el modelo AR estimado |
 | Precipitación media (GPCP), RX5Day mensual, TX90p y CDD | p de Holm (bootstrap-t) 0.25–0.74; IC con cero | **Sustentado que no hay evidencia suficiente** (no implica ausencia de cambio) |
-| Temperatura +0.27 °C/década | M1: IC bootstrap-t [+0.011, +0.523]; p = 0.044; **Holm 0.13** (M0: 0.033, Holm 0.098) | **Sensible**: no supera Holm al 5 %; 1992–2010 da −0.06; una recta y un escalón en 2011 se ajustan igual |
+| Temperatura +0.27 °C/década | M1: IC bootstrap-t individual [+0.011, +0.523]; p = 0.044; **Holm 0.13** (M0: 0.033, Holm 0.098) | **Inconcluso** por las reglas fijadas (clase C): la estimación es positiva y su IC individual excluye cero, pero no supera Holm al 5 %; además 1992–2010 da −0.06 y un escalón en 2011 ajusta igual que la recta. Comunicable como "aumento estimado, no concluyente" |
 | Rx5day anual (POWER diario) +16.0 mm/década | IC bootstrap-t [+5.1, +26.8]; Holm 0.020; igual con LST | **Pendiente**: un escalón en 2001-01, inicio de la corriente 300 de MERRA-2, explica los datos igual o mejor (+39 mm) |
-| Mejora predictiva de Prophet con ENSO operativo en RX5Day | 4–6 % frente a la climatología | **Pendiente / no se adopta**: pequeña y 1 de unas 20 comparaciones |
-| Prophet y red neuronal | sin mejora consistente en T2M ni GPCP; la red empeora un 25 % | **Sustentado que no se justifican** |
+| Mejora predictiva de Prophet con ENSO operativo en RX5Day | 4.0 % (particiones externas) y 5.7 % (periodo reservado, solo informado) frente a la climatología | **Pendiente / no se adopta**: pequeña y 1 de unas 20 comparaciones |
+| Prophet y red neuronal | sin mejora consistente en T2M ni GPCP; la red (activada por la puerta, que decide solo con 2016–2020) empeora un 25 % | **Sustentado que no se justifican** |
 
 ## 2. Intervalos y valores p
 

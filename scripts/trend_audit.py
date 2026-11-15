@@ -33,6 +33,7 @@ OUT = ROOT / "analysis" / "results"
 FIG = ROOT / "analysis" / "figures"
 PLAN = ROOT / "docs" / "ANALISIS_TENDENCIAS_PLAN.md"
 SEED = 20261114
+SIEVE_REPS = 4999
 DATES = pd.date_range("1992-01-01", "2024-12-01", freq="MS")
 BASE = (1992, 2021)
 BREAKS = {"2001-01": 2001, "2008-01": 2008, "2011-01": 2011}
@@ -310,12 +311,27 @@ def run_models(frame, enso, reps):
     return rows, enso_cmp, enso_season, breaks, influence, diag_store
 
 
-def add_families(rows):
-    for family, model in (("F1", "M0"), ("F2", "M1_L0")):
+def add_families(rows, frame, enso):
+    """Primary families F1 (M0) and F2 (M1, L=0): Holm on valid sieve bootstrap-t p-values (plan v3, section 1).
+    The same seeds as scripts/uncertainty_validation.py (variant "principal") give identical p-values."""
+    months = DATES.month.to_numpy()
+    n34 = lagged(enso, DATES, 0)
+    for mi, (family, model, extras) in enumerate((("F1", "M0", {}), ("F2", "M1_L0", {"nino34": n34}))):
         sel = [r for r in rows if r["window"] == "W0" and r["model"] == model and r["method"] == "HAC12"]
-        adj = multipletests([r["p_value"] for r in sel], method="holm")[1]
-        for r, p in zip(sel, adj):
-            r["family"], r["p_holm"] = family, p
+        for r in sel:
+            vi = list(VARS).index(r["variable"])
+            y = frame[r["variable"]].to_numpy()
+            X, _ = tl.design(len(y), months, extras)
+            tstats, _ = tl.simulate_t(y, X, np.delete(X, 1, axis=1), months - 1, 12, 12, 12,
+                                      {"order": "aic", "innov": "resample", "monthly_scale": True}, SIEVE_REPS, (SEED, 600, vi, mi, 0))
+            p_boot, q = tl.sieve_pvalue(tstats, r["slope_per_decade"] / r["se_per_decade"])
+            r.update({"p_value_bootstrap": p_boot, "ci_boot_t_low": r["slope_per_decade"] - q * r["se_per_decade"],
+                      "ci_boot_t_high": r["slope_per_decade"] + q * r["se_per_decade"],
+                      "coverage_of_nominal_hac95": float(np.mean(np.abs(tstats) <= tl.Z975))})
+        normal = multipletests([r["p_value"] for r in sel], method="holm")[1]
+        boot = multipletests([r["p_value_bootstrap"] for r in sel], method="holm")[1]
+        for r, pn, pb in zip(sel, normal, boot):
+            r["family"], r["p_holm"], r["p_holm_normal"] = family, pb, pn
             if family == "F1":
                 se = r["se_per_decade"]
                 r["ci_simultaneous_low"] = r["slope_per_decade"] - Q_SIMULTANEOUS * se
@@ -427,7 +443,7 @@ def classify(rows, breaks):
         excl = lambda r: r["ci_low"] > 0 or r["ci_high"] < 0
         checks = {
             "F1_holm_lt_0.05": m0["p_holm"] < 0.05, "F2_holm_lt_0.05": m1["p_holm"] < 0.05,
-            "M1_L0_ci_excludes_0": excl(m1), "boot12_ci_excludes_0": excl(boot),
+            "M1_L0_boot_t_ci_excludes_0": m1["ci_boot_t_low"] > 0 or m1["ci_boot_t_high"] < 0, "boot12_ci_excludes_0": excl(boot),
             "hac6_hac12_hac24_exclude_0": all(excl(pick(rows, key, "W0", "M0", f"HAC{L}")) for L in (6, 12, 24)),
             "same_sign_W1_W2_W3": all(np.sign(pick(rows, key, w, "M0", "HAC12")["slope_per_decade"]) == np.sign(m0["slope_per_decade"]) for w in ("W1", "W2", "W3")),
         }
@@ -596,9 +612,10 @@ def write_report(key, rows, enso_cmp, breaks, influence, classification, enso_se
              "## Qué se estimó", "",
              f"Cambio lineal por década en la caja `[-101, 25, -99, 27]`, enero de 1992 a diciembre de 2024 ({m0['n_months']} meses, {m0['n_years']} años), "
              f"con efectos fijos por mes y covarianza HAC (Bartlett). Unidad: {unit} por década. Los intervalos son del 95 % **individuales**.", "",
-             "| Análisis | Pendiente [IC 95 %] | p original | p Holm |", "| --- | --- | ---: | ---: |",
-             f"| M0 base, HAC12 (familia F1) | {fmt(m0)} | {m0['p_value']:.3g} | {m0['p_holm']:.3g} |",
-             f"| M1 con Niño 3.4 (L = 0), HAC12 (familia F2) | {fmt(m1)} | {m1['p_value']:.3g} | {m1['p_holm']:.3g} |", "",
+             "| Análisis | Pendiente [IC 95 % HAC normal] | IC 95 % bootstrap-t | p normal | p bootstrap-t | p Holm (bootstrap-t) |",
+             "| --- | --- | --- | ---: | ---: | ---: |",
+             *[f"| {label} | {fmt(r)} | [{r['ci_boot_t_low']:+.3g}, {r['ci_boot_t_high']:+.3g}] | {r['p_value']:.3g} | {r['p_value_bootstrap']:.3g} | {r['p_holm']:.3g} |"
+               for label, r in (("M0 base, HAC12 (familia F1)", m0), ("M1 con Niño 3.4 (L = 0), HAC12 (familia F2)", m1))], "",
              f"Intervalo simultáneo de Bonferroni para M0 (F1): [{m0['ci_simultaneous_low']:+.3g}, {m0['ci_simultaneous_high']:+.3g}].", "",
              "## Sensibilidad (exploratoria, sin ajuste de p)", "",
              "| Variante | Pendiente [IC 95 %] |", "| --- | --- |"]
@@ -613,9 +630,8 @@ def write_report(key, rows, enso_cmp, breaks, influence, classification, enso_se
     if key in ("gpcp", "rx5d"):
         lines.append(f"| M0 en % de la media mensual (unidad: %/década) | {fmt(pick(rows, key, 'W0', 'M0_pct_of_monthly_mean', 'HAC12'))} |")
     lines += ["", "## Validez de p e intervalos", "",
-              "Los p de esta tabla usan la aproximación normal del HAC, que en simulaciones cubre alrededor del 90 % en lugar del 95 %. "
-              "Los valores p válidos (bootstrap-t con criba AR estimada de los residuos), sus correcciones de Holm y la cobertura real "
-              "están en `uncertainty_validation.csv` (plan v3)."]
+              f"El IC HAC nominal del 95 % cubre en realidad {m1['coverage_of_nominal_hac95']:.1%} bajo el AR estimado de los residuos de M1. "
+              "Holm y la clasificación usan los p del bootstrap-t con criba AR (plan v3); las sensibilidades están en `uncertainty_validation.csv`."]
     lines += ["", "## ENSO", "",
               f"β cambia de {cmp0['beta_M0']:+.3g} a {cmp0['beta_E']:+.3g} {unit}/década al incluir Niño 3.4 (diferencia {cmp0['beta_E_minus_beta']:+.3g}); "
               f"el error estándar HAC se multiplica por {cmp0['se_ratio_E_over_M0']:.2f}. Coeficiente de Niño 3.4: {cmp0['enso_coef']:+.3g} [{cmp0['enso_coef_lo']:+.3g}, {cmp0['enso_coef_hi']:+.3g}] {unit}/°C (p = {cmp0['enso_coef_p']:.3g}). "
@@ -641,7 +657,9 @@ def write_report(key, rows, enso_cmp, breaks, influence, classification, enso_se
         lines += [f"- La estimación central es un {sign} de {abs(m0['slope_per_decade']):.3g} {unit} por década, pero no se cumple: " + ", ".join(k for k, v in cls["checks"].items() if not v) + ".",
                   "- El resultado depende del periodo, del control por ENSO o del método de incertidumbre."]
     elif c == "C":
-        lines += [f"- La estimación central es un {sign} de {abs(m0['slope_per_decade']):.3g} {unit} por década, pero el intervalo y los ajustes por Holm no establecen el signo con estos datos.",
+        individual = m1["ci_boot_t_low"] > 0 or m1["ci_boot_t_high"] < 0
+        lines += [f"- La estimación central es un {sign} de {abs(m0['slope_per_decade']):.3g} {unit} por década, pero la corrección de Holm sobre las tres variables no establece el signo"
+                  + (" (el IC bootstrap-t individual de M1 sí excluye cero)." if individual else "; el IC bootstrap-t individual también incluye cero."),
                   "- Un intervalo que contiene cero indica evidencia insuficiente bajo este análisis; no prueba que no haya cambio."]
     else:
         lines += ["- Los criterios fijados de antemano señalan una ruptura o una discrepancia de incertidumbre que impide fiarse del error estándar HAC; la estimación no debe interpretarse como tendencia sin investigar el producto."]
@@ -653,26 +671,6 @@ def write_report(key, rows, enso_cmp, breaks, influence, classification, enso_se
               "- Treinta y tres años no separan por completo una tendencia de la variabilidad de varias décadas (ver `ventanas_moviles.png`).",
               "- Los valores p no son probabilidades de que la tendencia sea real; las ventanas, los rezagos y los HAC alternativos son exploratorios sin ajuste de multiplicidad.", ""]
     (OUT / f"informe_{key}.md").write_text("\n".join(lines), encoding="utf-8")
-
-
-def write_summary(rows, classification, spatial, audit, consistency):
-    lines = ["# Resumen del análisis de tendencias", "",
-             "Generado por `scripts/trend_audit.py`. Reglas y definiciones: `docs/ANALISIS_TENDENCIAS_PLAN.md`. Cifras: pendiente por década [IC 95 % individual].", "",
-             "| Variable | M0 base (F1) | p original / Holm | M1 con Niño 3.4 (F2) | p original / Holm | Bootstrap bloque 12 | Clase |", "| --- | --- | --- | --- | --- | --- | --- |"]
-    for key in VARS:
-        m0, m1, b = pick(rows, key, "W0", "M0", "HAC12"), pick(rows, key, "W0", "M1_L0", "HAC12"), pick(rows, key, "W0", "M0", "BOOT12")
-        lines.append(f"| {VARS[key]['name']} ({VARS[key]['unit']}) | {fmt(m0)} | {m0['p_value']:.3g} / {m0['p_holm']:.3g} | {fmt(m1)} | {m1['p_value']:.3g} / {m1['p_holm']:.3g} | {fmt(b)} | {classification[key]['class']} |")
-    lines += ["", "Clases: " + "; ".join(f"**{k}** = {v}" for k, v in LABELS.items()) + ".", "",
-              "La pendiente mensual coincide con la pendiente de MCO de los promedios anuales (diferencia máxima "
-              f"{max(v['abs_difference'] for v in consistency.values()):.1e}); los intervalos difieren porque usan 396 meses con HAC frente a 33 promedios.", ""]
-    if "share_by_state" in spatial.get("requested_box", {}):
-        shares = spatial["requested_box"]["share_by_state"]
-        lines += ["Cobertura espacial de la caja solicitada: " + ", ".join(f"{k} {v:.1%}" for k, v in shares.items())
-                  + f". Huella de las celdas MERRA-2: Texas {spatial['merra2_cells_footprint']['share_by_state'].get('Texas', 0):.1%}; GPCP: Texas {spatial['gpcp_cells_footprint']['share_by_state'].get('Texas', 0):.1%}.", ""]
-    lines += ["Los p de Holm de esta tabla usan la aproximación normal del HAC; los p válidos por bootstrap-t con criba AR, "
-              "que reemplazan a la calibración retirada de la versión anterior, están en `uncertainty_validation.csv`.", ""]
-    lines += ["Informes: " + ", ".join(f"[{k}](informe_{k}.md)" for k in VARS) + ".", ""]
-    (OUT / "SUMMARY.md").write_text("\n".join(lines), encoding="utf-8")
 
 
 # ---------------------------------------------------------------- main
@@ -705,7 +703,7 @@ def main(reps):
     frame, enso = load_series(), load_enso()
     audit, spatial = audit_data(frame), audit_spatial()
     rows, enso_cmp, enso_season, breaks, influence, diag_store = run_models(frame, enso, reps)
-    add_families(rows)
+    add_families(rows, frame, enso)
     rolling_rows = rolling(frame, enso)
     consistency, reproduction = annual_consistency(frame, rows)
     classification = classify(rows, breaks)
@@ -734,7 +732,6 @@ def main(reps):
         write_report(key, rows, enso_cmp, breaks, influence, classification, enso_season)
     figure_forest(rows)
     figure_rolling(rolling_rows, rows)
-    write_summary(rows, classification, spatial, audit, consistency)
     print((OUT / "SUMMARY.md").read_text())
 
 
