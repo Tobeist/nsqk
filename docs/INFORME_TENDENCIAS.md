@@ -2,6 +2,8 @@
 
 Reproducción: `python scripts/run_analysis.py` (≈ 5 min; semilla 20261114). Planes previos a cada ejecución: [v1](ANALISIS_TENDENCIAS_PLAN.md), [v2](ANALISIS_TENDENCIAS_PLAN_V2.md) y [v3](ANALISIS_TENDENCIAS_PLAN_V3.md); lo añadido o retirado después de ver resultados está marcado en cada uno. Tablas y figuras: [`analysis/`](../analysis/README.md). Caja `[-101, 25, -99, 27]`: 78 % Nuevo León, 12 % Coahuila, 7 % Tamaulipas y 3 % Texas (4 % de la huella de las celdas MERRA-2); no es una medición completa de ningún estado.
 
+La [extensión exploratoria a Chihuahua y la caja sur](../analysis/regions/SUMMARY.md) se reproduce por separado con `python scripts/audit_regions.py`; sus familias de pruebas incluyen las tres cajas y no modifican las conclusiones publicadas aquí para el noreste.
+
 **Salida única:** la tabla de la sección 1 coincide con `analysis/results/final_status.csv` y `SUMMARY.md`, que genera `scripts/final_summary.py`; todos los p de Holm proceden del bootstrap-t con criba AR.
 
 **Método que se conserva:** regresión mensual MCO con efectos de mes y Niño 3.4 contemporáneo (M1), mostrada junto al modelo actual sin ENSO (M0). La pendiente es HAC(12); los **valores p e intervalos válidos** salen del bootstrap-t con criba autorregresiva (sección 2). No se añaden modelos.

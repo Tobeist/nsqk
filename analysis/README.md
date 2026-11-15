@@ -65,3 +65,7 @@ Plan: [`docs/ANALISIS_TENDENCIAS_PLAN_V3.md`](../docs/ANALISIS_TENDENCIAS_PLAN_V
 | `grouping_trends.csv` | Columnas añadidas: SE con rezagos equivalentes a 6/12/24 meses y WLS por días |
 
 La "calibración exploratoria" de la versión 1 (`size_calibration_exploratory.json`) se retiró: no producía valores p válidos.
+
+## Extensión a las tres cajas
+
+El [plan regional](../docs/PLAN_AUDITORIA_REGIONAL.md) fijó la extensión antes de calcular Chihuahua y sur, después de conocer el resultado del noreste. `python scripts/audit_regions.py` valida procedencia y cobertura, aplica el mismo modelo mensual y el bootstrap-t, corrige las familias ampliadas y prueba directamente las diferencias de pendientes entre cajas. La [síntesis](regions/SUMMARY.md) y los CSV están en `analysis/regions/`; no sustituyen `analysis/results/final_status.*` ni se muestran todavía como conclusiones auditadas en la interfaz.
