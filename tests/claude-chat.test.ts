@@ -74,6 +74,28 @@ test("Claude server uses canonical inference, protects credentials and handles f
     assert.doesNotMatch(facts, /independentEvaluationYears/);
   });
 
+  await t.test("plain-language instructions preserve a significant result and its pending robustness", async (st) => {
+    let sent: { system: { text: string }[] } | undefined;
+    st.mock.method(globalThis, "fetch", async (_url: string, init?: RequestInit) => {
+      sent = JSON.parse(String(init?.body));
+      return providerReply();
+    });
+    const response = await POST(request({ ...body,
+      question: "¿Qué cambió aquí?",
+      selection: { ...realDefaultSelection, regionId: "mx-chihuahua-interior", variables: ["temperature"] },
+    }));
+    const result = await response.json();
+    assert.equal(response.status, 200);
+    assert.match(result.verifiedSummary, /Estadísticamente significativo/);
+    assert.match(result.verifiedSummary, /0\.0340/);
+    assert.match(result.verifiedSummary, /requiere contraste independiente/);
+    assert.match(sent!.system[0].text, /dos frases y un máximo de 45 palabras/);
+    assert.match(sent!.system[0].text, /piden fórmulas, detalles o el método/);
+    assert.match(sent!.system[1].text, /"significant":true/);
+    assert.match(sent!.system[1].text, /"status":"pending"/);
+    assert.match(sent!.system[1].text, /"familySize":18/);
+  });
+
   await t.test("training questions receive the separate historical ENSO policy", async (st) => {
     let facts = "";
     st.mock.method(globalThis, "fetch", async (_url: string, init?: RequestInit) => {

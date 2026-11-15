@@ -2,6 +2,12 @@
 
 MVP de exploración climática para NASA Space Apps 2026. La pantalla principal usa **datos NASA procesados**, guardados en este repositorio. La [metodología](docs/METODOLOGIA.md) y el [glosario](docs/DATASETS.md) describen fuente, unidades, agregación e incertidumbre. Proyecto independiente, sin respaldo oficial de NASA.
 
+## Público y recorrido principal
+
+El MVP se orienta a estudiantes, docentes y personas que quieren explorar datos ambientales sin empezar por un programa estadístico. Es una decisión de enfoque del producto, pendiente de validar con usuarios. La vista inicial reúne región, cambio estimado, significancia y gráfica; «Cambiar datos» permite elegir variables y periodo. «Datos y método» conserva fuentes, pruebas y reservas técnicas. Los usuarios con experiencia pueden profundizar sin cargar de jerga el recorrido principal.
+
+Predicción, comparación de variables, mapa 3D y exportación están en «Herramientas avanzadas». La app empieza con temperatura; permite añadir hasta tres variables. La explicación de Claude es breve y el cálculo verificado se expande a petición. [Recorrido de presentación y alcance](docs/USO_Y_PRESENTACION.md).
+
 ## Ejecutar
 
 Requiere Node.js 20.19 o posterior y Python 3.9–3.12 para calcular periodos distintos de 1992–2024.
@@ -28,7 +34,7 @@ La conversación usa Claude desde el servidor y conserva el contexto de la caja,
 
 ## Predicción mensual
 
-La pestaña **Predicción** permite comparar la red neuronal original, **Red + ENSO** (Niño 3.4 histórico), el patrón estacional y el modelo elegido por validación. ENSO se limita a octubre del año anterior; los meses desconocidos se completan por persistencia del último valor, sin observaciones futuras. Disponible para las seis variables mensuales de cada caja con el periodo completo 1992–2024. Las vistas separan la prueba retrospectiva 2021–2024 de la proyección de doce meses de 2025 con datos hasta diciembre de 2024; esta última no es un pronóstico meteorológico actual. El índice anual no tiene un modelo predictivo validado.
+La opción **Predicción experimental**, dentro de **Herramientas avanzadas**, permite comparar la red neuronal original, **Red + ENSO** (Niño 3.4 histórico), el patrón estacional y el modelo elegido por validación. ENSO se limita a octubre del año anterior; los meses desconocidos se completan por persistencia del último valor, sin observaciones futuras. Disponible para las seis variables mensuales de cada caja con el periodo completo 1992–2024. Las vistas separan la prueba retrospectiva 2021–2024 de la proyección de doce meses de 2025 con datos hasta diciembre de 2024; esta última no es un pronóstico meteorológico actual. El índice anual no tiene un modelo predictivo validado.
 
 El modelo se elige con 2016–2020, antes de medir su error en 2021–2024. Ambos periodos ya se examinaron en versiones previas: repetir la comparación no crea una confirmación independiente. La pantalla muestra error en las unidades originales, comparación con el patrón estacional y bandas orientativas; no porcentajes de “acierto” ni una garantía de cobertura. La red puede perder frente a un modelo simple. Datos, modelos, reglas y reproducción: [docs/FORECAST_PROTOCOL.md](docs/FORECAST_PROTOCOL.md). Las fuentes y el método de significancia se consultan a un clic, sin cargar de texto la vista principal.
 

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import "./refinements.css";
+import "./explorer-focus.css";
 const plex = localFont({
   src: "../public/fonts/ibm-plex-sans.ttf",
   display: "swap",
