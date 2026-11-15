@@ -28,9 +28,11 @@ La conversación usa Claude desde el servidor y conserva el contexto de la caja,
 
 ## Predicción mensual
 
-La pestaña **Predicción** permite comparar una red neuronal con rezagos, el patrón estacional y el modelo elegido por validación. Disponible para las seis variables mensuales de cada caja con el periodo completo 1992–2024. Las vistas separan la prueba retrospectiva 2021–2024 de la proyección de doce meses de 2025 con datos hasta diciembre de 2024; esta última no es un pronóstico meteorológico actual. El índice anual no tiene un modelo predictivo validado.
+La pestaña **Predicción** permite comparar la red neuronal original, **Red + ENSO** (Niño 3.4 histórico), el patrón estacional y el modelo elegido por validación. ENSO se limita a octubre del año anterior; los meses desconocidos se completan por persistencia del último valor, sin observaciones futuras. Disponible para las seis variables mensuales de cada caja con el periodo completo 1992–2024. Las vistas separan la prueba retrospectiva 2021–2024 de la proyección de doce meses de 2025 con datos hasta diciembre de 2024; esta última no es un pronóstico meteorológico actual. El índice anual no tiene un modelo predictivo validado.
 
-El modelo se elige con 2016–2020, antes de medir su error en 2021–2024. La pantalla muestra error en las unidades originales, comparación con el patrón estacional y bandas orientativas; no porcentajes de “acierto” ni una garantía de cobertura. La red puede perder frente a un modelo simple. Datos, modelos, reglas y reproducción: [docs/FORECAST_PROTOCOL.md](docs/FORECAST_PROTOCOL.md). Las fuentes y el método de significancia se consultan a un clic, sin cargar de texto la vista principal.
+El modelo se elige con 2016–2020, antes de medir su error en 2021–2024. Ambos periodos ya se examinaron en versiones previas: repetir la comparación no crea una confirmación independiente. La pantalla muestra error en las unidades originales, comparación con el patrón estacional y bandas orientativas; no porcentajes de “acierto” ni una garantía de cobertura. La red puede perder frente a un modelo simple. Datos, modelos, reglas y reproducción: [docs/FORECAST_PROTOCOL.md](docs/FORECAST_PROTOCOL.md). Las fuentes y el método de significancia se consultan a un clic, sin cargar de texto la vista principal.
+
+El reentrenamiento con ENSO se ofrece como experimento comparativo. Sus resultados son mixtos, por lo que se conserva el modelo predeterminado anterior en las 18 series; no se eligen ganadores mirando los errores de prueba de cada serie. La interfaz distingue el modelo actual del ganador de validación del experimento. Resultados completos: [auditoría del reentrenamiento](docs/FORECAST_RETRAINING.md).
 
 ## Mapa del área de estudio
 

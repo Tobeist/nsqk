@@ -67,6 +67,24 @@ test("Claude server uses canonical inference, protects credentials and handles f
     assert.match(facts, /"testMae":/);
     assert.match(facts, /not a current weather forecast/);
     assert.match(facts, /"sourceLinks":/);
+    assert.match(facts, /"evaluationPreviouslyExamined":true/);
+    assert.match(facts, /"neural-enso":/);
+    assert.match(facts, /"ensoKnownThrough":"2024-10-01"/);
+    assert.match(facts, /ersst5\.nino\.mth\.91-20\.ascii/);
+    assert.doesNotMatch(facts, /independentEvaluationYears/);
+  });
+
+  await t.test("training questions receive the separate historical ENSO policy", async (st) => {
+    let facts = "";
+    st.mock.method(globalThis, "fetch", async (_url: string, init?: RequestInit) => {
+      const sent = JSON.parse(String(init?.body)); facts = sent.system[1].text;
+      return providerReply();
+    });
+    const response = await POST(request({ ...body, question: "¿Cómo entrenaste la red con ENSO?" }));
+    assert.equal(response.status, 200);
+    assert.match(facts, /"futureStrategy":"persistence"/);
+    assert.match(facts, /"availabilityLagMonths":2/);
+    assert.match(facts, /no usa ENSO/);
   });
 
   await t.test("keeps conversation history scoped to the current canonical analysis", async (st) => {

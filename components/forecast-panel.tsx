@@ -7,6 +7,7 @@ import { getRegion, getVariable, type VariableId } from "@/lib/catalog";
 import { Modal } from "./modal";
 import { formatNumber } from "@/lib/format";
 import { forecastCsv, forecastModelLabel, forecastValues, getForecast, type ForecastModelId, type ForecastResult } from "@/lib/forecast-data";
+import { getSourceLinks } from "@/lib/source-links";
 import styles from "./forecast-panel.module.css";
 
 export function ForecastPanel(props: { regionId: string; variableId: VariableId; start: number; end: number }) {
@@ -19,7 +20,8 @@ function ForecastExperiment({ result, regionId, variableId }: { result: Forecast
   const [model, setModel] = useState<ForecastModelId>(result.selectedModel);
   const [expanded, setExpanded] = useState(false);
   const score = result.models.find((m) => m.id === model)!;
-  const models = [...new Set<ForecastModelId>([result.selectedModel, "neural", "climatology"])];
+  const models = [...new Set<ForecastModelId>([result.selectedModel, "neural", "neural-enso", "climatology"])];
+  const ensoSource = getSourceLinks(variableId)[1];
   function download() {
     const url = URL.createObjectURL(new Blob([forecastCsv(regionId, variableId, mode, model)], { type: "text/csv;charset=utf-8;" }));
     const link = document.createElement("a"); link.href = url;
@@ -33,19 +35,22 @@ function ForecastExperiment({ result, regionId, variableId }: { result: Forecast
     </div>
     <p className={styles.context}>{mode === "projection" ? "12 meses estimados desde diciembre de 2024." : "Prueba retrospectiva de 2021–2024, año por año."}</p>
     <div className={styles.models} role="group" aria-label="Modelo de predicción">
-      {models.map((id) => <button key={id} aria-pressed={id === model} onClick={() => setModel(id)}>{forecastModelLabel[id]}{id === result.selectedModel && <span>elegido</span>}</button>)}
+      {models.map((id) => <button key={id} aria-pressed={id === model} onClick={() => setModel(id)}>{forecastModelLabel[id]}{id === result.selectedModel ? <span>actual</span> : id === "neural-enso" ? <span>experimental</span> : null}</button>)}
     </div>
+    {model === "neural-enso" && <p className={styles.context}>Incluye Niño 3.4, indicador de El Niño y La Niña. <a href={ensoSource.href} target="_blank" rel="noreferrer">Fuente: NOAA</a></p>}
   </>;
   return <><section className={styles.panel} aria-label="Predicción mensual">
     <div className={styles.heading}><h4><FlaskConical size={16} /> Predicción mensual</h4><div className={styles.actions}><button className="icon-button" aria-label="Ampliar predicción" onClick={() => setExpanded(true)}><Expand size={15} /></button><button className="icon-button" aria-label="Descargar predicciones" onClick={download}><Download size={15} /></button></div></div>
     {controls}
     <ForecastPlot key={`${mode}:${model}`} result={result} mode={mode} model={model} />
     <p className={styles.score}>Error histórico medio: <strong>{formatNumber(score.testMae, 2)} {result.unit}</strong></p>
-    <p className={styles.comparison}>{score.skillVsClimatology === 0 ? "Referencia: el patrón habitual de cada mes." : `${formatNumber(Math.abs(score.skillVsClimatology) * 100, 0)} % ${score.skillVsClimatology > 0 ? "menos" : "más"} error que el patrón estacional en 2021–2024.`}{model === "neural" && model !== result.selectedModel ? " Red experimental; no ganó la selección." : ""}</p>
+    <p className={styles.comparison}>{score.skillVsClimatology === 0 ? "Referencia: el patrón habitual de cada mes." : `${formatNumber(Math.abs(score.skillVsClimatology) * 100, 0)} % ${score.skillVsClimatology > 0 ? "menos" : "más"} error que el patrón estacional en 2021–2024.`}{model === "neural-enso" ? " Experimento; se conserva el modelo anterior como predeterminado." : model === "neural" && model !== result.selectedModel ? " Red experimental; no ganó la selección." : ""}</p>
     <details className={styles.details}><summary>Cómo se probó y qué tan bien predice</summary>
-      <p>Modelo elegido con 2016–2020. Error medido aparte en 2021–2024, prediciendo cada año sólo con datos anteriores. Menor error es mejor.</p>
+      <p>Modelo elegido con 2016–2020. Error medido en 2021–2024, prediciendo cada año sólo con datos anteriores. Estos años ya se revisaron en versiones previas; no son una prueba nueva. Menor error es mejor.</p>
+      <p>Red + ENSO sigue en evaluación: los resultados generales son mixtos. Ganador de validación al incluir el experimento: {forecastModelLabel[result.validationWinner]}. Se conserva el modelo de la versión anterior en todas las series hasta contar con una validación nueva.</p>
       <table><caption>Error medio mensual ({result.unit})</caption><thead><tr><th>Modelo</th><th>Validar</th><th>Probar</th></tr></thead><tbody>{result.models.map((m) => <tr key={m.id}><th scope="row">{forecastModelLabel[m.id]}</th><td>{formatNumber(m.validationMae, 2)}</td><td>{formatNumber(m.testMae, 2)}</td></tr>)}</tbody></table>
       <p>La banda apunta al 80 % con errores de validación. En la prueba cubrió {formatNumber(score.coverage80 * 100, 0)} % de los meses; es orientativa.</p>
+      <p>La red original usa la historia de la variable y el mes del año. Red + ENSO añade Niño 3.4 hasta octubre del año anterior; para los meses desconocidos mantiene el último valor disponible. Es una suposición, no conocimiento del ENSO futuro.</p>
       <p>Datos hasta diciembre de 2024. La proyección de 2025 no es un pronóstico meteorológico actual ni una observación. Fuente: {result.source}.</p>
       <a href="https://github.com/Tobeist/nsqk/blob/main/docs/FORECAST_PROTOCOL.md" target="_blank" rel="noreferrer">Ver protocolo y reproducción</a>
     </details>
