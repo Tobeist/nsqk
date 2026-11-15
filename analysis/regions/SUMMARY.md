@@ -2,7 +2,7 @@
 
 Plan fijado antes de calcular Chihuahua y sur: [protocolo](../../docs/PLAN_AUDITORIA_REGIONAL.md). El noreste ya se conocía: esta ampliación es exploratoria. Datos y métodos no implican causalidad ni cobertura de estados completos.
 
-Las pendientes mensuales primarias usan calendario + Niño 3.4 (M1), HAC(12), p e IC bootstrap-t de criba AR. Rx5day anual usa HAC(2). Holm se aplica a las nueve pruebas mensuales y a las tres anuales por separado. Por eso el p de Holm del noreste aquí puede diferir del que muestra la app: la familia original tenía tres pruebas mensuales.
+Las pendientes mensuales primarias usan calendario + Niño 3.4 (M1), HAC(12), p e IC bootstrap-t de criba AR. Rx5day anual usa HAC(2). Holm se aplica a las nueve pruebas mensuales y a las tres anuales por separado. La app integra seis variables mensuales por caja (18 pruebas) y el índice anual (tres pruebas), con HAC(12) mensual y HAC(2) anual. Esta auditoría regional tiene un alcance mensual menor (nueve pruebas); sus p de Holm no son intercambiables con los de la app ni con la auditoría original de tres pruebas mensuales.
 
 | Caja | Serie | Pendiente [IC bootstrap-t 95 %] por década | p Holm | Estado |
 | --- | --- | --- | ---: | --- |

@@ -1,6 +1,7 @@
 import { signed, evidenceLabel } from "./format";
 import { getVariable } from "./catalog";
 import { createRealAnalysis } from "./real-data";
+import { getSignificance } from "./significance";
 import { selectionKey, type Analysis, type AnalysisAdapter, type ChatAdapter, type ChatContext } from "./contracts";
 export const realAnalysisAdapter: AnalysisAdapter = {
   async analyze(selection, signal) {
@@ -17,6 +18,23 @@ export const realAnalysisAdapter: AnalysisAdapter = {
       throw new Error("El resultado no corresponde a la selección. Vuelve a analizar.");
     }
     return analysis;
+  },
+};
+export const claudeChatAdapter: ChatAdapter = {
+  connected: true,
+  mode: "real",
+  async reply(question, context, signal, history = []) {
+    if (signal?.aborted) throw new DOMException("Cancelado", "AbortError");
+    const response = await fetch("/api/chat", {
+      method: "POST", headers: { "Content-Type": "application/json" }, signal,
+      body: JSON.stringify({ question, selection: context.selection, variableId: context.variableId, history: history.slice(-8).map(({ role, text }) => ({ role, text: text.slice(0, 1500) })) }),
+    });
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload.error || "Claude no pudo responder. Vuelve a intentarlo.");
+    if (payload.analysisId !== context.analysisId || payload.provider !== "claude" || typeof payload.text !== "string") {
+      throw new Error("La respuesta no corresponde al análisis visible. Vuelve a analizar y preguntar.");
+    }
+    return payload;
   },
 };
 export const localEvidenceChatAdapter: ChatAdapter = {
@@ -83,6 +101,7 @@ export function analysisCsv(
     "period_start", "period_end", "p_bootstrap_t", "p_holm", "family", "family_size",
     "evidence_status", "evidence_reasons", "slope_without_enso", "p_holm_without_enso",
     "ci_definition", "bootstrap_replicates", "bootstrap_seed", "audit_version", "input_fingerprint",
+    "statistically_significant_holm_005", "significance_label", "significance_threshold",
   ];
   return (
     "\uFEFF" +
@@ -116,6 +135,7 @@ export function analysisCsv(
         r.evidence ? "Individual 95%; bootstrap-t AR; no simultáneo" : "Referencia: aproximación normal HAC",
         analysis.provenance.audit?.replicates, analysis.provenance.audit?.seed,
         analysis.provenance.audit?.version, analysis.provenance.audit?.fingerprint,
+        getSignificance(r.evidence).significant, getSignificance(r.evidence).label, .05,
       ]),
     ]
       .map((row) => row.map(quote).join(","))

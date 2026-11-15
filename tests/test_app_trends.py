@@ -1,6 +1,7 @@
 """Runtime engine parity, fixed families, and source freshness."""
 import json
 import sys
+import tempfile
 import unittest
 from unittest.mock import patch
 from pathlib import Path
@@ -32,6 +33,7 @@ class AppTrendsTest(unittest.TestCase):
 
     def test_committed_bundle_matches_every_current_input_and_family(self):
         bundle = json.loads((ROOT / "analysis/app/1992-2024.json").read_text())
+        self.assertEqual(bundle["hashPolicy"], app.HASH_POLICY)
         fingerprint, hashes = app.fingerprints()
         self.assertEqual(bundle["fingerprint"], fingerprint, "Regenerate the app bundle after changing data, code or protocol")
         self.assertEqual(bundle["inputHashes"], hashes)
@@ -51,6 +53,23 @@ class AppTrendsTest(unittest.TestCase):
                 X = (np.column_stack([np.ones(len(y)), np.arange(len(y))]) if annual else
                      tl.design(len(y), np.tile(np.arange(1, 13), 33), {"enso": app.enso_values(1992, 2024)})[0])
                 self.assertAlmostEqual(row["slopePerDecade"], tl.fit_hac(y, X, 2 if annual else 12).params[1] * 10)
+
+    def test_text_fingerprint_ignores_only_crlf_lf_checkout_conversion(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            path = root / "series.csv"
+            with patch.object(app, "ROOT", root), patch.object(app, "input_files", return_value=[path]):
+                path.write_bytes(b"date,value\n1992-01-01,1.25\n")
+                expected = app.text_sha256(path)
+                fingerprint, hashes = app.fingerprints()
+                self.assertEqual(hashes, {"series.csv": expected})
+                path.write_bytes(b"date,value\r\n1992-01-01,1.25\r\n")
+                self.assertEqual(app.text_sha256(path), expected)
+                self.assertEqual(app.fingerprints(), (fingerprint, hashes))
+                for changed in (b"date,value\r\n1992-01-01,1.26\r\n", b"date,value\r\n1992-01-01,1.25 \r\n"):
+                    path.write_bytes(changed)
+                    self.assertNotEqual(app.text_sha256(path), expected)
+                    self.assertNotEqual(app.fingerprints()[0], fingerprint)
 
     def test_unstable_ar_cannot_produce_a_certainty_label(self):
         y = np.arange(33, dtype=float)

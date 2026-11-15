@@ -1520,6 +1520,24 @@ a {
   font-weight: 400;
   letter-spacing: 0.2px;
 }
+.chat-notice small {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.verified-chat-summary {
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+.message-section-label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+}
 .chat-notice p {
   font-size: 10px;
   line-height: 1.8;

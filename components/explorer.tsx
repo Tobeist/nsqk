@@ -1,7 +1,7 @@
 "use client";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowDownToLine,
   ArrowLeft,
@@ -48,6 +48,7 @@ import {
   type Selection,
 } from "@/lib/contracts";
 import { evidenceLabel, formatNumber, signed, uncertainEvidence } from "@/lib/format";
+import { getSignificance } from "@/lib/significance";
 import {
   annualIndexId,
   createRealAnalysis,
@@ -60,7 +61,7 @@ import {
 import {
   analysisCsv,
   realAnalysisAdapter,
-  localEvidenceChatAdapter,
+  claudeChatAdapter,
   toChatContext,
 } from "@/lib/adapters";
 import { createMapLayer, getMapLimit } from "@/lib/map-layer";
@@ -81,7 +82,7 @@ const families: Family[] = ["Calor", "Lluvia", "Suelo"];
 const FamilyIcon = { Calor: Thermometer, Lluvia: Droplets, Suelo: Leaf };
 const suggestions = [
   "¿Qué significa esta pendiente?",
-  "¿Qué tan clara es la evidencia?",
+  "¿Es estadísticamente significativo?",
   "¿Qué no puedo concluir?",
 ];
 const availableYears = Array.from(
@@ -112,6 +113,20 @@ export function Explorer() {
   const [threads, setThreads] = useState<Record<string, ChatMessage[]>>({});
   const [chatBusy, setChatBusy] = useState<Record<string, boolean>>({});
   const [chatErrors, setChatErrors] = useState<Record<string, string>>({});
+  const [claudeConnection, setClaudeConnection] = useState<"checking" | "configured" | "unconfigured" | "unavailable">("checking");
+  const [claudeModel, setClaudeModel] = useState("");
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/api/chat", { signal: controller.signal, cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("Estado no disponible");
+        const data = await response.json();
+        setClaudeConnection(data.configured ? "configured" : "unconfigured");
+        setClaudeModel(typeof data.model === "string" ? data.model : "");
+      })
+      .catch(() => { if (!controller.signal.aborted) setClaudeConnection("unavailable"); });
+    return () => controller.abort();
+  }, []);
   const resultRef = useRef<HTMLDivElement>(null);
   const regionRef = useRef<HTMLDivElement>(null);
   const requestRef = useRef<AbortController | null>(null);
@@ -231,7 +246,8 @@ export function Explorer() {
     setChatBusy((b) => ({ ...b, [key]: true }));
     setChatErrors((e) => ({ ...e, [key]: "" }));
     try {
-      const response = await localEvidenceChatAdapter.reply(question, context);
+      const previous = retry && messages.at(-1)?.role === "user" ? messages.slice(0, -1) : messages;
+      const response = await claudeChatAdapter.reply(question, context, undefined, previous);
       setThreads((t) => ({
         ...t,
         [key]: [
@@ -263,6 +279,7 @@ export function Explorer() {
   const mapLimit = mapLayer[0]?.limit ?? getMapLimit(activeId);
   const stat = result?.statistics;
   const inconclusive = stat && uncertainEvidence(stat);
+  const significance = getSignificance(result?.evidence);
   return (
     <div className="app-shell">
       <a className="skip-link" href="#analysis-panel">
@@ -752,7 +769,9 @@ export function Explorer() {
                     messages={messages}
                     busy={chatBusy[contextKey]}
                     error={chatErrors[contextKey]}
-                    disabled={!result?.statistics}
+                    disabled={!result?.statistics || claudeConnection !== "configured"}
+                    connection={claudeConnection}
+                    model={claudeModel}
                     onSend={send}
                     onEvidence={openEvidence}
                     onRetry={() => {
@@ -818,7 +837,7 @@ export function Explorer() {
                         <span>
                           {inconclusive ? "±" : <TrendingUp size={12} />}
                         </span>
-                        {evidenceLabel(stat)}
+                        {significance.significant === true ? "Significativo" : significance.significant === false ? "No significativo" : "No evaluable"}
                       </span>
                     </div>
                     <button
@@ -842,7 +861,9 @@ export function Explorer() {
                     </button>
                     {stat.evidence && (
                       <div className="audit-summary">
-                        <p>p de Holm <strong>{formatNumber(stat.evidence.pAdjusted!, 3)}</strong> · {stat.evidence.familySize} pruebas · bootstrap-t AR</p>
+                        <p><strong>{significance.label}</strong></p>
+                        <p>p de Holm <strong>{formatNumber(stat.evidence.pAdjusted!, 4)}</strong> · umbral 0.05 · {stat.evidence.familySize} pruebas</p>
+                        <p>{evidenceLabel(stat)}. {significance.description}</p>
                         {stat.evidence.baseline && <p>Sin ENSO: {signed(stat.evidence.baseline.slopePerDecade, 3)} · Con ENSO: {signed(stat.slopePerDecade, 3)} {result.unit}/década</p>}
                         <button className="text-button" onClick={() => openEvidence("method")}>Ver método y comprobaciones <ArrowUpRight size={12} /></button>
                       </div>
@@ -912,7 +933,7 @@ export function Explorer() {
                         <ArrowRight size={14} />
                       </button>
                       <span className="chat-disclaimer">
-                        Explicaciones locales del resultado · sin Claude
+                        {claudeConnection === "configured" ? "Claude · contexto del análisis visible" : claudeConnection === "checking" ? "Comprobando disponibilidad de Claude…" : "Claude no está disponible · revisa la conversación"}
                       </span>
                     </div>
                   </>
@@ -1047,7 +1068,7 @@ export function Explorer() {
               Series NASA procesadas para tres cajas de México. La
               gráfica muestra valores anuales; las pendientes e intervalos se
               calculan según el método de cada variable. Las respuestas son
-              explicaciones locales, sin llamadas a Claude.
+              explicaciones con Claude sobre la caja, el periodo y la variable visibles. La significancia la calcula el motor estadístico; Claude explica sus resultados y límites.
             </p>
             <h3>El mapa sí tiene geografía real</h3>
             <p>
@@ -1082,6 +1103,8 @@ function ChatView({
   onEvidence,
   onRetry,
   context,
+  connection,
+  model,
 }: {
   messages: ChatMessage[];
   busy?: boolean;
@@ -1091,6 +1114,8 @@ function ChatView({
   onEvidence: (f?: string) => void;
   onRetry: () => void;
   context: string;
+  connection: "checking" | "configured" | "unconfigured" | "unavailable";
+  model: string;
 }) {
   const [input, setInput] = useState("");
   function submit(e: React.SubmitEvent<HTMLFormElement>) {
@@ -1107,15 +1132,15 @@ function ChatView({
       </div>
       <p className="chat-context-label">Contexto: {context}</p>
       <div className="chat-notice">
-        <span className="demo-pill">Explicación local</span>
+        <span className="demo-pill">Claude</span>
         <p>
-          Respuestas deterministas basadas en la pendiente, el intervalo y las
-          limitaciones del análisis visible. No hay un modelo de IA conectado.
+          {connection === "checking" ? "Comprobando disponibilidad…" : connection === "unconfigured" ? "Claude necesita configurarse en el servidor para responder." : connection === "unavailable" ? "No se pudo comprobar la disponibilidad de Claude. Recarga la página para reintentar." : "Claude recibe tus preguntas y los datos de esta selección. La significancia se calcula con Holm; la IA explica el resultado."}
+          {connection === "configured" && <small>Modelo: {model}. Preguntas y contexto se envían a Anthropic.</small>}
         </p>
       </div>
       {disabled ? (
         <div className="error-box">
-          No hay una serie disponible para conversar sobre esta combinación.
+          {connection !== "configured" ? "La conversación estará disponible cuando Claude esté configurado y responda el servidor." : "No hay un ajuste válido para conversar sobre esta combinación."}
         </div>
       ) : (
         <>
@@ -1135,9 +1160,16 @@ function ChatView({
             {messages.map((m) => (
               <div className={`message ${m.role}`} key={m.id}>
                 <span className="message-role">
-                  {m.role === "user" ? "TÚ" : "EXPLICACIÓN LOCAL"}
+                  {m.role === "user" ? "TÚ" : m.provider === "claude" ? "CLAUDE" : "EXPLICACIÓN LOCAL"}
                 </span>
-                <p>{m.text}</p>
+                {m.provider === "claude" && m.verifiedSummary && m.explanation ? <>
+                  <div className="verified-chat-summary">
+                    <span className="message-section-label">Resultado calculado</span>
+                    <p>{m.verifiedSummary}</p>
+                  </div>
+                  <span className="message-section-label">Explicación de Claude</span>
+                  <ExplanationText text={m.explanation} />
+                </> : <p>{m.text}</p>}
                 {m.evidence && (
                   <button onClick={() => onEvidence(m.evidence)}>
                     <FileText size={12} />
@@ -1150,7 +1182,7 @@ function ChatView({
             {busy && (
               <div className="chat-loading">
                 <LoaderCircle className="spin" size={14} />
-                Preparando explicación…
+                Claude está preparando la explicación…
               </div>
             )}
           </div>
@@ -1202,6 +1234,15 @@ function ChatView({
       </p>
     </div>
   );
+}
+function ExplanationText({ text }: { text: string }) {
+  // React escapes all content; support emphasis without accepting generated HTML.
+  return text.split(/\n{2,}/).map((paragraph, index) => (
+    <p key={index}>{paragraph.split(/(\*\*[^*\n]+\*\*)/g).map((part, i) =>
+      part.startsWith("**") && part.endsWith("**")
+        ? <strong key={i}>{part.slice(2, -2)}</strong> : part,
+    )}</p>
+  ));
 }
 function Evidence({
   analysis,
@@ -1295,6 +1336,7 @@ function Evidence({
             cero no confirma la dirección y tampoco demuestra ausencia de
             cambio.
           </p>
+          <p><strong>{getSignificance(r.evidence).label}.</strong> {getSignificance(r.evidence).description}</p>
           {s.evidence && <>
             <div><span>p bootstrap-t / p de Holm</span><strong>{formatNumber(s.evidence.pValue!, 4)} / {formatNumber(s.evidence.pAdjusted!, 4)}</strong></div>
             <p>Familia de {s.evidence.familySize} pruebas, independiente de las variables visibles. El IC individual puede excluir cero aunque la evidencia tras Holm sea inconclusa.</p>

@@ -69,6 +69,11 @@ export interface ChatMessage {
   role: "user" | "assistant";
   text: string;
   evidence?: "slope" | "interval" | "method";
+  provider?: "claude" | "local";
+  model?: string;
+  analysisId?: string;
+  verifiedSummary?: string;
+  explanation?: string;
 }
 export interface ChatAdapter {
   connected: boolean;
@@ -77,6 +82,7 @@ export interface ChatAdapter {
     question: string,
     context: ChatContext,
     signal?: AbortSignal,
+    history?: Pick<ChatMessage, "role" | "text">[],
   ): Promise<Omit<ChatMessage, "id" | "role">>;
 }
 export function selectionKey(s: Selection) {
