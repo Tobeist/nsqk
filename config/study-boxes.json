@@ -1,0 +1,24 @@
+{
+  "coordinate_order": "west,south,east,north",
+  "analysis_period": [1992, 2024],
+  "boxes": [
+    {
+      "id": "mx-northeast",
+      "name": "Noreste de México (caja de prueba)",
+      "bbox": [-101, 25, -99, 27],
+      "data_status": "processed"
+    },
+    {
+      "id": "mx-chihuahua-interior",
+      "name": "Chihuahua interior",
+      "bbox": [-107, 28, -105, 30],
+      "data_status": "defined"
+    },
+    {
+      "id": "mx-south-humid",
+      "name": "Caja sur (Chiapas–Tabasco)",
+      "bbox": [-94, 16, -92, 18],
+      "data_status": "defined"
+    }
+  ]
+}

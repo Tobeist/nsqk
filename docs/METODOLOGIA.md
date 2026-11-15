@@ -4,7 +4,7 @@
 
 ## 1. Pregunta y alcance inicial
 
-Queremos medir cómo cambió la temperatura media mensual en una caja de prueba del noreste de México y establecer un pipeline reproducible que después permita comparar promedios y extremos. La caja es **[-101, 25, -99, 27]** (oeste, sur, este, norte). Es un área rectangular de validación técnica; no representa la región Norte-Noreste formada por estados completos.
+Queremos medir cómo cambió la temperatura media mensual en una caja de prueba del noreste de México y establecer un pipeline reproducible que después permita comparar promedios y extremos. La caja con datos procesados es **[-101, 25, -99, 27]** (oeste, sur, este, norte). Es un área rectangular de validación técnica; no representa la región Norte-Noreste formada por estados completos. También se [fijaron dos cajas adicionales](REGIONES.md) antes de estudiar sus tendencias; todavía no se han descargado ni procesado sus series.
 
 Usamos enero de 2010 a diciembre de 2012 para verificar extracción y estructura, y enero de 1992 a diciembre de 2024 para el primer análisis histórico. Elegimos el periodo antes de calcular la tendencia. Los tres años de prueba no se usan para inferencia de tendencias.
 
