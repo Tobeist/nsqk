@@ -732,7 +732,6 @@ def main(reps):
         write_report(key, rows, enso_cmp, breaks, influence, classification, enso_season)
     figure_forest(rows)
     figure_rolling(rolling_rows, rows)
-    print((OUT / "SUMMARY.md").read_text())
 
 
 if __name__ == "__main__":
