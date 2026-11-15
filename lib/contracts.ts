@@ -1,4 +1,5 @@
 import type { VariableId, Region } from "./catalog";
+import type { TrendEvidence } from "./trend-evidence";
 export interface Selection {
   regionId: string;
   variables: VariableId[];
@@ -16,6 +17,7 @@ export interface Statistics {
   intercept: number;
   rSquared?: number;
   sampleSize: number;
+  evidence?: TrendEvidence;
 }
 export interface VariableResult {
   variableId: VariableId;
@@ -28,7 +30,8 @@ export interface VariableResult {
   series: Observation[];
   trend: Observation[];
   statistics: Statistics | null;
-  status: "ready" | "no-data";
+  evidence?: TrendEvidence;
+  status: "ready" | "no-data" | "not-evaluable";
 }
 export interface Analysis {
   id: string;
@@ -41,6 +44,7 @@ export interface Analysis {
     updatedAt: string;
     resolution: string;
     limitations: string[];
+    audit?: { version: string; fingerprint: string; replicates: number; seed: number };
   };
 }
 export interface AnalysisAdapter {

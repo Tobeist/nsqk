@@ -1,12 +1,22 @@
-import { signed, formatNumber } from "./format";
+import { signed, evidenceLabel } from "./format";
 import { getVariable } from "./catalog";
 import { createRealAnalysis } from "./real-data";
-import { auditStatusExplanation, auditStatusLabel, getAuditStatus } from "./audit-status";
-import type { AnalysisAdapter, ChatAdapter, ChatContext } from "./contracts";
+import { selectionKey, type Analysis, type AnalysisAdapter, type ChatAdapter, type ChatContext } from "./contracts";
 export const realAnalysisAdapter: AnalysisAdapter = {
   async analyze(selection, signal) {
     if (signal?.aborted) throw new DOMException("Cancelado", "AbortError");
-    return createRealAnalysis(selection);
+    if (selection.start === 1992 && selection.end === 2024) return createRealAnalysis(selection);
+    const response = await fetch("/api/analysis", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(selection), signal,
+    });
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload.error || "No se pudo calcular el periodo seleccionado.");
+    const analysis = payload as Analysis;
+    if (selectionKey(analysis.selection) !== selectionKey(selection) || !analysis.provenance.audit) {
+      throw new Error("El resultado no corresponde a la selección. Vuelve a analizar.");
+    }
+    return analysis;
   },
 };
 export const localEvidenceChatAdapter: ChatAdapter = {
@@ -17,15 +27,11 @@ export const localEvidenceChatAdapter: ChatAdapter = {
     const s = context.statistics;
     if (!s) return { text: "No hay datos para esta selección.", evidence: "method" };
     const q = question.toLowerCase();
-    const audit = getAuditStatus(context.selection, context.variableId);
-    const auditText = audit
-      ? `La auditoría del periodo completo clasifica el resultado como ${auditStatusLabel(audit.status).toLowerCase()} (p de Holm ${formatNumber(audit.pHolm, 3)}). ${auditStatusExplanation(audit.status)}`
-      : "Esta caja, variable o ventana de años no tiene una conclusión auditada; el resultado es exploratorio.";
-    if (/causa|niño|enso|pdo|futuro|pron[oó]st|clim[aá]tico/.test(q))
-      return { text: `Este análisis describe la serie y su incertidumbre. No permite atribuir causas ni pronosticar. La caja estudiada no representa estados completos ni todo México. ${auditText}`, evidence: "method" };
+    if (/causa|niño|enso|pdo|estacion|estaci[oó]n|calendario|futuro|pron[oó]st|clim[aá]tico/.test(q))
+      return { text: `${s.evidence?.baseline ? `La regresión incluye once indicadores de mes y Niño 3.4 contemporáneo: controla el calendario estacional y parte de la variación asociada a ENSO. Sin ENSO: ${signed(s.evidence.baseline.slopePerDecade, 3)}; con ENSO: ${signed(s.slopePerDecade, 3)} ${context.unit}/década.` : "El índice anual se analiza sin ajuste ENSO."} No controla todos los factores naturales, no establece causas ni permite pronosticar. La caja no representa estados completos.`, evidence: "method" };
     if (/evidencia|intervalo|significativ|significancia|confian|segur|clara/.test(q))
-      return { text: `El IC HAC del ajuste base (95 %) es ${signed(s.confidenceInterval[0], 3)} a ${signed(s.confidenceInterval[1], 3)} ${context.unit}/década e ${s.confidenceInterval[0] <= 0 && s.confidenceInterval[1] >= 0 ? "incluye" : "excluye"} cero. Este intervalo individual no es la conclusión final. ${auditText}`, evidence: "interval" };
-    return { text: `La pendiente estimada del ajuste base es ${signed(s.slopePerDecade, 3)} ${context.unit} por década para ${context.selection.start}–${context.selection.end}. Se estimó con ${s.sampleSize} ${context.sampleUnit} mediante ${context.method.name}. La gráfica muestra ${context.annualLabel}. ${auditText}`, evidence: "slope" };
+      return { text: `El intervalo individual del 95 % es ${signed(s.confidenceInterval[0], 3)} a ${signed(s.confidenceInterval[1], 3)} ${context.unit}/década. ${evidenceLabel(s)} en esta caja y periodo. ${s.evidence ? `p de bootstrap-t AR: ${s.evidence.pValue}; p de Holm: ${s.evidence.pAdjusted} (${s.evidence.familySize} pruebas). ${s.evidence.reasons.join(" ")} El intervalo individual no determina por sí solo la certeza tras pruebas múltiples.` : "Resultado de referencia sin auditoría integrada."} Un intervalo que incluye cero no demuestra ausencia de cambio.`, evidence: "interval" };
+    return { text: `La pendiente estimada es ${signed(s.slopePerDecade, 3)} ${context.unit} por década para ${context.selection.start}–${context.selection.end}. Se estimó con ${s.sampleSize} ${context.sampleUnit} mediante ${context.method.name}. La gráfica muestra ${context.annualLabel}. ${context.sources.limitations[0]}`, evidence: "slope" };
   },
 };
 export function toChatContext(
@@ -53,7 +59,6 @@ export function analysisCsv(
   variableId: import("./catalog").VariableId,
 ) {
   const r = analysis.results.find((d) => d.variableId === variableId)!;
-  const audit = getAuditStatus(analysis.selection, variableId);
   const quote = (s: unknown) => `"${String(s ?? "").replaceAll('"', '""')}"`;
   const headers = [
     "analysis_id",
@@ -75,14 +80,9 @@ export function analysisCsv(
     "sample_unit",
     "source",
     "updated_at",
-    "audit_status",
-    "audit_scope",
-    "audit_estimate",
-    "audit_unit",
-    "audit_p_holm",
-    "audit_ci95_low",
-    "audit_ci95_high",
-    "audit_method",
+    "period_start", "period_end", "p_bootstrap_t", "p_holm", "family", "family_size",
+    "evidence_status", "evidence_reasons", "slope_without_enso", "p_holm_without_enso",
+    "ci_definition", "bootstrap_replicates", "bootstrap_seed", "audit_version", "input_fingerprint",
   ];
   return (
     "\uFEFF" +
@@ -108,14 +108,14 @@ export function analysisCsv(
         r.sampleUnit,
         r.source,
         analysis.provenance.updatedAt,
-        audit?.status ?? "sin auditoría",
-        audit ? "mx-northeast; 1992-2024" : "",
-        audit?.estimate,
-        audit?.unit,
-        audit?.pHolm,
-        audit?.ciLow,
-        audit?.ciHigh,
-        audit?.model,
+        analysis.selection.start, analysis.selection.end,
+        r.evidence?.pValue, r.evidence?.pAdjusted,
+        r.evidence?.family, r.evidence?.familySize,
+        r.evidence?.status, r.evidence?.reasons.join(" ") ?? r.limitations.join(" "),
+        r.statistics?.evidence?.baseline?.slopePerDecade, r.statistics?.evidence?.baseline?.pAdjusted,
+        r.evidence ? "Individual 95%; bootstrap-t AR; no simultáneo" : "Referencia: aproximación normal HAC",
+        analysis.provenance.audit?.replicates, analysis.provenance.audit?.seed,
+        analysis.provenance.audit?.version, analysis.provenance.audit?.fingerprint,
       ]),
     ]
       .map((row) => row.map(quote).join(","))

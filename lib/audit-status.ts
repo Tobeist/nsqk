@@ -16,7 +16,8 @@ export type AuditStatus = {
   model: string;
 };
 
-// The published audit covers only this box and the complete 1992–2024 window.
+// Historical published audit, retained for reproducibility; live app inference uses trend-evidence.ts.
+// This original audit covers only this box and the complete 1992–2024 window.
 // Its conclusions cannot be transferred to another region or selected window.
 export function getAuditStatus(
   selection: Selection,

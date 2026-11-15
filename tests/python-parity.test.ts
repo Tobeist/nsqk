@@ -1,6 +1,7 @@
+// Historical HAC calculation checks. Production inference is tested in app-evidence.test.ts.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createRealAnalysis, realDefaultSelection } from "../lib/real-data";
+import { createReferenceAnalysis as createRealAnalysis, realDefaultSelection } from "../lib/real-data";
 import { analysisCsv } from "../lib/adapters";
 import fixture from "../analysis/results/parity_fixture.json";
 
@@ -19,7 +20,7 @@ const close = (a: number, b: number, message: string) => assert.ok(Math.abs(a - 
 
 // Regenerate the fixture with `python scripts/trend_audit.py` after changing the data or the model.
 for (const label of ["W0", "W3"] as const) {
-  test(`Python audit, app statistics, chart series and CSV export agree for ${label}`, () => {
+  test(`Historical Python audit, reference statistics, chart series and CSV export agree for ${label}`, () => {
     const { start, end } = python[label];
     const analysis = createRealAnalysis({ ...realDefaultSelection, start, end });
     for (const [key, id] of Object.entries(ids) as [keyof typeof ids, (typeof ids)[keyof typeof ids]][]) {

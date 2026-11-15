@@ -3,7 +3,7 @@ import { useId, useMemo } from "react";
 import { geoMercator, geoPath } from "d3";
 import { Navigation } from "lucide-react";
 import { stateFeatures, getIntersectedStates, getStateNames } from "@/lib/geography";
-import { signed } from "@/lib/format";
+import { signed, evidenceLabel, uncertainEvidence } from "@/lib/format";
 import type { MapRegionValue } from "@/lib/map-layer";
 import type { Region, Variable } from "@/lib/catalog";
 
@@ -45,9 +45,7 @@ export function RegionMap({
   const footprint = `M${left},${top}H${right}V${bottom}H${left}Z`;
   const ready = value?.state === "analyzed";
   const color = ready ? value.color : "#8299a8";
-  const uncertain = !!value?.statistics &&
-    value.statistics.confidenceInterval[0] <= 0 &&
-    value.statistics.confidenceInterval[1] >= 0;
+  const uncertain = !!value?.statistics && uncertainEvidence(value.statistics);
   const longitudeLines = Array.from({ length: east - west + 7 }, (_, i) => west - 3 + i);
   const latitudeLines = Array.from({ length: north - south + 7 }, (_, i) => south - 3 + i);
 
@@ -57,7 +55,7 @@ export function RegionMap({
         aria-labelledby={`map-title-${id} map-description-${id}`}>
         <title id={`map-title-${id}`}>{`${region.name} y límites de ${stateNames.join(", ")}`}</title>
         <desc id={`map-description-${id}`}>
-          {`El recuadro [${region.bbox.join(", ")}] representa el análisis regional; los límites estatales son contexto, sin resultados por estado completo. ${ready ? `Pendiente del recuadro: ${signed(value.statistics!.slopePerDecade, 3)} ${variable.unit} por década.` : "Sin análisis visible para esta selección."}`}
+          {`El recuadro [${region.bbox.join(", ")}] representa el análisis regional; los límites estatales son contexto, sin resultados por estado completo. ${ready ? `Pendiente del recuadro: ${signed(value.statistics!.slopePerDecade, 3)} ${variable.unit} por década. ${evidenceLabel(value.statistics!)}.` : "Sin análisis visible para esta selección."}`}
         </desc>
         <defs>
           <clipPath id={`map-clip-${id}`}><rect width={width} height={height} /></clipPath>

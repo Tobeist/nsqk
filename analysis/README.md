@@ -14,7 +14,7 @@ npm test                            # incluye tests/python-parity.test.ts (Pytho
 
 `trend_audit.py` no modifica `data/raw/`, `data/processed/` ni `data/results/`. Escribe solo en `analysis/`.
 
-`scripts/final_summary.py`, ejecutado al final de `run_analysis.py`, genera `final_status.csv`, `final_status.json` y `SUMMARY.md` desde los mismos resultados. La interfaz lee el JSON para mostrar el estado auditado únicamente en la caja noreste y el periodo completo 1992–2024.
+`scripts/final_summary.py`, ejecutado al final de `run_analysis.py`, genera `final_status.csv`, `final_status.json` y `SUMMARY.md` desde los mismos resultados. Es la auditoría original, limitada a la caja noreste y el periodo completo 1992–2024. La app usa ahora su extensión reproducible a 21 series en `analysis/app/1992-2024.json` y recalcula otros periodos con `scripts/app_trends.py`; véase [el protocolo de integración](../docs/APP_TREND_PROTOCOL.md). La familia mensual ampliada tiene 18 pruebas en lugar de tres: los p ajustados de ambos informes no son intercambiables.
 
 ## Resultados (`analysis/results/`)
 
