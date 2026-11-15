@@ -1,0 +1,14 @@
+{
+ "n_months": 396,
+ "simulations": 1000,
+ "bootstrap_reps": 199,
+ "seed": 20261114,
+ "noise": "AR(1) phi=0.37, sd 1; seasonal cycle amplitude 8; ENSO-like AR(1) phi=0.93, innovation sd 0.33, effect -0.2",
+ "scenarios": {
+  "S0": "no trend",
+  "S1": "0.27 per decade",
+  "S2": "20-year sinusoid, amplitude 0.4, random phase",
+  "S3": "+0.5 step at month 192 (2008-01)"
+ },
+ "note": "Prophet with Optuna is not re-run inside the simulations (cost); predictive selection is simulated for CLIM vs OLS_TREND only."
+}

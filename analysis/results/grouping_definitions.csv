@@ -1,0 +1,8 @@
+grouping,definition,blocks,days_per_block_min,days_per_block_max,coverage_rule,purpose,justification
+1d,día UTC,12054,1,1,100 % de días válidos; sin faltantes en 1992–2024,solo estudio de agregación de la pregunta A,resolución nativa del producto diario
+3d,bloques no solapados de 3 días anclados al 1 de enero de cada año,4026,2,3,100 % de días válidos; sin faltantes en 1992–2024,solo estudio de agregación de la pregunta A,comparación predefinida; no se elige por p
+7d,bloques no solapados de 7 días anclados al 1 de enero,1749,1,7,100 % de días válidos; sin faltantes en 1992–2024,solo estudio de agregación de la pregunta A,comparación predefinida; no se elige por p
+14d,bloques no solapados de 14 días anclados al 1 de enero,891,1,14,100 % de días válidos; sin faltantes en 1992–2024,solo estudio de agregación de la pregunta A,comparación predefinida; no se elige por p
+month,mes calendario,396,28,31,100 % de días válidos; sin faltantes en 1992–2024,"pregunta A (principal), C y D",resolución común a los tres productos y a Niño 3.4
+season,"DJF (año de enero), MAM, JJA, SON",131,90,92,100 % de días válidos; sin faltantes en 1992–2024,descripción de ENSO por estación,la teleconexión ENSO depende de la estación
+year,año calendario,33,365,366,100 % de días válidos; sin faltantes en 1992–2024,resumen visual y pregunta B (índices anuales),los índices ETCCDI son anuales; la media anual ponderada coincide con la diaria

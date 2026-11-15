@@ -1,0 +1,535 @@
+{
+ "outer_test_years": [
+  2016,
+  2017,
+  2018,
+  2019,
+  2020
+ ],
+ "holdout_years": [
+  2021,
+  2022,
+  2023,
+  2024
+ ],
+ "inner_years_per_outer": 3,
+ "trials_per_study": 25,
+ "sampler": "optuna TPESampler, seed = 20261114 + 1000*variable + 100*model + last training year",
+ "objective": "mean MAE over inner 12-month folds",
+ "search_space": {
+  "changepoint_prior_scale": [
+   0.001,
+   0.5
+  ],
+  "seasonality_prior_scale": [
+   0.01,
+   10.0
+  ],
+  "yearly_fourier_order": [
+   2,
+   6
+  ]
+ },
+ "mlp_search_space": {
+  "hidden_units": [
+   2,
+   4,
+   8
+  ],
+  "alpha": [
+   0.001,
+   10.0
+  ]
+ },
+ "fixed": {
+  "changepoint_range": 0.8,
+  "n_changepoints": 25,
+  "interval_width": 0.8,
+  "enso_prior_scale": 10.0
+ },
+ "nn_gate_variables": [
+  "rx5d"
+ ],
+ "versions": {
+  "prophet": "1.5.0",
+  "optuna": "5.0.0",
+  "scikit-learn": "1.9.1"
+ },
+ "plan_sha256": "114804e59a00830f59a89d3c6cbe7b3dfdbeb90d956d74d3384a9222fc0b7bd8",
+ "best_params": [
+  {
+   "variable": "t2m",
+   "model": "PROPHET",
+   "last_train_year": 2015,
+   "changepoint_prior_scale": 0.026547800705733638,
+   "seasonality_prior_scale": 4.50962568367542,
+   "yearly_fourier_order": 6
+  },
+  {
+   "variable": "t2m",
+   "model": "PROPHET",
+   "last_train_year": 2016,
+   "changepoint_prior_scale": 0.030614298417524794,
+   "seasonality_prior_scale": 0.02462050782494114,
+   "yearly_fourier_order": 2
+  },
+  {
+   "variable": "t2m",
+   "model": "PROPHET",
+   "last_train_year": 2017,
+   "changepoint_prior_scale": 0.005822468517385267,
+   "seasonality_prior_scale": 1.383297504573836,
+   "yearly_fourier_order": 4
+  },
+  {
+   "variable": "t2m",
+   "model": "PROPHET",
+   "last_train_year": 2018,
+   "changepoint_prior_scale": 0.0044387990497875545,
+   "seasonality_prior_scale": 0.1558964512987106,
+   "yearly_fourier_order": 4
+  },
+  {
+   "variable": "t2m",
+   "model": "PROPHET",
+   "last_train_year": 2019,
+   "changepoint_prior_scale": 0.005848848433935913,
+   "seasonality_prior_scale": 0.11516697050589444,
+   "yearly_fourier_order": 6
+  },
+  {
+   "variable": "t2m",
+   "model": "PROPHET_ENSO_OPER",
+   "last_train_year": 2015,
+   "changepoint_prior_scale": 0.029881889270014957,
+   "seasonality_prior_scale": 1.6680416640197822,
+   "yearly_fourier_order": 4
+  },
+  {
+   "variable": "t2m",
+   "model": "PROPHET_ENSO_OPER",
+   "last_train_year": 2016,
+   "changepoint_prior_scale": 0.030213737324876273,
+   "seasonality_prior_scale": 0.42560810023693724,
+   "yearly_fourier_order": 2
+  },
+  {
+   "variable": "t2m",
+   "model": "PROPHET_ENSO_OPER",
+   "last_train_year": 2017,
+   "changepoint_prior_scale": 0.007811047963560048,
+   "seasonality_prior_scale": 0.024970991334901865,
+   "yearly_fourier_order": 2
+  },
+  {
+   "variable": "t2m",
+   "model": "PROPHET_ENSO_OPER",
+   "last_train_year": 2018,
+   "changepoint_prior_scale": 0.00580806023307597,
+   "seasonality_prior_scale": 4.219773236383504,
+   "yearly_fourier_order": 6
+  },
+  {
+   "variable": "t2m",
+   "model": "PROPHET_ENSO_OPER",
+   "last_train_year": 2019,
+   "changepoint_prior_scale": 0.004078081746493041,
+   "seasonality_prior_scale": 1.4484886255250335,
+   "yearly_fourier_order": 5
+  },
+  {
+   "variable": "t2m",
+   "model": "PROPHET_ENSO_RECON",
+   "last_train_year": 2015,
+   "changepoint_prior_scale": 0.0018821309508669575,
+   "seasonality_prior_scale": 2.369901921255257,
+   "yearly_fourier_order": 6
+  },
+  {
+   "variable": "t2m",
+   "model": "PROPHET_ENSO_RECON",
+   "last_train_year": 2016,
+   "changepoint_prior_scale": 0.00942990843702447,
+   "seasonality_prior_scale": 2.0870904467712097,
+   "yearly_fourier_order": 2
+  },
+  {
+   "variable": "t2m",
+   "model": "PROPHET_ENSO_RECON",
+   "last_train_year": 2017,
+   "changepoint_prior_scale": 0.007554537763083509,
+   "seasonality_prior_scale": 5.046264692527083,
+   "yearly_fourier_order": 2
+  },
+  {
+   "variable": "t2m",
+   "model": "PROPHET_ENSO_RECON",
+   "last_train_year": 2018,
+   "changepoint_prior_scale": 0.007054226410064151,
+   "seasonality_prior_scale": 0.08607605181847458,
+   "yearly_fourier_order": 4
+  },
+  {
+   "variable": "t2m",
+   "model": "PROPHET_ENSO_RECON",
+   "last_train_year": 2019,
+   "changepoint_prior_scale": 0.4668734195441397,
+   "seasonality_prior_scale": 1.4804822464459029,
+   "yearly_fourier_order": 6
+  },
+  {
+   "variable": "gpcp",
+   "model": "PROPHET",
+   "last_train_year": 2015,
+   "changepoint_prior_scale": 0.005551206793444519,
+   "seasonality_prior_scale": 6.649637218297441,
+   "yearly_fourier_order": 6
+  },
+  {
+   "variable": "gpcp",
+   "model": "PROPHET",
+   "last_train_year": 2016,
+   "changepoint_prior_scale": 0.49434904640245114,
+   "seasonality_prior_scale": 8.062026172830183,
+   "yearly_fourier_order": 4
+  },
+  {
+   "variable": "gpcp",
+   "model": "PROPHET",
+   "last_train_year": 2017,
+   "changepoint_prior_scale": 0.33965272845772937,
+   "seasonality_prior_scale": 0.011854874783289579,
+   "yearly_fourier_order": 4
+  },
+  {
+   "variable": "gpcp",
+   "model": "PROPHET",
+   "last_train_year": 2018,
+   "changepoint_prior_scale": 0.003995231444505652,
+   "seasonality_prior_scale": 1.4299285334558953,
+   "yearly_fourier_order": 6
+  },
+  {
+   "variable": "gpcp",
+   "model": "PROPHET",
+   "last_train_year": 2019,
+   "changepoint_prior_scale": 0.00356630571714667,
+   "seasonality_prior_scale": 1.8314521853633643,
+   "yearly_fourier_order": 6
+  },
+  {
+   "variable": "gpcp",
+   "model": "PROPHET_ENSO_OPER",
+   "last_train_year": 2015,
+   "changepoint_prior_scale": 0.006967312469170623,
+   "seasonality_prior_scale": 7.248128242312244,
+   "yearly_fourier_order": 6
+  },
+  {
+   "variable": "gpcp",
+   "model": "PROPHET_ENSO_OPER",
+   "last_train_year": 2016,
+   "changepoint_prior_scale": 0.2098092999063163,
+   "seasonality_prior_scale": 0.01629059446221496,
+   "yearly_fourier_order": 4
+  },
+  {
+   "variable": "gpcp",
+   "model": "PROPHET_ENSO_OPER",
+   "last_train_year": 2017,
+   "changepoint_prior_scale": 0.0068580816680052815,
+   "seasonality_prior_scale": 0.46180228881541613,
+   "yearly_fourier_order": 4
+  },
+  {
+   "variable": "gpcp",
+   "model": "PROPHET_ENSO_OPER",
+   "last_train_year": 2018,
+   "changepoint_prior_scale": 0.004712430752545405,
+   "seasonality_prior_scale": 0.7369778812846032,
+   "yearly_fourier_order": 5
+  },
+  {
+   "variable": "gpcp",
+   "model": "PROPHET_ENSO_OPER",
+   "last_train_year": 2019,
+   "changepoint_prior_scale": 0.4700078802355156,
+   "seasonality_prior_scale": 2.050869457947115,
+   "yearly_fourier_order": 6
+  },
+  {
+   "variable": "gpcp",
+   "model": "PROPHET_ENSO_RECON",
+   "last_train_year": 2015,
+   "changepoint_prior_scale": 0.008310257223981963,
+   "seasonality_prior_scale": 0.706116928499443,
+   "yearly_fourier_order": 6
+  },
+  {
+   "variable": "gpcp",
+   "model": "PROPHET_ENSO_RECON",
+   "last_train_year": 2016,
+   "changepoint_prior_scale": 0.49930512947162614,
+   "seasonality_prior_scale": 0.12361747208368519,
+   "yearly_fourier_order": 4
+  },
+  {
+   "variable": "gpcp",
+   "model": "PROPHET_ENSO_RECON",
+   "last_train_year": 2017,
+   "changepoint_prior_scale": 0.010883699491913229,
+   "seasonality_prior_scale": 0.012496453203651428,
+   "yearly_fourier_order": 4
+  },
+  {
+   "variable": "gpcp",
+   "model": "PROPHET_ENSO_RECON",
+   "last_train_year": 2018,
+   "changepoint_prior_scale": 0.4136313885929977,
+   "seasonality_prior_scale": 0.7073704688703597,
+   "yearly_fourier_order": 5
+  },
+  {
+   "variable": "gpcp",
+   "model": "PROPHET_ENSO_RECON",
+   "last_train_year": 2019,
+   "changepoint_prior_scale": 0.33595810801957726,
+   "seasonality_prior_scale": 0.364161364647982,
+   "yearly_fourier_order": 6
+  },
+  {
+   "variable": "rx5d",
+   "model": "PROPHET",
+   "last_train_year": 2015,
+   "changepoint_prior_scale": 0.0019490899329990931,
+   "seasonality_prior_scale": 2.319514534188667,
+   "yearly_fourier_order": 6
+  },
+  {
+   "variable": "rx5d",
+   "model": "PROPHET",
+   "last_train_year": 2016,
+   "changepoint_prior_scale": 0.0010410978716215641,
+   "seasonality_prior_scale": 0.18573199341103214,
+   "yearly_fourier_order": 6
+  },
+  {
+   "variable": "rx5d",
+   "model": "PROPHET",
+   "last_train_year": 2017,
+   "changepoint_prior_scale": 0.020791905431429242,
+   "seasonality_prior_scale": 0.014655641845682623,
+   "yearly_fourier_order": 6
+  },
+  {
+   "variable": "rx5d",
+   "model": "PROPHET",
+   "last_train_year": 2018,
+   "changepoint_prior_scale": 0.11268277551884492,
+   "seasonality_prior_scale": 8.949152151159355,
+   "yearly_fourier_order": 4
+  },
+  {
+   "variable": "rx5d",
+   "model": "PROPHET",
+   "last_train_year": 2019,
+   "changepoint_prior_scale": 0.004075039161824387,
+   "seasonality_prior_scale": 0.040372373234667865,
+   "yearly_fourier_order": 4
+  },
+  {
+   "variable": "rx5d",
+   "model": "PROPHET_ENSO_OPER",
+   "last_train_year": 2015,
+   "changepoint_prior_scale": 0.002883114264421913,
+   "seasonality_prior_scale": 0.11575755845928015,
+   "yearly_fourier_order": 6
+  },
+  {
+   "variable": "rx5d",
+   "model": "PROPHET_ENSO_OPER",
+   "last_train_year": 2016,
+   "changepoint_prior_scale": 0.005710917025226014,
+   "seasonality_prior_scale": 0.12161088743672419,
+   "yearly_fourier_order": 6
+  },
+  {
+   "variable": "rx5d",
+   "model": "PROPHET_ENSO_OPER",
+   "last_train_year": 2017,
+   "changepoint_prior_scale": 0.006537780275792455,
+   "seasonality_prior_scale": 0.01814077952988792,
+   "yearly_fourier_order": 4
+  },
+  {
+   "variable": "rx5d",
+   "model": "PROPHET_ENSO_OPER",
+   "last_train_year": 2018,
+   "changepoint_prior_scale": 0.004165574925209859,
+   "seasonality_prior_scale": 0.06263803964635484,
+   "yearly_fourier_order": 4
+  },
+  {
+   "variable": "rx5d",
+   "model": "PROPHET_ENSO_OPER",
+   "last_train_year": 2019,
+   "changepoint_prior_scale": 0.14423145970768744,
+   "seasonality_prior_scale": 0.11838461652001221,
+   "yearly_fourier_order": 4
+  },
+  {
+   "variable": "rx5d",
+   "model": "PROPHET_ENSO_RECON",
+   "last_train_year": 2015,
+   "changepoint_prior_scale": 0.012002671727340179,
+   "seasonality_prior_scale": 3.647736659086535,
+   "yearly_fourier_order": 6
+  },
+  {
+   "variable": "rx5d",
+   "model": "PROPHET_ENSO_RECON",
+   "last_train_year": 2016,
+   "changepoint_prior_scale": 0.016660219418677857,
+   "seasonality_prior_scale": 0.8862083284732868,
+   "yearly_fourier_order": 6
+  },
+  {
+   "variable": "rx5d",
+   "model": "PROPHET_ENSO_RECON",
+   "last_train_year": 2017,
+   "changepoint_prior_scale": 0.13979376825286813,
+   "seasonality_prior_scale": 2.220295809810783,
+   "yearly_fourier_order": 4
+  },
+  {
+   "variable": "rx5d",
+   "model": "PROPHET_ENSO_RECON",
+   "last_train_year": 2018,
+   "changepoint_prior_scale": 0.003529628628524143,
+   "seasonality_prior_scale": 0.022718298771148136,
+   "yearly_fourier_order": 4
+  },
+  {
+   "variable": "rx5d",
+   "model": "PROPHET_ENSO_RECON",
+   "last_train_year": 2019,
+   "changepoint_prior_scale": 0.13486937649048314,
+   "seasonality_prior_scale": 0.24111457504160494,
+   "yearly_fourier_order": 4
+  },
+  {
+   "variable": "t2m",
+   "model": "PROPHET",
+   "last_train_year": 2020,
+   "changepoint_prior_scale": 0.0018535450743096084,
+   "seasonality_prior_scale": 3.8317669681339264,
+   "yearly_fourier_order": 6
+  },
+  {
+   "variable": "t2m",
+   "model": "PROPHET_ENSO_OPER",
+   "last_train_year": 2020,
+   "changepoint_prior_scale": 0.004474508739915048,
+   "seasonality_prior_scale": 9.782320516997192,
+   "yearly_fourier_order": 5
+  },
+  {
+   "variable": "t2m",
+   "model": "PROPHET_ENSO_RECON",
+   "last_train_year": 2020,
+   "changepoint_prior_scale": 0.004195937749495335,
+   "seasonality_prior_scale": 0.19355795437046494,
+   "yearly_fourier_order": 4
+  },
+  {
+   "variable": "gpcp",
+   "model": "PROPHET",
+   "last_train_year": 2020,
+   "changepoint_prior_scale": 0.00598221723428377,
+   "seasonality_prior_scale": 0.10181649461513627,
+   "yearly_fourier_order": 4
+  },
+  {
+   "variable": "gpcp",
+   "model": "PROPHET_ENSO_OPER",
+   "last_train_year": 2020,
+   "changepoint_prior_scale": 0.4840918203973916,
+   "seasonality_prior_scale": 0.2743826235766193,
+   "yearly_fourier_order": 6
+  },
+  {
+   "variable": "gpcp",
+   "model": "PROPHET_ENSO_RECON",
+   "last_train_year": 2020,
+   "changepoint_prior_scale": 0.4028293959987378,
+   "seasonality_prior_scale": 2.619939202395362,
+   "yearly_fourier_order": 6
+  },
+  {
+   "variable": "rx5d",
+   "model": "PROPHET",
+   "last_train_year": 2020,
+   "changepoint_prior_scale": 0.1356025561832948,
+   "seasonality_prior_scale": 1.3927256326367714,
+   "yearly_fourier_order": 5
+  },
+  {
+   "variable": "rx5d",
+   "model": "PROPHET_ENSO_OPER",
+   "last_train_year": 2020,
+   "changepoint_prior_scale": 0.0032927639830922974,
+   "seasonality_prior_scale": 0.017007702386610476,
+   "yearly_fourier_order": 5
+  },
+  {
+   "variable": "rx5d",
+   "model": "PROPHET_ENSO_RECON",
+   "last_train_year": 2020,
+   "changepoint_prior_scale": 0.003082021953409915,
+   "seasonality_prior_scale": 0.039401240821520446,
+   "yearly_fourier_order": 6
+  },
+  {
+   "variable": "rx5d",
+   "model": "MLP_ENSO_OPER",
+   "last_train_year": 2015,
+   "hidden_units": 2,
+   "alpha": 2.306456080430313
+  },
+  {
+   "variable": "rx5d",
+   "model": "MLP_ENSO_OPER",
+   "last_train_year": 2016,
+   "hidden_units": 2,
+   "alpha": 8.023987949378862
+  },
+  {
+   "variable": "rx5d",
+   "model": "MLP_ENSO_OPER",
+   "last_train_year": 2017,
+   "hidden_units": 2,
+   "alpha": 8.942599466295306
+  },
+  {
+   "variable": "rx5d",
+   "model": "MLP_ENSO_OPER",
+   "last_train_year": 2018,
+   "hidden_units": 2,
+   "alpha": 7.577374497725085
+  },
+  {
+   "variable": "rx5d",
+   "model": "MLP_ENSO_OPER",
+   "last_train_year": 2019,
+   "hidden_units": 4,
+   "alpha": 8.062243666438084
+  },
+  {
+   "variable": "rx5d",
+   "model": "MLP_ENSO_OPER",
+   "last_train_year": 2020,
+   "hidden_units": 2,
+   "alpha": 0.00360732148266231
+  }
+ ]
+}

@@ -1,0 +1,24 @@
+{
+ "ar1_phi_0.0": {
+  "simulations": 1000,
+  "nominal_rejection_rate": 0.05,
+  "empirical_rejection_rate": {
+   "HAC6": 0.061,
+   "HAC12": 0.071,
+   "HAC24": 0.085,
+   "HAC12_t": 0.07,
+   "BOOT12": 0.064
+  }
+ },
+ "ar1_phi_0.37": {
+  "simulations": 1000,
+  "nominal_rejection_rate": 0.05,
+  "empirical_rejection_rate": {
+   "HAC6": 0.095,
+   "HAC12": 0.094,
+   "HAC24": 0.11,
+   "HAC12_t": 0.091,
+   "BOOT12": 0.082
+  }
+ }
+}

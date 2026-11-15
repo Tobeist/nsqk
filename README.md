@@ -36,3 +36,5 @@ La leyenda cambia con la variable y el periodo ejecutados y amplía su escala pa
 - Si se quiere un chat con preguntas abiertas, conectar un servicio de IA mediante una API que reciba únicamente la selección, las estadísticas y la procedencia de la variable visible, y verifique que cada respuesta cite esos datos. El chat actual sólo da explicaciones locales predefinidas.
 
 Los scripts Python en `scripts/` y los archivos originales en `data/raw/` se conservan para reproducibilidad. La cartografía local y sus atribuciones están en `public/assets/`.
+
+La [auditoría estadística de tendencias](analysis/README.md) (control por ENSO, bootstrap por bloques, sensibilidad al periodo y corrección de Holm) se reproduce con `python scripts/run_analysis.py` (informe: [docs/INFORME_TENDENCIAS.md](docs/INFORME_TENDENCIAS.md)); sus resultados no sustituyen los de `data/results/`.
