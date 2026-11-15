@@ -6,6 +6,8 @@ Claude explica los hechos recibidos en respuestas breves. El cálculo de signifi
 
 ## Configuración
 
+En preguntas sobre entrenamiento o predicción, Claude recibe las métricas de la red original y de Red + ENSO por separado. Sólo esta última añade Niño 3.4 histórico, con corte en octubre del año anterior y persistencia para los meses desconocidos. El ganador experimental de validación se separa del modelo actual: el anterior se conserva como predeterminado en las 18 series y ENSO sigue experimental. La evaluación 2021–2024 se identifica como retrospectiva y ya examinada en versiones anteriores; no se presenta como confirmación independiente nueva. Las fuentes de NASA y NOAA se incluyen en el contexto.
+
 Define estas variables sólo en el entorno del servidor o en `.env.local`, que Git ignora:
 
 ```dotenv

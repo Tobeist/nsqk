@@ -1,7 +1,7 @@
 import artifact from "../analysis/forecast/app-forecast.json";
 import type { VariableId } from "./catalog";
 
-export type ForecastModelId = "climatology" | "seasonal-naive" | "trend" | "neural";
+export type ForecastModelId = "climatology" | "seasonal-naive" | "trend" | "neural" | "neural-enso";
 export interface ForecastScore {
   id: ForecastModelId;
   label: string;
@@ -21,6 +21,10 @@ export interface ForecastPoint {
   neuralValue: number;
   neuralLower: number;
   neuralUpper: number;
+  ensoValue: number;
+  ensoLower: number;
+  ensoUpper: number;
+  ensoKnownThrough: string;
   climatologyValue: number;
   climatologyLower: number;
   climatologyUpper: number;
@@ -33,11 +37,20 @@ export interface ForecastResult {
   unit: string;
   source: string;
   selectedModel: ForecastModelId;
+  validationWinner: ForecastModelId;
+  deploymentPolicy: string;
   models: ForecastScore[];
   projection: ForecastPoint[];
   history: { date: string; value: number }[];
   holdout: BacktestPoint[];
   neuralBeatsSelectedOnTest: boolean;
+  selectedEnsoConfig: string;
+  ensoPolicy: {
+    source: string;
+    availabilityLagMonths: number;
+    lagMonths: number[];
+    futureStrategy: string;
+  };
 }
 export interface ForecastBundle {
   version: string;
@@ -51,7 +64,7 @@ export interface ForecastBundle {
 export const forecastBundle = artifact as unknown as ForecastBundle;
 export const forecastModelLabel: Record<ForecastModelId, string> = {
   climatology: "Patrón estacional", "seasonal-naive": "Repetir último año",
-  trend: "Estación + tendencia", neural: "Red neuronal",
+  trend: "Estación + tendencia", neural: "Red neuronal", "neural-enso": "Red + ENSO",
 };
 export function getForecast(regionId: string, variableId: VariableId, start: number, end: number) {
   if (start !== 1992 || end !== 2024) return null;
@@ -60,6 +73,7 @@ export function getForecast(regionId: string, variableId: VariableId, start: num
 export function forecastValues(point: ForecastPoint, model: ForecastModelId, selected: ForecastModelId) {
   if (model === selected) return { value: point.value, lower: point.lower, upper: point.upper };
   if (model === "neural") return { value: point.neuralValue, lower: point.neuralLower, upper: point.neuralUpper };
+  if (model === "neural-enso") return { value: point.ensoValue, lower: point.ensoLower, upper: point.ensoUpper };
   if (model === "climatology") return { value: point.climatologyValue, lower: point.climatologyLower, upper: point.climatologyUpper };
   throw new Error("Este modelo no tiene una trayectoria exportada.");
 }
@@ -69,12 +83,13 @@ export function forecastCsv(regionId: string, variableId: VariableId, mode: "pro
   const rows = mode === "projection" ? result.projection : result.holdout;
   const quote = (value: unknown) => `"${String(value ?? "").replaceAll('"', '""')}"`;
   return "\uFEFF" + [
-    ["region_id", "variable_id", "record_type", "date", "observed", "prediction", "lower_orientative_80", "upper_orientative_80", "unit", "model", "trained_through", "validation_period", "test_period", "fingerprint"],
+    ["region_id", "variable_id", "record_type", "date", "observed", "prediction", "lower_orientative_80", "upper_orientative_80", "unit", "model", "trained_through", "validation_period", "test_period", "fingerprint", "uses_historical_enso", "enso_known_through", "unknown_enso_strategy"],
     ...rows.map((point) => {
       const fit = forecastValues(point, model, result.selectedModel);
       return [regionId, variableId, mode === "projection" ? "projection_from_2024" : "retrospective_test", point.date,
         "actual" in point ? point.actual : "", fit.value, fit.lower, fit.upper, result.unit, model,
-        "trainedThrough" in point ? point.trainedThrough : forecastBundle.sourceEnd, "2016-2020", "2021-2024", forecastBundle.fingerprint];
+        "trainedThrough" in point ? point.trainedThrough : forecastBundle.sourceEnd, "2016-2020", "2021-2024", forecastBundle.fingerprint,
+        model === "neural-enso", model === "neural-enso" ? point.ensoKnownThrough : "", model === "neural-enso" ? result.ensoPolicy.futureStrategy : ""];
     }),
   ].map((row) => row.map(quote).join(",")).join("\r\n");
 }
