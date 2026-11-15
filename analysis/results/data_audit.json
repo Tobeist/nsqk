@@ -1,0 +1,126 @@
+{
+ "t2m": {
+  "months": 396,
+  "missing": 0,
+  "duplicate_dates": 0,
+  "fill_like_values(<=-900)": 0,
+  "min": 10.7818,
+  "max": 30.8527,
+  "mean": 21.977023737373734,
+  "sd": 5.451909112928941,
+  "zeros": 0,
+  "negatives": 0,
+  "longest_identical_run": 1,
+  "anomaly_by_period(mean,sd)": {
+   "1992-2000": [
+    -0.04152685185185147,
+    1.3449072777711608
+   ],
+   "2001-2010": [
+    -0.2079805555555554,
+    1.254534546201552
+   ],
+   "2011-2024": [
+    0.37991587301587326,
+    1.4196433249495748
+   ]
+  },
+  "raw_json_cells": 15,
+  "region_csv_vs_recomputed_weighted_max_abs_diff": 4.967164655056422e-05,
+  "unweighted_vs_cos_weighted_max_abs_diff": 0.016397654884666935,
+  "valid_cells_per_month(min,max)": [
+   15,
+   15
+  ]
+ },
+ "gpcp": {
+  "months": 396,
+  "missing": 0,
+  "duplicate_dates": 0,
+  "fill_like_values(<=-900)": 0,
+  "min": 0.0410848893,
+  "max": 9.70424747,
+  "mean": 1.6608378847727272,
+  "sd": 1.6749528034552037,
+  "zeros": 0,
+  "negatives": 0,
+  "longest_identical_run": 1,
+  "anomaly_by_period(mean,sd)": {
+   "1992-2000": [
+    -0.29820893713518515,
+    1.1303837406231585
+   ],
+   "2001-2010": [
+    0.22786786975722226,
+    1.3780774113137408
+   ],
+   "2011-2024": [
+    0.01195692240912705,
+    1.3419906462807991
+   ]
+  },
+  "raw_csv_vs_processed_max_abs_diff": 0.0,
+  "anomaly_corr_with_prectotcorr": 0.940543064843511
+ },
+ "rx5d": {
+  "months": 396,
+  "missing": 0,
+  "duplicate_dates": 0,
+  "fill_like_values(<=-900)": 0,
+  "min": 0.554775059,
+  "max": 326.013306,
+  "mean": 38.11596672711363,
+  "sd": 37.58613867293377,
+  "zeros": 0,
+  "negatives": 0,
+  "longest_identical_run": 1,
+  "anomaly_by_period(mean,sd)": {
+   "1992-2000": [
+    -4.136896210575001,
+    25.926897797005417
+   ],
+   "2001-2010": [
+    4.4963507120555555,
+    39.74838748012633
+   ],
+   "2011-2024": [
+    -1.203351068215873,
+    30.188988831786265
+   ]
+  },
+  "raw_csv_vs_processed_max_abs_diff": 0.0,
+  "share_months_below_5x_prectotcorr": 0.0,
+  "share_months_below_5x_gpcp": 0.005050505050505051,
+  "anomaly_corr_with_prectotcorr": 0.7321144346864942,
+  "anomaly_corr_with_gpcp": 0.702344574868478
+ },
+ "prectotcorr": {
+  "months": 396,
+  "missing": 0,
+  "duplicate_dates": 0,
+  "fill_like_values(<=-900)": 0,
+  "min": 0.0067,
+  "max": 9.3397,
+  "mean": 1.4977517676767675,
+  "sd": 1.5806921006428931,
+  "zeros": 0,
+  "negatives": 0,
+  "longest_identical_run": 1,
+  "anomaly_by_period(mean,sd)": {
+   "1992-2000": [
+    -0.26918240740740745,
+    1.0475896121749342
+   ],
+   "2001-2010": [
+    0.2389716666666666,
+    1.44345192746581
+   ],
+   "2011-2024": [
+    -0.015106547619047617,
+    1.156520683052115
+   ]
+  },
+  "region_csv_vs_recomputed_weighted_max_abs_diff": 4.9999450892901365e-05,
+  "unweighted_vs_cos_weighted_max_abs_diff": 0.014667381774964738
+ }
+}

@@ -1,0 +1,13 @@
+{
+  "source": "NOAA Climate Prediction Center, Nino regions SST indices from ERSSTv5",
+  "url": "https://www.cpc.ncep.noaa.gov/data/indices/ersst5.nino.mth.91-20.ascii",
+  "downloaded_utc": "2026-11-14T22:52:03+00:00",
+  "http_last_modified": "Wed, 05 Aug 2026 06:20:03 GMT",
+  "sha256": "bedcd0683c07f7ccb2ae358a90cb39d57413dcc8881027e0c30a1811f6d58012",
+  "definition": "Nino 3.4 = SST area average over 5N-5S, 170W-120W; ANOM column = anomaly relative to the fixed 1991-2020 base period",
+  "column_used": "NINO3.4 ANOM (monthly, degC, not the 3-month running mean ONI)",
+  "first_month": "1950-01",
+  "last_month": "2026-06",
+  "rows": 918,
+  "note": "The latest months can be revised by CPC; the analysis uses only 1991-01 to 2024-12."
+}
