@@ -1,6 +1,7 @@
-import { signed, evidenceLabel } from "./format";
+import { signed, formatNumber } from "./format";
 import { getVariable } from "./catalog";
 import { createRealAnalysis } from "./real-data";
+import { auditStatusExplanation, auditStatusLabel, getAuditStatus } from "./audit-status";
 import type { AnalysisAdapter, ChatAdapter, ChatContext } from "./contracts";
 export const realAnalysisAdapter: AnalysisAdapter = {
   async analyze(selection, signal) {
@@ -16,11 +17,15 @@ export const localEvidenceChatAdapter: ChatAdapter = {
     const s = context.statistics;
     if (!s) return { text: "No hay datos para esta selección.", evidence: "method" };
     const q = question.toLowerCase();
+    const audit = getAuditStatus(context.selection, context.variableId);
+    const auditText = audit
+      ? `La auditoría del periodo completo clasifica el resultado como ${auditStatusLabel(audit.status).toLowerCase()} (p de Holm ${formatNumber(audit.pHolm, 3)}). ${auditStatusExplanation(audit.status)}`
+      : "Esta caja, variable o ventana de años no tiene una conclusión auditada; el resultado es exploratorio.";
     if (/causa|niño|enso|pdo|futuro|pron[oó]st|clim[aá]tico/.test(q))
-      return { text: "Este análisis describe la serie y su incertidumbre. No permite atribuir causas, aislar ENSO/PDO ni pronosticar. La caja estudiada no representa estados completos ni todo México.", evidence: "method" };
+      return { text: `Este análisis describe la serie y su incertidumbre. No permite atribuir causas ni pronosticar. La caja estudiada no representa estados completos ni todo México. ${auditText}`, evidence: "method" };
     if (/evidencia|intervalo|significativ|significancia|confian|segur|clara/.test(q))
-      return { text: `El intervalo del 95 % es ${signed(s.confidenceInterval[0], 3)} a ${signed(s.confidenceInterval[1], 3)} ${context.unit}/década. ${evidenceLabel(s)} en esta caja y periodo. Un intervalo que incluye cero no demuestra ausencia de cambio. Son resultados exploratorios sin corrección por múltiples pruebas.`, evidence: "interval" };
-    return { text: `La pendiente estimada es ${signed(s.slopePerDecade, 3)} ${context.unit} por década para ${context.selection.start}–${context.selection.end}. Se estimó con ${s.sampleSize} ${context.sampleUnit} mediante ${context.method.name}. La gráfica muestra ${context.annualLabel}. ${context.sources.limitations[0]}`, evidence: "slope" };
+      return { text: `El IC HAC del ajuste base (95 %) es ${signed(s.confidenceInterval[0], 3)} a ${signed(s.confidenceInterval[1], 3)} ${context.unit}/década e ${s.confidenceInterval[0] <= 0 && s.confidenceInterval[1] >= 0 ? "incluye" : "excluye"} cero. Este intervalo individual no es la conclusión final. ${auditText}`, evidence: "interval" };
+    return { text: `La pendiente estimada del ajuste base es ${signed(s.slopePerDecade, 3)} ${context.unit} por década para ${context.selection.start}–${context.selection.end}. Se estimó con ${s.sampleSize} ${context.sampleUnit} mediante ${context.method.name}. La gráfica muestra ${context.annualLabel}. ${auditText}`, evidence: "slope" };
   },
 };
 export function toChatContext(
@@ -48,6 +53,7 @@ export function analysisCsv(
   variableId: import("./catalog").VariableId,
 ) {
   const r = analysis.results.find((d) => d.variableId === variableId)!;
+  const audit = getAuditStatus(analysis.selection, variableId);
   const quote = (s: unknown) => `"${String(s ?? "").replaceAll('"', '""')}"`;
   const headers = [
     "analysis_id",
@@ -69,6 +75,14 @@ export function analysisCsv(
     "sample_unit",
     "source",
     "updated_at",
+    "audit_status",
+    "audit_scope",
+    "audit_estimate",
+    "audit_unit",
+    "audit_p_holm",
+    "audit_ci95_low",
+    "audit_ci95_high",
+    "audit_method",
   ];
   return (
     "\uFEFF" +
@@ -94,6 +108,14 @@ export function analysisCsv(
         r.sampleUnit,
         r.source,
         analysis.provenance.updatedAt,
+        audit?.status ?? "sin auditoría",
+        audit ? "mx-northeast; 1992-2024" : "",
+        audit?.estimate,
+        audit?.unit,
+        audit?.pHolm,
+        audit?.ciLow,
+        audit?.ciHigh,
+        audit?.model,
       ]),
     ]
       .map((row) => row.map(quote).join(","))

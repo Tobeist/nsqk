@@ -1,10 +1,10 @@
-result,unit,estimate,ci_low,ci_high,ci_method,p_bootstrap,p_holm,family,p_holm_M0,rule_class,status,note
-"Tendencia mensual: Temperatura media a 2 m (NASA POWER, MERRA-2)",°C/década,0.2672857006835949,0.011229386536773578,0.5233420148304162,bootstrap-t (criba AR),0.044,0.132,F2 (M1),0.09840000000000002,C,inconcluso,IC individual sin cero; escalón documentado que ajusta igual: 2011-01 (+0.521)
-"Tendencia mensual: Precipitación media (GPCP satélite + pluviómetros, Giovanni)",mm/día/década,0.10094996283293883,-0.03158015667948186,0.23348008234535952,bootstrap-t (criba AR),0.123,0.246,F2 (M1),0.324,C,inconcluso,IC individual con cero; escalón documentado que ajusta igual: 2001-01 (+0.395)
-"Tendencia mensual: RX5Day mensual (MERRA-2, Giovanni)",mm/5 días/década,0.8548872291124576,-2.8254816130009033,4.5352560712258185,bootstrap-t (criba AR),0.6328,0.6328,F2 (M1),0.668,C,inconcluso,IC individual con cero
-Extremo anual TX90p (POWER diario),% de días/década,1.5337854309598453,-1.406890871718407,4.474461733638098,bootstrap-t (criba AR),0.2734,0.5468,B,,inconcluso,inconcluso,
-Extremo anual CDD (POWER diario),días/década,-1.3235294117646967,-9.503429133454398,6.856370309925005,bootstrap-t (criba AR),0.742,0.742,B,,inconcluso,inconcluso,
-Extremo anual Rx5day (POWER diario),mm/década,15.964088333780829,5.090691006986356,26.837485660575304,bootstrap-t (criba AR),0.0066,0.019799999999999998,B,,consistente,pendiente,escalón documentado que ajusta igual: 2001-01 (+39.1); falta un producto diario independiente de MERRA-2
-Predicción mensual a 12 meses: t2m,MAE,,,,,,,,,,sustentado,ningún modelo complejo mejora de forma consistente; se mantiene el más simple
-Predicción mensual a 12 meses: gpcp,MAE,,,,,,,,,,sustentado,ningún modelo complejo mejora de forma consistente; se mantiene el más simple
-Predicción mensual a 12 meses: rx5d,MAE,,,,,,,,,,pendiente,"mejora pequeña de PROPHET_ENSO_OPER (habilidad +4.0% externa, +5.7% reservado); no se adopta"
+result,variable_id,unit,estimate,ci_low,ci_high,ci_method,p_bootstrap,p_holm,family,p_holm_M0,rule_class,status,note
+"Tendencia mensual: Temperatura media a 2 m (NASA POWER, MERRA-2)",temperature,°C/década,0.2672857006835949,0.0112293865367735,0.5233420148304162,bootstrap-t (criba AR),0.044,0.132,F2 (M1),0.0984,C,inconcluso,IC individual sin cero; escalón documentado que ajusta igual: 2011-01 (+0.521)
+"Tendencia mensual: Precipitación media (GPCP satélite + pluviómetros, Giovanni)",precipitation,mm/día/década,0.1009499628329388,-0.0315801566794818,0.2334800823453595,bootstrap-t (criba AR),0.123,0.246,F2 (M1),0.324,C,inconcluso,IC individual con cero; escalón documentado que ajusta igual: 2001-01 (+0.395)
+"Tendencia mensual: RX5Day mensual (MERRA-2, Giovanni)",rain5,mm/5 días/década,0.8548872291124576,-2.8254816130009037,4.5352560712258185,bootstrap-t (criba AR),0.6328,0.6328,F2 (M1),0.668,C,inconcluso,IC individual con cero
+Extremo anual TX90p (POWER diario),,% de días/década,1.533785430959845,-1.406890871718407,4.474461733638098,bootstrap-t (criba AR),0.2734,0.5468,B,,inconcluso,inconcluso,
+Extremo anual CDD (POWER diario),,días/década,-1.3235294117646967,-9.503429133454398,6.856370309925005,bootstrap-t (criba AR),0.742,0.742,B,,inconcluso,inconcluso,
+Extremo anual Rx5day (POWER diario),rain5-power-annual,mm/década,15.964088333780827,5.090691006986356,26.837485660575304,bootstrap-t (criba AR),0.0066,0.0197999999999999,B,,consistente,pendiente,escalón documentado que ajusta igual: 2001-01 (+39.1); falta un producto diario independiente de MERRA-2
+Predicción mensual a 12 meses: t2m,,MAE,,,,,,,,,,sustentado,ningún modelo complejo mejora de forma consistente; se mantiene el más simple
+Predicción mensual a 12 meses: gpcp,,MAE,,,,,,,,,,sustentado,ningún modelo complejo mejora de forma consistente; se mantiene el más simple
+Predicción mensual a 12 meses: rx5d,,MAE,,,,,,,,,,pendiente,"mejora pequeña de PROPHET_ENSO_OPER (habilidad +4.0% externa, +5.7% reservado); no se adopta"

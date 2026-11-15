@@ -241,7 +241,7 @@ export function createRealAnalysis(selection: Selection): Analysis {
       resolution: `Caja [${getRegion(selection.regionId).bbox.join(", ")}]. POWER y Giovanni usan mallas y agregaciones distintas; no representa estados completos.`,
       limitations: [
         "Resultados exploratorios para una caja de estudio; no son tendencias de una región administrativa.",
-        "Sin corrección por múltiples pruebas, ENSO/PDO ni atribución causal.",
+        "El ajuste base no corrige pruebas múltiples ni controla ENSO/PDO; tampoco permite atribución causal. La auditoría separada sólo cubre algunas variables de la caja noreste en 1992–2024.",
         "Las variables proceden de productos y escalas temporales distintos; no se comparan sus pendientes numéricamente de forma directa.",
       ],
     },

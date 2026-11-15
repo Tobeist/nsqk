@@ -47,7 +47,7 @@ import {
   type ChatMessage,
   type Selection,
 } from "@/lib/contracts";
-import { evidenceLabel, formatNumber, signed } from "@/lib/format";
+import { formatNumber, signed } from "@/lib/format";
 import {
   annualIndexId,
   createRealAnalysis,
@@ -64,6 +64,7 @@ import {
   toChatContext,
 } from "@/lib/adapters";
 import { createMapLayer, getMapLimit } from "@/lib/map-layer";
+import { auditReportUrl, auditStatusExplanation, auditStatusLabel, getAuditStatus } from "@/lib/audit-status";
 import { RegionMap } from "./region-map";
 import { getStateNames } from "@/lib/geography";
 import { TrendChart } from "./chart";
@@ -261,7 +262,8 @@ export function Explorer() {
   const mapLayer = createMapLayer(history, analysis, activeId);
   const mapLimit = mapLayer[0]?.limit ?? getMapLimit(activeId);
   const stat = result?.statistics;
-  const inconclusive =
+  const audit = analysis ? getAuditStatus(analysis.selection, activeId) : null;
+  const intervalIncludesZero =
     stat && stat.confidenceInterval[0] <= 0 && stat.confidenceInterval[1] >= 0;
   return (
     <div className="app-shell">
@@ -586,7 +588,7 @@ export function Explorer() {
             <div className="map-certainty">
               <i />
               Sin analizar / sin datos <span className="dash-swatch" />
-              IC incluye cero
+              IC HAC incluye cero
             </div>
           </div>
           <div className="region-selector" ref={regionRef}>
@@ -784,22 +786,24 @@ export function Explorer() {
                         </span>
                       </div>
                       <h3>
-                        {inconclusive
-                          ? "La dirección aún no es concluyente."
-                          : stat.slopePerDecade > 0
-                            ? "Una señal de aumento en la serie."
-                            : "Una señal de disminución en la serie."}
+                        {audit?.status === "inconcluso"
+                          ? `${stat.slopePerDecade >= 0 ? "Aumento" : "Disminución"} estimado; conclusión inconclusa.`
+                          : audit?.status === "pendiente"
+                            ? "Cambio estimado; pendiente de comprobación."
+                            : `${stat.slopePerDecade >= 0 ? "Aumento" : "Disminución"} estimado en la serie.`}
                       </h3>
                       <p>
-                        {inconclusive
+                        {intervalIncludesZero
                           ? "La estimación es " +
                             (stat.slopePerDecade >= 0
                               ? "positiva"
                               : "negativa") +
-                            ", pero su intervalo incluye cero."
-                          : "El intervalo de este ajuste excluye cero."}{" "}
+                            ", pero el IC HAC del ajuste base incluye cero."
+                          : "El IC HAC del ajuste base excluye cero."}{" "}
                         <span>
-                          Resultado exploratorio; revisa fuente y método.
+                          {audit
+                            ? "Esa prueba individual no es la conclusión final."
+                            : "Sin auditoría, no constituye una conclusión firme."}
                         </span>
                       </p>
                     </div>
@@ -818,19 +822,28 @@ export function Explorer() {
                         </div>
                       </div>
                       <span
-                        className={`evidence-status ${inconclusive ? "uncertain" : ""}`}
+                        className={`evidence-status ${audit || intervalIncludesZero ? "uncertain" : ""}`}
                       >
                         <span>
-                          {inconclusive ? "±" : <TrendingUp size={12} />}
+                          {audit || intervalIncludesZero ? "±" : <TrendingUp size={12} />}
                         </span>
-                        {inconclusive ? "Inconclusa" : "IC excluye cero"}
+                        {audit ? auditStatusLabel(audit.status) : "Exploratorio"}
                       </span>
+                    </div>
+                    <div className={`audit-notice ${audit ? "" : "not-audited"}`}>
+                      <strong>{audit
+                        ? `Auditoría 1992–2024: ${auditStatusLabel(audit.status)}`
+                        : "Sin conclusión auditada para esta selección"}</strong>
+                      <p>{audit
+                        ? `${auditStatusExplanation(audit.status)} p de Holm: ${formatNumber(audit.pHolm, 3)}. La pendiente y el IC de esta tarjeta pertenecen al ajuste base.`
+                        : "La caja, el periodo o la variable aún no tiene auditoría completa. La pendiente y el IC son exploratorios."}</p>
+                      {audit && <button onClick={() => openEvidence("audit")}>Ver auditoría y método</button>}
                     </div>
                     <button
                       className="interval-row"
                       onClick={() => openEvidence("interval")}
                     >
-                      <span>Intervalo de confianza del 95 %</span>
+                      <span>IC HAC del ajuste base (95 %)</span>
                       <strong>
                         {signed(
                           stat.confidenceInterval[0],
@@ -880,9 +893,11 @@ export function Explorer() {
                         Cómo leer este resultado
                       </summary>
                       <p>
-                        {evidenceLabel(stat)} bajo los supuestos del ajuste.
+                        {audit
+                          ? `Auditoría: ${auditStatusLabel(audit.status).toLowerCase()}. `
+                          : "Sin conclusión auditada para esta selección. "}
                         La pendiente describe dirección y magnitud;
-                        el intervalo describe incertidumbre. No explica causas.{" "}
+                        el IC HAC describe incertidumbre del ajuste base. No explica causas.{" "}
                         {result.method.description}
                       </p>
                     </details>
@@ -961,8 +976,9 @@ export function Explorer() {
                 {signed(stat.slopePerDecade, 3)} {result.unit}/década
               </strong>
               <span>
-                IC 95 %: {signed(stat.confidenceInterval[0], 3)} a{" "}
-                {signed(stat.confidenceInterval[1], 3)} · {evidenceLabel(stat)}
+                IC HAC base 95 %: {signed(stat.confidenceInterval[0], 3)} a{" "}
+                {signed(stat.confidenceInterval[1], 3)} ·{" "}
+                {audit ? `Auditoría: ${auditStatusLabel(audit.status)}` : "Exploratorio"}
               </span>
             </div>
           )}
@@ -1009,7 +1025,9 @@ export function Explorer() {
           <p className="comparison-note">
             Las variables se muestran en paralelo. No se suman ni se calcula
             aquí una correlación, un índice combinado o atribución causal. Los
-            dos RX5day tienen definiciones temporales y fuentes distintas.
+            dos RX5day tienen definiciones temporales y fuentes distintas. Las
+            líneas muestran los ajustes base; la auditoría sólo cubre la caja
+            noreste completa y las variables indicadas en cada resultado.
           </p>
         </Modal>
       )}
@@ -1214,7 +1232,8 @@ function Evidence({
 }) {
   const r = analysis.results.find((d) => d.variableId === variableId)!,
     v = getVariable(variableId),
-    s = r.statistics;
+    s = r.statistics,
+    audit = getAuditStatus(analysis.selection, variableId);
   return (
     <div className="evidence-content">
       <div className="evidence-intro">
@@ -1282,23 +1301,38 @@ function Evidence({
             </strong>
           </div>
           <div>
-            <span>Intervalo bilateral del 95 %</span>
+            <span>IC HAC del ajuste base (95 %)</span>
             <strong>
               {signed(s.confidenceInterval[0], 4)} a{" "}
               {signed(s.confidenceInterval[1], 4)} {v.unit}/década
             </strong>
           </div>
           <p>
-            {evidenceLabel(s)} bajo este modelo. Un intervalo que cruza
-            cero no confirma la dirección y tampoco demuestra ausencia de
-            cambio.
+            El IC HAC del ajuste base {s.confidenceInterval[0] <= 0 && s.confidenceInterval[1] >= 0
+              ? "incluye" : "excluye"} cero. Por sí solo no determina la
+            conclusión de la auditoría ni demuestra causalidad.
           </p>
         </div>
       )}
+      <div className={`audit-detail ${focus === "audit" ? "highlighted" : ""}`}>
+        <h3>Conclusión de la auditoría</h3>
+        {audit ? <>
+          <strong>{auditStatusLabel(audit.status)} · p de Holm {formatNumber(audit.pHolm, 3)}</strong>
+          <p>{audit.model}. Estimación: {signed(audit.estimate, 3)} {audit.unit};
+            IC bootstrap-t individual del 95 %: {signed(audit.ciLow, 3)} a{" "}
+            {signed(audit.ciHigh, 3)} {audit.unit}.</p>
+          <p>{audit.note}. El ajuste base de la gráfica y el modelo auditado
+            pueden dar cifras distintas; sus intervalos no son intercambiables.</p>
+          <a href={auditReportUrl} target="_blank" rel="noreferrer">
+            Leer el informe metodológico <ExternalLink size={13} />
+          </a>
+        </> : <p>Esta región, variable o ventana de años todavía no tiene una
+          conclusión auditada. La pendiente y el IC visibles son exploratorios.</p>}
+      </div>
       <div
         className={`evidence-method ${focus === "method" ? "highlighted" : ""}`}
       >
-        <h3>Método y límites</h3>
+        <h3>Método del ajuste base y límites</h3>
         <p>{r.method.description}</p>
         <ul>
           {[...r.limitations, ...analysis.provenance.limitations].map((l) => (

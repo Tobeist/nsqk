@@ -38,3 +38,5 @@ La leyenda cambia con la variable y el periodo ejecutados y amplía su escala pa
 Los scripts Python en `scripts/` y los archivos originales en `data/raw/` se conservan para reproducibilidad. La cartografía local y sus atribuciones están en `public/assets/`.
 
 La [auditoría estadística de tendencias](analysis/README.md) (control por ENSO, bootstrap por bloques, sensibilidad al periodo y corrección de Holm) se reproduce con `python scripts/run_analysis.py` (informe: [docs/INFORME_TENDENCIAS.md](docs/INFORME_TENDENCIAS.md)); sus resultados no sustituyen los de `data/results/`.
+
+La interfaz muestra por separado la pendiente y el IC HAC del ajuste exploratorio y, cuando corresponde, el estado de la auditoría. La conclusión auditada sólo se aplica a la caja noreste en 1992–2024 para T2M, GPCP, RX5Day mensual y el Rx5day anual derivado. Las demás selecciones se identifican como exploratorias. El CSV exportado conserva ambos conjuntos de cifras en columnas distintas.

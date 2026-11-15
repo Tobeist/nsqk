@@ -14,6 +14,8 @@ npm test                            # incluye tests/python-parity.test.ts (Pytho
 
 `trend_audit.py` no modifica `data/raw/`, `data/processed/` ni `data/results/`. Escribe solo en `analysis/`.
 
+`scripts/final_summary.py`, ejecutado al final de `run_analysis.py`, genera `final_status.csv`, `final_status.json` y `SUMMARY.md` desde los mismos resultados. La interfaz lee el JSON para mostrar el estado auditado únicamente en la caja noreste y el periodo completo 1992–2024.
+
 ## Resultados (`analysis/results/`)
 
 | Archivo | Contenido |
