@@ -2,7 +2,7 @@
  "command": "python scripts/trend_audit.py",
  "seed": 20261114,
  "bootstrap_reps": 5000,
- "run_utc": "2026-11-15T00:11:17+00:00",
+ "run_utc": "2026-11-15T00:30:09+00:00",
  "plan_sha256": "1c58a9a10ba98aa28fe815cc945596c580548133fdf566d747e1b6c9ae90f93a",
  "enso": {
   "url": "https://www.cpc.ncep.noaa.gov/data/indices/ersst5.nino.mth.91-20.ascii",

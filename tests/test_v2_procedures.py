@@ -54,3 +54,24 @@ class LeakageTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SingleOutputTest(unittest.TestCase):
+    """After `python scripts/run_analysis.py`, every summary must use the same valid (bootstrap-t) Holm p-values."""
+
+    def test_primary_holm_matches_uncertainty_validation_and_final_status(self):
+        out = Path(__file__).resolve().parents[1] / "analysis" / "results"
+        trends = pd.read_csv(out / "trend_results.csv")
+        uv = pd.read_csv(out / "uncertainty_validation.csv")
+        final = pd.read_csv(out / "final_status.csv")
+        for family, model in (("F1", "M0"), ("F2", "M1_L0")):
+            a = trends[(trends.family == family)].set_index("variable")["p_holm"]
+            b = uv[(uv.family == family)].set_index("series")["p_holm_bootstrap"]
+            np.testing.assert_allclose(a.sort_index(), b.sort_index())
+        f2 = trends[trends.family == "F2"].set_index("variable")["p_holm"]
+        for key, p in f2.items():
+            row = final[final.result.str.startswith("Tendencia mensual") & final.result.str.contains(fx.ta.VARS[key]["name"], regex=False)]
+            self.assertAlmostEqual(float(row.p_holm.iloc[0]), p)
+        extremes = pd.read_csv(out / "extremes_trends.csv").set_index("index")["p_holm_family_B"]
+        uvb = uv[uv.family == "B"].set_index("series")["p_holm_bootstrap"]
+        np.testing.assert_allclose(extremes.sort_index(), uvb.sort_index())

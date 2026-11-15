@@ -16,7 +16,7 @@
  "plan_sha256": {
   "ANALISIS_TENDENCIAS_PLAN.md": "1c58a9a10ba98aa28fe815cc945596c580548133fdf566d747e1b6c9ae90f93a",
   "ANALISIS_TENDENCIAS_PLAN_V2.md": "114804e59a00830f59a89d3c6cbe7b3dfdbeb90d956d74d3384a9222fc0b7bd8",
-  "ANALISIS_TENDENCIAS_PLAN_V3.md": "b03a980c9b7fdab6caec1f84eb14b8afe8d45497eb6c5609b786aee37c4638ab"
+  "ANALISIS_TENDENCIAS_PLAN_V3.md": "bf9df667f7b13de24ff20dca6ae336f1e91f3f0540b994d8a5dabca44953fe49"
  },
  "daily_inputs_sha256": {
   "power_daily_temperature_region_1992_2024.csv": "95fdea0d39812edf03dd067950ecf501efd5a0deedfdea1da2557618d6cd9e31"

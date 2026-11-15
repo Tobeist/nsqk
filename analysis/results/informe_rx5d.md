@@ -6,10 +6,10 @@
 
 Cambio lineal por década en la caja `[-101, 25, -99, 27]`, enero de 1992 a diciembre de 2024 (396 meses, 33 años), con efectos fijos por mes y covarianza HAC (Bartlett). Unidad: mm/5 días por década. Los intervalos son del 95 % **individuales**.
 
-| Análisis | Pendiente [IC 95 %] | p original | p Holm |
-| --- | --- | ---: | ---: |
-| M0 base, HAC12 (familia F1) | +0.778 [-2.58, +4.14] | 0.65 | 0.65 |
-| M1 con Niño 3.4 (L = 0), HAC12 (familia F2) | +0.855 [-2.43, +4.14] | 0.61 | 0.61 |
+| Análisis | Pendiente [IC 95 % HAC normal] | IC 95 % bootstrap-t | p normal | p bootstrap-t | p Holm (bootstrap-t) |
+| --- | --- | --- | ---: | ---: | ---: |
+| M0 base, HAC12 (familia F1) | +0.778 [-2.58, +4.14] | [-2.93, +4.49] | 0.65 | 0.668 | 0.668 |
+| M1 con Niño 3.4 (L = 0), HAC12 (familia F2) | +0.855 [-2.43, +4.14] | [-2.83, +4.54] | 0.61 | 0.633 | 0.633 |
 
 Intervalo simultáneo de Bonferroni para M0 (F1): [-3.33, +4.88].
 
@@ -37,7 +37,7 @@ Intervalo simultáneo de Bonferroni para M0 (F1): [-3.33, +4.88].
 
 ## Validez de p e intervalos
 
-Los p de esta tabla usan la aproximación normal del HAC, que en simulaciones cubre alrededor del 90 % en lugar del 95 %. Los valores p válidos (bootstrap-t con criba AR estimada de los residuos), sus correcciones de Holm y la cobertura real están en `uncertainty_validation.csv` (plan v3).
+El IC HAC nominal del 95 % cubre en realidad 91.7% bajo el AR estimado de los residuos de M1. Holm y la clasificación usan los p del bootstrap-t con criba AR (plan v3); las sensibilidades están en `uncertainty_validation.csv`.
 
 ## ENSO
 
@@ -55,10 +55,10 @@ Razón de errores estándar bootstrap(12)/HAC(12): 1.05.
 
 ## Qué se puede concluir
 
-- La estimación central es un aumento de 0.778 mm/5 días por década, pero el intervalo y los ajustes por Holm no establecen el signo con estos datos.
+- La estimación central es un aumento de 0.778 mm/5 días por década, pero la corrección de Holm sobre las tres variables no establece el signo; el IC bootstrap-t individual también incluye cero.
 - Un intervalo que contiene cero indica evidencia insuficiente bajo este análisis; no prueba que no haya cambio.
 
-Criterios del plan (verdadero = se cumple): F1_holm_lt_0.05: False; F2_holm_lt_0.05: False; M1_L0_ci_excludes_0: False; boot12_ci_excludes_0: False; hac6_hac12_hac24_exclude_0: False; same_sign_W1_W2_W3: False; ruptura (Holm < 0.01): False; razón SE en [0.67, 1.5]: True.
+Criterios del plan (verdadero = se cumple): F1_holm_lt_0.05: False; F2_holm_lt_0.05: False; M1_L0_boot_t_ci_excludes_0: False; boot12_ci_excludes_0: False; hac6_hac12_hac24_exclude_0: False; same_sign_W1_W2_W3: False; ruptura (Holm < 0.01): False; razón SE en [0.67, 1.5]: True.
 
 ## Qué no se puede concluir
 
