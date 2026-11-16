@@ -76,18 +76,37 @@ test("API rejects invalid input before starting analysis", async () => {
   }
 });
 
-test("engine failure returns an error instead of statistics for another period", async () => {
+test("precomputed custom period works without Python in the deployed runtime", async () => {
   const original = process.env.PYTHON_BIN;
   process.env.PYTHON_BIN = "/nonexistent-nsqk-python";
   try {
     const response = await POST(new Request("http://localhost/api/analysis", { method: "POST", body: JSON.stringify({ ...realDefaultSelection, start: 2001 }) }));
-    assert.equal(response.status, 503);
+    assert.equal(response.status, 200);
     const payload = await response.json();
-    assert.match(payload.error, /Python/);
-    assert.equal(payload.results, undefined);
+    assert.deepEqual(payload.selection, { ...realDefaultSelection, start: 2001 });
+    assert.equal(payload.provenance.audit.replicates, 4999);
+    assert.equal(payload.results[0].statistics.sampleSize, 288);
   } finally {
     if (original === undefined) delete process.env.PYTHON_BIN; else process.env.PYTHON_BIN = original;
   }
+});
+
+test("precomputed boundary periods preserve monthly and annual hypothesis families", async () => {
+  const monthly = await POST(new Request("http://localhost/api/analysis", {
+    method: "POST", body: JSON.stringify({ ...realDefaultSelection, start: 1992, end: 2001 }),
+  }));
+  assert.equal(monthly.status, 200);
+  const monthlyBody = await monthly.json();
+  assert.equal(monthlyBody.results[0].statistics.sampleSize, 120);
+  assert.equal(monthlyBody.results[0].evidence.familySize, 18);
+
+  const annual = await POST(new Request("http://localhost/api/analysis", {
+    method: "POST", body: JSON.stringify({ ...realDefaultSelection, variables: ["rain5-power-annual"], start: 1992, end: 2011 }),
+  }));
+  assert.equal(annual.status, 200);
+  const annualBody = await annual.json();
+  assert.equal(annualBody.results[0].statistics.sampleSize, 20);
+  assert.equal(annualBody.results[0].evidence.familySize, 3);
 });
 
 test("a non-evaluable fit keeps observations and explains why inference is unavailable", () => {

@@ -1,5 +1,5 @@
 import type { NextConfig } from "next";
-const analysisFiles = ["./scripts/*.py", "./requirements-analysis.txt", "./config/study-boxes.json", "./data/results/**/*.json", "./data/external/enso/*", "./docs/APP_TREND_PROTOCOL.md"];
+const analysisFiles = ["./analysis/periods/*.json", "./scripts/*.py", "./requirements-analysis.txt", "./config/study-boxes.json", "./data/results/**/*.json", "./data/external/enso/*", "./docs/APP_TREND_PROTOCOL.md"];
 const config: NextConfig = {
   transpilePackages: ["three"],
   devIndicators: false,

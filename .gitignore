@@ -21,3 +21,4 @@ artifacts/demo/
 
 # Capturas locales de revisión visual
 artifacts/
+.vercel

@@ -1,9 +1,10 @@
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { Selection } from "./contracts";
 import type { TrendBundle } from "./trend-evidence";
-import { createRealAnalysis, validateSelection } from "./real-data";
+import { createRealAnalysis, defaultTrendBundle, validateSelection } from "./real-data";
 
 // Deduplicate requests for the same period; the Python cache also checks source hashes.
 const pending = new Map<string, Promise<TrendBundle>>();
@@ -14,6 +15,21 @@ export function pythonExecutable() {
   return existsSync(/*turbopackIgnore: true*/ venv) ? venv : "python3";
 }
 export class AnalysisBusyError extends Error {}
+async function precomputed(start: number, end: number): Promise<TrendBundle | null> {
+  const filename = path.join(process.cwd(), "analysis", "periods", `${start}-${end}.json`);
+  let raw: string;
+  try {
+    raw = await readFile(filename, "utf8");
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
+    throw error;
+  }
+  const bundle = JSON.parse(raw) as TrendBundle;
+  if (bundle.start !== start || bundle.end !== end || bundle.fingerprint !== defaultTrendBundle.fingerprint) {
+    throw new Error("El cálculo guardado no coincide con los datos auditados. Regenera los periodos antes de desplegar.");
+  }
+  return bundle;
+}
 function calculate(start: number, end: number): Promise<TrendBundle> {
   const key = `${start}-${end}`;
   const existing = pending.get(key);
@@ -45,8 +61,12 @@ function calculate(start: number, end: number): Promise<TrendBundle> {
 export async function analyzeOnServer(selection: Selection) {
   validateSelection(selection);
   // The canonical full-period bundle ships with the app and needs no Python runtime.
-  // Keep the API usable on hosts where Python dependencies are unavailable.
+  // Other full-year windows have the same audited Python result precomputed at build time.
   if (selection.start === 1992 && selection.end === 2024) return createRealAnalysis(selection);
-  const bundle = await calculate(selection.start, selection.end);
-  return createRealAnalysis(selection, bundle);
+  const bundle = await precomputed(selection.start, selection.end);
+  if (bundle) return createRealAnalysis(selection, bundle);
+  if (process.env.VERCEL) {
+    throw new Error("No hay un cálculo auditado para este periodo en el despliegue. Vuelve a intentarlo más tarde.");
+  }
+  return createRealAnalysis(selection, await calculate(selection.start, selection.end));
 }
