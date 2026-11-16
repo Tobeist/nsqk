@@ -44,6 +44,9 @@ function calculate(start: number, end: number): Promise<TrendBundle> {
 
 export async function analyzeOnServer(selection: Selection) {
   validateSelection(selection);
+  // The canonical full-period bundle ships with the app and needs no Python runtime.
+  // Keep the API usable on hosts where Python dependencies are unavailable.
+  if (selection.start === 1992 && selection.end === 2024) return createRealAnalysis(selection);
   const bundle = await calculate(selection.start, selection.end);
   return createRealAnalysis(selection, bundle);
 }
